@@ -1,0 +1,93 @@
+%\usepackage[ngerman]{babel} % deutsche Sprachdatei
+\usepackage[english]{babel} % englische
+\usepackage[utf8]{inputenc} %Input-Kodierung; hier utf8
+\usepackage[T1]{fontenc} %Silbentrennung
+\usepackage{hyphenat} %Silbentrennung unterdrücken
+\usepackage{tabularx} %formatierte Tabellen
+\usepackage{helvet} %Schriftart helvetica
+%\usepackage[scaled]{uarial} %Schriftart Arial
+\usepackage{ifpdf} %für pdf-Ausgaben
+\usepackage{setspace} %Zeilenabstand
+%\usepackage{lipsum}
+\usepackage{fancyhdr} %pagestyle
+\usepackage{lastpage} %ausgabe der gesamten Seitenanzahl
+\usepackage{geometry} %Papierränder
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead{}
+\cfoot{}
+\rfoot{}
+\lfoot{Seite \thepage /\pageref{LastPage}}
+
+\renewcommand{\familydefault}{\sfdefault} 
+\geometry{a4paper, top=20mm, left=20mm, right=18mm, bottom=30mm, headsep=0mm, footskip=12mm}
+\usepackage{color}
+\definecolor{rot}{RGB}{165,30,55} %rote Farbe
+\definecolor{grau}{RGB}{50,65,75}
+\definecolor{gold}{RGB}{180,160,105}
+\definecolor{hellgold}{RGB}{210,197,163}
+\definecolor{hellstgold}{RGB}{232,225,208}
+\ifpdf 
+  \usepackage[pdftex]{graphicx}
+\else
+  \usepackage{graphicx}
+\fi
+\ifpdf 
+  \DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\else
+  \DeclareGraphicsExtensions{.eps,.pdf}
+\fi
+
+\usepackage{titlesec}
+\titleformat{\section}
+{\normalfont\large\bfseries}
+{\thesection}{1em}{}
+
+
+\newcommand{\kopfzeile}{ % Kopfzeile
+\vspace*{-2cm}
+\begin{flushleft}
+\begin{minipage}[t][2cm]{0.45\textwidth}
+\ifpdf% Ausgabe in pdf
+  \ifnum\farbe=1% farbiges Logo
+  	\raisebox{-12mm}{\includegraphics[width=78mm, keepaspectratio=true]{logos/UT_WBMW_Rot_RGB_01.png}}
+  \else% nicht farbiges Logo
+  	\raisebox{-12mm}{\includegraphics[width=78mm, keepaspectratio=true]{logos/logo_sw.pdf}}
+  \fi
+\else% nicht pdf
+  \ifnum\farbe=1% farbiges Logo
+  	\raisebox{-12mm}{\includegraphics[width=78mm, keepaspectratio=true]{logos/UT_WBMW_Rot_RGB.eps}}
+  \else% nicht farbiges Logo
+  	\raisebox{-12mm}{\includegraphics[width=78mm, keepaspectratio=true]{logos/logo_sw.eps}}
+  \fi
+\fi
+\end{minipage}
+\hfill
+% rechter Header, Absenderinformationen. Höhe niedrig gewählt, dass das nachfolgende Adressfeld hochrutschen kann.
+\begin{minipage}[t][0.5cm]{0.23\textwidth}
+\upshape\sffamily\flushleft
+{\fontsize{10pt}{12pt}\selectfont
+	\textbf{\ifnum\farbe=1\color{rot}\fi \fakult}\par\bigskip}
+  	%{\bf \footnotesize \ifnum\farbe=1\color{rot}\fi \fbname}\bigskip \\
+  	{\bf \scriptsize \profname} \\[-3pt]
+  	{\scriptsize \funkt} \bigskip \\
+  	{\scriptsize \anschrift} \bigskip
+  	{\scriptsize \tel} \bigskip
+  	{\scriptsize \web}
+\end{minipage}
+\\[1cm]
+
+% Adressfeld - Höhe regelt den Abstand von Betreffzeile zu rechtem Header
+\begin{minipage}[t][3.25cm][t]{0.44\textwidth}
+        {\tiny \mbox{\textbf{Universität Tübingen} · \strasse ~· \plzort}\smallskip \\}
+	{\footnotesize \empfaenger}
+\end{minipage}
+\end{flushleft}
+}
+\newcommand{\angebot}{ % schreibt Header und Betreffzeile
+\thispagestyle{empty} 
+\kopfzeile
+{\Large \bf \nohyphens{\ang}} \hfill {\large \ort, \datum} \\
+\newline
+{\Large \angbeschr}
+}
