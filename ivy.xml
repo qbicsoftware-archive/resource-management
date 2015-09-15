@@ -43,6 +43,10 @@
 			
 		<dependency org="org.apache.velocity" name="velocity" rev="1.6.2"/>
 		
+		<dependency org="commons-io" name="commons-io" rev="2.4"/>
+		
+	<!--	<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="1.2.0"/> -->
+		
 		
 	</dependencies>
 </ivy-module>
