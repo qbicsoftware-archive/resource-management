@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.liferay.portal.model.User;
 import com.vaadin.shared.ui.calendar.CalendarState.Event;
 import com.vaadin.ui.components.calendar.event.CalendarEvent;
 
@@ -13,6 +14,7 @@ public class BookingModel implements Serializable {
   private static final long serialVersionUID = -3559766268838702415L;
  
   private UserBean user;
+  private User liferayUser;
   private List<DeviceBean> devices;
 
   private Map<String, List<CalendarEvent>> deviceCalendarEvents;
@@ -20,6 +22,10 @@ public class BookingModel implements Serializable {
   
   public BookingModel(UserBean user) {
     this.user = user;
+  }
+
+  public BookingModel(User user) {
+    liferayUser = user;
   }
 
   public boolean isAllowedToBook() {

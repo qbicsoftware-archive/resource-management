@@ -1,32 +1,25 @@
 package facs.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class DeviceBean implements Serializable {
   private static final long serialVersionUID = -6717244163406823687L;
 
   private int id;
   private String name;
-  //cost of a machine per hour
-  private float cost;
+  private String description;
+  private boolean restricted; 
   
-  private String allowedRole; 
-  
-  public DeviceBean(int id, String name, float cost, String allowedRole) {
+  public DeviceBean(int id, String name, String description, boolean restricted) {
     super();
     this.id = id;
     this.name = name;
-    this.cost = cost;
-    this.allowedRole = allowedRole;
+    this.setDescription(description);
+    this.setRestricted(restricted);
   }
 
   public int getId() {
     return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
   }
 
   public String getName() {
@@ -37,21 +30,19 @@ public class DeviceBean implements Serializable {
     this.name = name;
   }
 
-  public float getCost() {
-    return cost;
+  public String getDescription() {
+    return description;
   }
 
-  public void setCost(float cost) {
-    this.cost = cost;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
-  public String getAllowedRole() {
-    return allowedRole;
+  public boolean isRestricted() {
+    return restricted;
   }
 
-  public void setAllowedRole(String allowedRole) {
-    this.allowedRole = allowedRole;
+  public void setRestricted(boolean restricted) {
+    this.restricted = restricted;
   }
-
-
 }

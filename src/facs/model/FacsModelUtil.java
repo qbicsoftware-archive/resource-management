@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.liferay.portal.kernel.exception.SystemException;
 import com.vaadin.ui.components.calendar.event.BasicEvent;
 import com.vaadin.ui.components.calendar.event.CalendarEvent;
+
 
 public class FacsModelUtil {
 
@@ -18,11 +20,8 @@ public class FacsModelUtil {
     UserBean user = new UserBean(0, "David Novice", Constants.NOVICE_ROLE, "active", kostenstelle);
     
     BookingModel bm = new BookingModel(user);
-    DeviceBean db1 = new DeviceBean(0, "Device 1",2.5f, Constants.ADVANCED_ROLE);
-    DeviceBean db2 = new DeviceBean(0, "Device 2",3.5f, Constants.NOVICE_ROLE);
-    DeviceBean db3 = new DeviceBean(0, "Device 3",1.45f, Constants.NOVICE_ROLE);
-    DeviceBean db4 = new DeviceBean(0, "Device 4",15.5f, Constants.SUPER_ROLE);
-    DeviceBean db5 = new DeviceBean(0, "Device 5",20f, Constants.ADVANCED_ROLE);
+    DeviceBean db1 = new DeviceBean(0, "Device 1","desc1", false);
+    DeviceBean db2 = new DeviceBean(1, "Device 2","desc2", true);
     ArrayList<DeviceBean> dbs = new ArrayList<DeviceBean>(5);
     
     Map<String, List<CalendarEvent>> events = new HashMap<String, List<CalendarEvent>>();
@@ -33,7 +32,7 @@ public class FacsModelUtil {
     GregorianCalendar end = new GregorianCalendar();
     end.setTime(date);
     end.add(java.util.Calendar.HOUR, 1);
-    
+ 
     BasicEvent reserved = new BasicEvent("occupied" , "This time frame is already occupied.", start.getTime(), end.getTime());
     reserved.setStyleName("color1");
     c.add(reserved);
@@ -71,7 +70,7 @@ public class FacsModelUtil {
     events.put("Device 5", new ArrayList<CalendarEvent>());
     bm.setDeviceCalendarEvents(events);
     
-    dbs.add(db1);dbs.add(db2);dbs.add(db3);dbs.add(db4);dbs.add(db5);
+    dbs.add(db1);dbs.add(db2);
     bm.setDevices(dbs);
     
     
