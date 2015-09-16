@@ -13,10 +13,15 @@ import java.util.Map.Entry;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.model.User;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.Action;
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Calendar;
@@ -161,7 +166,15 @@ public class Booking  extends CustomComponent{
       message += ". ";
       for (CalendarEvent event : entry.getValue()) {
         if (event instanceof BasicEvent) {
-          ((BasicEvent) event).setStyleName("color2");
+          User user;
+          try {
+            user = UserLocalServiceUtil.getUser(Long.parseLong(VaadinService.getCurrent().getCurrentRequest().getRemoteUser()));
+            ((BasicEvent) event).setStyleName("color2");
+          } catch (NumberFormatException | PortalException | SystemException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+
         }
       }
     }

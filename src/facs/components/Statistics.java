@@ -1,26 +1,46 @@
 package facs.components;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import org.apache.velocity.exception.ParseErrorException;
+import org.apache.velocity.exception.ResourceNotFoundException;
+
+import com.vaadin.data.Property;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.FooterCell;
 import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
+
+import facs.utils.Billing;
+import facs.utils.Billing.CostEntry;
+import facs.utils.Formatter;
 
 public class Statistics extends CustomComponent {
   private static final long serialVersionUID = 4811041982287436302L;
@@ -33,6 +53,10 @@ public class Statistics extends CustomComponent {
 
   private final String CAPTION = "Usage/Statistics";
 
+  Button createBill = new Button("create Bill");
+  Button downloadBill = new Button("download Bill");
+  private GeneratedPropertyContainer gpcontainer;
+  
   public Statistics() {
     this.setCaption(CAPTION);
 
@@ -45,7 +69,7 @@ public class Statistics extends CustomComponent {
     container.addContainerProperty(costCaption, Float.class, null);
 
     // Add some generated properties
-    GeneratedPropertyContainer gpcontainer = new GeneratedPropertyContainer(container);
+    gpcontainer = new GeneratedPropertyContainer(container);
 
     Grid grid = new Grid(gpcontainer);
     grid.setWidth("800px");
@@ -99,9 +123,7 @@ public class Statistics extends CustomComponent {
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    int hours = (int) (total * 0.000000277778f);
-    float minutes = ((float) (total * 0.000000277778f) - hours) * 60;
-    footerCellEnd.setText(String.format("%d:%02d hours", hours, (int) minutes)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
 
     // Set up a filter for all columns
     HeaderRow filterRow = grid.appendHeaderRow();
@@ -111,6 +133,82 @@ public class Statistics extends CustomComponent {
 
     VerticalLayout layout = new VerticalLayout();
     layout.addComponent(grid);
+    layout.addComponent(createBill);
+    downloadBill.setEnabled(false);
+    layout.addComponent(downloadBill);
+    
+    createBill.addClickListener(new ClickListener(){
+      private File bill;
+      private FileDownloader fileDownloader;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        String basepath = VaadinService.getCurrent()
+            .getBaseDirectory().getAbsolutePath();
+       Paths.get(basepath, "WEB-INF/billingTemplates");
+        
+        try {
+          Billing billing = new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
+          billing.setRecieverInstitution("BER - Berliner Flughafen");
+          billing.setRecieverPI("Klaus Wowereit");
+          billing.setRecieverStreet("am berliner flughafen 12");
+          billing.setRecieverPostalCode("D-12345");
+          billing.setRecieverCity("Berlin");
+          
+          billing.setSenderName("Dr. Stella Autenrieth");
+          billing.setSenderFunction("Geschaeftsfuehrerin");
+          billing.setSenderPostalCode("sender postal");
+          billing.setSenderCity("Tuebingen");
+          billing.setSenderStreet("Auf der Morgenstelle 42");
+          billing.setSenderPhone("+49-7071-29-72163");
+          billing.setSenderEmail("qbic@qbic.uni");
+          billing.setSenderUrl("qbic.uni-tuebingen.de");
+          billing.setSenderFaculty("Medizinischen Fakultät");
+          
+          billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
+          billing.setProjectShortDescription("jede Menge Extras.");
+          billing.setProjectNumber("QA2014016");
+          
+          ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
+          for (Object itemId : gpcontainer.getItemIds()){
+            float cost = ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue()).floatValue();
+            long s = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue()).getTime();
+            long e = ((Date) gpcontainer.getContainerProperty(itemId, endCaption).getValue()).getTime();
+            long timeFrame = e - s;
+            Date start  = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
+            SimpleDateFormat ft = new SimpleDateFormat(
+                "dd.MM.yyyy");
+            String date = ft.format(start);
+            String description = "no description available";
+            String time_frame = Formatter.toHoursAndMinutes(timeFrame);
+            entries.add(billing.new CostEntry(date, time_frame, description, cost));  
+          }
+          billing.setCostEntries(entries);
+          float totalCosts = 0.0f;
+          for (Object itemId : gpcontainer.getItemIds()) {
+            totalCosts +=
+                ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
+                    .floatValue();
+          }
+          
+          billing.setTotalCost(String.format("%1$.2f", totalCosts));
+          
+          bill = billing.createPdf();
+          System.out.println(bill.getAbsolutePath());
+          if(fileDownloader != null) downloadBill.removeExtension(fileDownloader);
+          fileDownloader = new FileDownloader(new FileResource(bill));
+          fileDownloader.extend(downloadBill);
+          downloadBill.setEnabled(true);
+          Notification.show("Bill is ready");
+        } catch (Exception e) {
+          Notification.show("Error occured while trying to create bill. Please log out and contact your sysadmin",Notification.Type.ERROR_MESSAGE);
+          e.printStackTrace();
+        }
+        
+        
+      }
+      
+    });
     setCompositionRoot(layout);
 
   }
