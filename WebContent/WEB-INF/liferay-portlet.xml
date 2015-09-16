@@ -15,4 +15,12 @@
         <instanceable>true</instanceable>
         <ajaxable>false</ajaxable>
     </portlet>
+            <portlet>
+        <!-- Matches definition in portlet.xml. -->
+        <!-- Note: Must not be the same as servlet name. -->
+        <portlet-name>FacsSettings</portlet-name>
+        <instanceable>true</instanceable>
+        <ajaxable>false</ajaxable>
+    </portlet>
+    
 </liferay-portlet-app>

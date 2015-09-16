@@ -4,5 +4,6 @@
     <category name="QBiC">
         <portlet id="FacsStatistics"/>
         <portlet id="FacsBooking"/>
+        <portlet id="FacsSettings"/>
     </category>
 </display>
