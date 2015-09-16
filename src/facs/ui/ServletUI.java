@@ -12,6 +12,7 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 
 import facs.components.Booking;
+import facs.components.Settings;
 import facs.components.Statistics;
 import facs.model.BookingModel;
 import facs.model.FacsModelUtil;
@@ -37,6 +38,8 @@ public class ServletUI extends UI {
     // statistics
     Statistics statistics = new Statistics();
     tabs.addComponent(statistics);
+    
+    tabs.addComponent(new Settings(null));
 
     setContent(tabs);
   }
