@@ -1,0 +1,87 @@
+package facs.utils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+
+import facs.model.MachineOccupationBean;
+
+
+/**
+ * It turns out that the csv files we get from facs facility are not exactly the same. This is an attempt to be somewhat generic in the parsing.
+ * 
+ * Note: One might make it better, with introducing a fixed width parameter. However, I did not need it so far.
+ * Second note: there seems to be a library for that: http://opencsv.sourceforge.net/
+ * @author wojnar
+ *
+ */
+public class GenericFacsParser {
+  String delimiter = "\"";
+  String separator = ",";
+  
+  public GenericFacsParser(String separator, String delimiter){
+    this.delimiter = delimiter;
+    this.separator = separator;
+  }
+  /**
+   * default separartor = ','  and delimiter = ' " ' 
+   */
+  public GenericFacsParser(){
+  }
+  
+  /**
+   * Parse instrument statistics from a BufferedReader and return a List of beans.
+   * throws IOException if there is a probrem with the bufferedReader.
+   * @param br
+   * @param deviceId every statistical entry has to belong to a device id
+   * @throws IOException 
+   * @throws ParseException 
+   */
+  public List<MachineOccupationBean> parse(BufferedReader br, int deviceId) throws IOException, ParseException{
+    List<MachineOccupationBean> ret = new ArrayList<MachineOccupationBean>();
+    //read header
+    String line = br.readLine();
+    String [] info = lineToColumns(line);
+    Map<String, Integer> headerNumbers = MachineOccupationBean.getHeaderNumbers(info);
+    
+    //read values
+    while ((line = br.readLine()) != null) {
+      info = lineToColumns(line);
+      
+      MachineOccupationBean bean = new MachineOccupationBean();
+      bean.setBean(info, deviceId, headerNumbers);
+      ret.add(bean);
+    }
+    return ret;
+  }
+  
+  public String[] lineToColumns(String line) {
+    String[] info = line.split(separator);
+    
+    //remove delimiter in all columns
+    if(delimiter != null && !delimiter.isEmpty()){
+      return StringUtils.stripAll(StringUtils.stripAll(info), delimiter);
+    }
+    return info;
+  }
+
+
+  public String getDelimiter() {
+    return delimiter;
+  }
+  public void setDelimiter(String delimiter) {
+    this.delimiter = delimiter;
+  }
+  public String getSeparator() {
+    return separator;
+  }
+  public void setSeparator(String separator) {
+    if(separator == null) this.separator = "";
+    else this.separator = separator;
+  }
+}
