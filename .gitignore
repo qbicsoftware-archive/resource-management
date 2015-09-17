@@ -4,4 +4,8 @@
 build
 WebContent/VAADIN/themes/facs/styles.css
 WebContent/VAADIN/widgetsets
+*.aux
+*.log
+*.pdf
+
 
