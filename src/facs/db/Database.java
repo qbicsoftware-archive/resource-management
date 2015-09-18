@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -324,12 +325,12 @@ public enum Database {
    * @param restricted
    * @return
    */
-  public int addDevice(String label, String description, boolean restricted) {
+  public int addDevice(String label, String description, String shortDescription, boolean restricted) {
     int deviceId = -1;
     if (label == null || label.isEmpty() || description == null || description.isEmpty()) {
       return deviceId;
     }
-    String sql = "INSERT INTO resources (name, description, restricted) VALUES(?, ?, ?)";
+    String sql = "INSERT INTO resources (name, descr, short_desc, restricted) VALUES(?, ?, ?, ?)";
     // The following statement is an try-with-resources statement, which declares two resources,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -337,7 +338,8 @@ public enum Database {
       
       statement.setString(1, label);
       statement.setString(2, description);
-      statement.setBoolean(3, restricted);
+      statement.setString(3, shortDescription);
+      statement.setBoolean(4, restricted);
       // execute the statement, data IS NOT commit yet
       statement.execute();
       ResultSet rs = statement.getGeneratedKeys();
@@ -607,6 +609,104 @@ public enum Database {
     }
     
     return userIds;
+  }
+
+  /**
+   * returns -1 if that specific timeblock can not be found or the first timeblock that can be found with that settings.
+   * @param deviceId
+   * @param userName
+   * @param userFullName
+   * @param start
+   * @param end
+   * @return
+   */
+  public int isPhysicalTimeBlock(int deviceId, String userName, String userFullName, Date start,
+      Date end){
+    int userId = -1;
+    String startStatement = "";
+    String endStatement = "";
+    if(start == null){
+      startStatement = "start_time IS NULL";
+    }else{
+      startStatement = "start_time = ?";
+    }
+    if(end == null){
+      endStatement = "end_time IS NULL";
+    }else{
+      endStatement = "end_time = ?";
+    }
+
+    String sql = "SELECT id FROM physical_time_blocks WHERE resource_id = ? AND resource_user_name = ? AND resource_specific_id = ? AND " + startStatement + "  AND " + endStatement;
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setInt(1, deviceId);
+      statement.setString(2, userFullName);
+      statement.setString(3, userName);
+      if(start != null){
+        statement.setTimestamp(4, new Timestamp(start.getTime()));
+      }
+      if(end != null){
+        statement.setTimestamp(5, new Timestamp(end.getTime()));
+      }
+      
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        userId =rs.getInt("id");
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return userId;   
+   }
+  
+  /**
+   * Adds a physical time block into the database.
+   * BE AWARE: It is added without further checking. If you want to be sure that this time block was not added check it with isPhysicalTimeBlock
+   * @param deviceId
+   * @param userName
+   * @param userFullName
+   * @param start
+   * @param end
+   * @return
+   */
+  public boolean addPhysicalTimeBlock(int deviceId, String userName, String userFullName, Date start,
+      Date end) {
+    //select user_id from users where name = '?';
+    boolean id = false;
+    if (deviceId == -1 || userName == null){
+      return id;
+    }
+      
+
+    String sql = "INSERT INTO physical_time_blocks (resource_id, resource_user_name, resource_specific_id, start_time, end_time) VALUES(?, ?, ?, ?, ?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setInt(1, deviceId);
+      statement.setString(2, userFullName);
+      statement.setString(3, userName);
+      if(start == null){
+        statement.setNull(4, java.sql.Types.TIMESTAMP);
+      }else{
+        statement.setTimestamp(4, new Timestamp(start.getTime()));
+      }
+      if(end == null){
+        statement.setNull(5, java.sql.Types.TIMESTAMP);
+      }else{
+        statement.setTimestamp(5, new Timestamp(end.getTime()));
+      }
+      statement.executeUpdate();
+      //if (rs.next()) {
+      //  id =rs.getInt("id");
+     // }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }
+    return true;
   }
 
 }

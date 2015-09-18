@@ -152,13 +152,13 @@ public class MiscTests {
 
       }
 
-
       /*
-       * //These should be added once. DBManager.getDatabaseInstance().addDevice("FC500",
-       * "No desc.", false); DBManager.getDatabaseInstance().addDevice("Canto", "No desc.", false);
-       * DBManager.getDatabaseInstance().addDevice("LSR Fortessa", "No desc.", false);
-       * DBManager.getDatabaseInstance().addDevice("Aria1", "No desc.", true);
-       * DBManager.getDatabaseInstance().addDevice("Aria2", "No desc.", true);
+       * //These should be added once. 
+      DBManager.getDatabaseInstance().addDevice("FC500","No desc.","No desc." ,false);
+      DBManager.getDatabaseInstance().addDevice("Canto", "No desc.","No desc.", false);
+      DBManager.getDatabaseInstance().addDevice("LSR Fortessa", "No desc.", "No desc.", false);
+      DBManager.getDatabaseInstance().addDevice("Aria1", "No desc.","No desc.", true);
+      DBManager.getDatabaseInstance().addDevice("Aria2", "No desc.", "No desc.", true);
        * 
        * //init script? System.out.println(
        * "INSERT INTO resources (name, descr, short_desc, restricted) VALUES ('FC500', 'No desc.', 'No desc.', 0);"
@@ -178,7 +178,48 @@ public class MiscTests {
     }
 
   }
-
+  @Test
+  public void importPhysicalDeviceCsvs(){
+    GenericFacsParser parser = new GenericFacsParser();
+    String[] files =
+        {"/home/wojnar/QBiC/Facs/2015_September_Canto.csv",
+            "/home/wojnar/QBiC/Facs/2015_September_Fortessa.csv",
+            "/home/wojnar/QBiC/Facs/2015_August_Fortessa.csv",
+            "/home/wojnar/QBiC/Facs/2015_June.csv"};
+      System.out.println("---------------------------------------");
+      write(parser, files[0], 2);
+      write(parser, files[1], 3);
+      write(parser, files[2], 3);
+      write(parser, files[3], 1);
+  }
+  
+  void write(GenericFacsParser parser, String file, int deviceId){
+    try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+      List<MachineOccupationBean> test = parser.parse(in, deviceId);
+      for (MachineOccupationBean m : test) {
+        System.out.println(m.getDeviceId() + " " + m.getUserName() + " " + m.getUserFullName()
+            + " " + m.getInstitution() + " " + m.getStart() + " " + m.getEnd() + " corrupted: "
+            + m.isCorrupted());
+        int id = DBManager.getDatabaseInstance().isPhysicalTimeBlock(m.getDeviceId(),m.getUserName(),m.getUserFullName(),m.getStart(),m.getEnd());
+        if(id == -1){
+          boolean success = DBManager.getDatabaseInstance().addPhysicalTimeBlock(m.getDeviceId(),m.getUserName(),m.getUserFullName(),m.getStart(),m.getEnd());
+          System.out.println(success);
+        }else{
+          System.out.println("Already in database with id: "+ id);
+        }
+      }
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
   @Test
   public void mapUserToDevice() {
     String line = "";
