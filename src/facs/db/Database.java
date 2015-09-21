@@ -524,7 +524,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery(sql);
       while (rs.next()) {
         list.add(new DeviceBean(rs.getInt("resource_id"), rs.getString("name"), rs
-            .getString("description"), rs.getBoolean("restricted")));
+            .getString("descr"), rs.getBoolean("restricted")));
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -732,6 +732,48 @@ public enum Database {
       return false;
     }
     return true;
+  }
+
+
+  public boolean addUserGroup(String name) {
+    String sql = "INSERT INTO usergroups (name) VALUES(?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, name);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }   
+  return true;
+  }
+
+
+  public boolean addResourceCostPerGroup(int resourceId, String usergroup, float cost) {
+    // INSERT INTO group_resource_cost (usergroup,resource_id, cost) VALUES ('test2',1,25.24);
+    String sql = "INSERT INTO group_resource_cost (usergroup,resource_id, cost) VALUES (?,?,?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, usergroup);
+      statement.setInt(2,resourceId);
+      statement.setFloat(3, cost);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }   
+  return true;   
+    
   }
 
 }

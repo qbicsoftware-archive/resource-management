@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import facs.db.DBManager;
+import facs.model.DeviceBean;
 import facs.model.InstituteBean;
 import facs.model.MachineOccupationBean;
 import facs.model.UserBean;
@@ -178,6 +180,54 @@ public class MiscTests {
     }
 
   }
+  
+  @Test
+  public void addGroupsAndCosts(){
+    boolean success = DBManager.getDatabaseInstance().addUserGroup("Admin");
+    DBManager.getDatabaseInstance().addUserGroup("Abteilung");
+    DBManager.getDatabaseInstance().addUserGroup("Intern");
+    DBManager.getDatabaseInstance().addUserGroup("Extern 1");
+    DBManager.getDatabaseInstance().addUserGroup("Extern 2");
+    
+    List<DeviceBean> devices = DBManager.getDatabaseInstance().getDevices();
+    for(DeviceBean device: devices){
+      switch (device.getName()){
+        case "FC500":{
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", 0);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 5);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Intern", 10);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 1", 20);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 2", 30);
+        }
+        case "Canto":{
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", 0);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 5);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Intern", 10);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 1", 20);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 2", 30);          
+        }
+        case "LSR Fortessa":{
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", 0);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 7.5f);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Intern", 25);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 1", 30);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 2", 40);          
+        }
+        case "Aria1":
+        case "Aria2":
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", 0);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 10);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Intern", 85);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 1", 100);
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 2", 125);          
+        default:
+    }
+    }
+      
+      //DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", cost.get(new AbstractMap.SimpleEntry<Integer,String>(device.getId(), "Admin")));
+    
+    
+  }
   @Test
   public void importPhysicalDeviceCsvs(){
     GenericFacsParser parser = new GenericFacsParser();
@@ -193,6 +243,7 @@ public class MiscTests {
       write(parser, files[3], 1);
   }
   
+  //not a test
   void write(GenericFacsParser parser, String file, int deviceId){
     try (BufferedReader in = new BufferedReader(new FileReader(file))) {
       List<MachineOccupationBean> test = parser.parse(in, deviceId);
@@ -389,7 +440,8 @@ public class MiscTests {
       System.out.println(",");
     }
   }
-
+  
+  //not a test
   /**
    * skip empty lines
    * 
