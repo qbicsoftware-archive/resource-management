@@ -13,7 +13,7 @@ The project consists of several Servlets/Portlets which should help to mangage o
 
 Quick Setup
 =====
-1. <code>git clone https://github.com/qbicsoftware/TODO.git</code>
+1. <code>git clone https://github.com/qbicsoftware/resource-management.git</code>
 1. Install IvyDE, including Ant Tasks, if needed
    (http://www.apache.org/dist/ant/ivyde/updatesite)
 1. Insall vaadin see here:
@@ -22,7 +22,8 @@ Quick Setup
 1. Import the project into Eclipse
 1. create war
 1. deploy war file in Liferay
-1. create database with [link here](https://github.com/qbicsoftware/TODO.git)
+1. create database with [link
+   here](https://github.com/qbicsoftware/resource-management-data)
 
 
 Everything was written in Java 1.7 openjdk, [vaadin](https://vaadin.com/hom://vaadin.com/home) 7.5, [Liferay 6.2](https://www.liferay.com/),
