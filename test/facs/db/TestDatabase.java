@@ -2,6 +2,7 @@ package facs.db;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -12,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import facs.model.DeviceBean;
+import facs.model.MachineOccupationBean;
 
 public class TestDatabase {
   private String hostname = "localhost";
@@ -118,6 +120,22 @@ public class TestDatabase {
     String description = "";
     int kostenstellenId = 1;
 
+  }
+  @Test
+  public void getUserByid(){
+    db.getUserById(6);
+  }
+  
+  @Test
+  public void getPhysicalBlocks(){
+    List<MachineOccupationBean> mbeans = db.getPhysicalTimeBlocks();
+    for(MachineOccupationBean bean: mbeans){
+      System.out.println(bean.getDeviceId());
+      System.out.println(bean.getStart());
+      System.out.println(bean.getEnd());
+    }
+    //what kind of test is that?
+    fail();
   }
   
   @Test

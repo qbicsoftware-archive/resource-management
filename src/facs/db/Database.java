@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import facs.model.DeviceBean;
+import facs.model.MachineOccupationBean;
+import facs.model.UserBean;
 
 public enum Database {
   Instance;
@@ -414,7 +417,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         devbean =
-            new DeviceBean(deviceId, rs.getString("name"), rs.getString("description"),
+            new DeviceBean(deviceId, rs.getString("name"), rs.getString("descr"),
                 rs.getBoolean("restricted"));
       }
       statement.close();
@@ -684,6 +687,28 @@ public enum Database {
     return userId;
   }
 
+  public List<MachineOccupationBean> getPhysicalTimeBlocks(){
+    String sql = "SELECT * FROM physical_time_blocks";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while(rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("resource_id"));
+        m.setUserFullName(rs.getString("resource_user_name"));
+        m.setUserName(rs.getString("resource_specific_id"));
+        m.setStart(rs.getTimestamp("start_time"));
+        m.setEnd(rs.getTimestamp("end_time"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+  
   /**
    * Adds a physical time block into the database. BE AWARE: It is added without further checking.
    * If you want to be sure that this time block was not added check it with isPhysicalTimeBlock
@@ -774,6 +799,31 @@ public enum Database {
     }   
   return true;   
     
+  }
+
+  public UserBean getUserById(int userId) {
+    String sql = "select users.user_id, users.name, users.workgroup, institute.name from users inner join institute on users.institute_id=institute.institute_id where users.user_id = ?";
+    //1 2 3 4
+    UserBean ret = new UserBean();
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setInt(1, userId);
+      ResultSet rs = statement.executeQuery();
+      if(rs.next()){
+        ret.setId(rs.getInt(1));
+        ret.setName(rs.getString(2));
+        ret.setWorkinggroup(rs.getString(3));
+        ret.setInstitute(rs.getString(4));
+        //TODO get the correct ones
+        List<String> kostenStelle = new ArrayList<String>();
+        kostenStelle.add("unknown");
+        ret.setKostenstelle(kostenStelle);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }   
+    return ret;
   }
 
 }
