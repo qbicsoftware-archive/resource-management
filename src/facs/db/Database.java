@@ -202,7 +202,21 @@ public enum Database {
     return costLocId;
 
   }
-
+  public String getKostenstelleByUserId(int userId){
+    String sql = "SELECT cost_locations.name FROM cost_locations INNER JOIN  users_cost_locations_junction ON users_cost_locations_junction.cost_location_id=cost_locations.cost_location_id WHERE users_cost_locations_junction.user_id = ?";
+    String kostenstelle = "";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setInt(1, userId);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        kostenstelle = rs.getString("name");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    
+    return kostenstelle;
+  }
 
   public void addCategory(String name) {
     String sql = "INSERT INTO category (name) VALUES(?)";
@@ -807,7 +821,7 @@ public enum Database {
     UserBean ret = new UserBean();
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+      
       statement.setInt(1, userId);
       ResultSet rs = statement.executeQuery();
       if(rs.next()){
@@ -817,13 +831,41 @@ public enum Database {
         ret.setInstitute(rs.getString(4));
         //TODO get the correct ones
         List<String> kostenStelle = new ArrayList<String>();
-        kostenStelle.add("unknown");
+        String k = getKostenstelleByUserId(ret.getId());        
+        kostenStelle.add(k.isEmpty()?"unknown":k);
         ret.setKostenstelle(kostenStelle);
       }
     } catch (SQLException e) {
       e.printStackTrace();
     }   
     return ret;
+  }
+
+  /**
+   * Trys to get cost (per hour?) of a resource for a given user. User have to have a usergroup which has a cost value for that resource.
+   * Returns -1 if it can not find a value in the database.
+   * @param userId
+   * @param resourceId
+   * @return
+   */
+  public float getCostByResourceAndUserIds(int userId, int resourceId) {
+    // select group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=7 AND group_resource_cost.resource_id=3;
+    String sql = "SELECT group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=? AND group_resource_cost.resource_id=?";
+    float cost = -1f; 
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+     
+      statement.setInt(1, userId);
+      statement.setInt(2, resourceId);
+      ResultSet rs = statement.executeQuery();
+      if(rs.next()){     
+        cost = rs.getFloat("cost");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }   
+    return cost;
+
   }
 
 }

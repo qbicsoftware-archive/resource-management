@@ -127,6 +127,12 @@ public class TestDatabase {
   }
   
   @Test
+  public void getCostByResourceAndUserIds(){
+    float cost = db.getCostByResourceAndUserIds(7,1);
+    System.out.println(cost);
+  }
+  
+  @Test
   public void getPhysicalBlocks(){
     List<MachineOccupationBean> mbeans = db.getPhysicalTimeBlocks();
     for(MachineOccupationBean bean: mbeans){

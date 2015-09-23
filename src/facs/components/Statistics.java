@@ -12,6 +12,7 @@ import java.util.Locale;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
+import com.liferay.portal.kernel.jmx.model.MBean;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.IndexedContainer;
@@ -72,8 +73,8 @@ public class Statistics extends CustomComponent {
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
     Grid grid = new Grid(gpcontainer);
-    grid.setWidth("800px");
-    grid.setHeightByRows(5);
+    grid.setWidth("1000px");
+    grid.setHeightByRows(10);
     grid.setHeightMode(HeightMode.ROW);
     
     setRenderers(grid);
@@ -218,13 +219,30 @@ public class Statistics extends CustomComponent {
       kostenStelle.add("unknown");
       String institute = "unknown";
       UserBean user = userId>0?DBManager.getDatabaseInstance().getUserById(userId):null;
+      float cost = -1.f;
+      Date end = mobean.getEnd() == null?mobean.getStart():mobean.getEnd();
       if(user != null){
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
+        System.out.println(user.getId() + "*********************************************************************" + mobean.getDeviceId());
+        
+        cost = getCost(user.getId(), mobean.getStart(),end,mobean.getDeviceId());
       }
-      grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(), kostenStelle.get(0), mobean.getStart(), mobean.getEnd() == null?mobean.getStart():mobean.getEnd(), -1.f, institute);
+      grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(), kostenStelle.get(0), mobean.getStart(), end, cost, institute);
     }
     
+  }
+  
+  private float getCost(int userId, Date start, Date end, int resourceId){
+    float cost = 0f;
+    float costPerHour = DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+    if(costPerHour > 0){
+      float hoursUsed = Formatter.toHours(start, end);
+      System.out.println(hoursUsed);
+      cost = hoursUsed*costPerHour;
+      System.out.println(cost);
+    }
+    return cost;
   }
   
   /**
