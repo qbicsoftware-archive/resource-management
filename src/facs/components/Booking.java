@@ -68,6 +68,7 @@ public class Booking  extends CustomComponent{
   private int eventCounter = 0;
   private NativeSelect selectedKostenStelle;
   private Date referenceDate;
+  private NativeSelect selectedProject;
   
   
   public Booking(final BookingModel bookingModel, Date referenceDate ){
@@ -99,6 +100,7 @@ public class Booking  extends CustomComponent{
   });
 
   selectedKostenStelle = initKostenstellen(bookingModel.getKostenStellen());
+  selectedProject = initProjects(bookingModel.getProjects());
 
   cal.setLocale(Locale.getDefault());
   cal.setImmediate(true);
@@ -119,17 +121,17 @@ public class Booking  extends CustomComponent{
   HorizontalLayout select = new HorizontalLayout();
   select.addComponent(selectedDevice);
   select.addComponent(selectedKostenStelle);
+  select.addComponent(selectedProject);
   bookInstrument.addComponent(select);
   bookInstrument.addComponent(cal);
   bookInstrument.addComponent(submit);
   book.setContent(bookInstrument);
   setCompositionRoot(book);
   }
-  
 
 
 
-  protected void setCalendar() {
+protected void setCalendar() {
     cal.removeAllComponents();
     cal.addComponent(bookMap.get(getCurrentDevice()));
 
@@ -373,7 +375,9 @@ public class Booking  extends CustomComponent{
     return (String) selectedKostenStelle.getValue();
   }
 
-
+  String currentProject() {
+	  return (String) selectedProject.getValue();
+  }
 
   protected String getCurrentDevice() {
     return (String) selectedDevice.getValue();
@@ -410,6 +414,17 @@ public class Booking  extends CustomComponent{
     selectKostenstelle.setNullSelectionAllowed(false);
     return selectKostenstelle;
   }
+  
+  NativeSelect initProjects(List<String> projects) {
+	    String caption = "Select Project";
+	    NativeSelect selectProject = new NativeSelect();
+	    selectProject.addItems(projects);
+
+	    selectProject.setCaption(caption);
+	    selectProject.setDescription(caption);
+	    selectProject.setNullSelectionAllowed(false);
+	    return selectProject;
+	  }
 
   
   class MyEventHandler{

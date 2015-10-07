@@ -1,5 +1,5 @@
-classpath
-project
+.classpath
+.project
 .settings
 build
 WebContent/VAADIN/themes/facs/styles.css

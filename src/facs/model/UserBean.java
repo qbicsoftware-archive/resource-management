@@ -16,14 +16,16 @@ public class UserBean implements Serializable{
   private String phone = "";
   private String status = "";
   private List<String> Kostenstelle = new ArrayList<String>();
+  private List<String> ProjectName = new ArrayList<String>();
   
-  public UserBean(int id, String name, String role, String status, List<String> kostenstelle) {
+  public UserBean(int id, String name, String role, String status, List<String> kostenstelle, List<String> projectName) {
     super();
     this.id = id;
     this.name = name;
     this.role = role;
     this.status = status;
     Kostenstelle = kostenstelle;
+    ProjectName = projectName;
   }
 
   public UserBean() {
@@ -64,9 +66,17 @@ public class UserBean implements Serializable{
   public List<String> getKostenstelle() {
     return Kostenstelle;
   }
-
+  
   public void setKostenstelle(List<String> kostenstelle) {
     Kostenstelle = kostenstelle;
+  }
+  
+  public List<String> getProject() {
+	    return ProjectName;
+  }
+  
+  public void setProject(List<String> projectName) {
+	    ProjectName = projectName;
   }
 
   public String getWorkinggroup() {

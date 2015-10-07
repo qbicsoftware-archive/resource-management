@@ -36,7 +36,6 @@ public class BookingModel implements Serializable {
     return devices;
   }
   
-  
   public List<String> getDevicesNames() {
     ArrayList<String> names = new ArrayList<String>();
     for(DeviceBean d: devices){
@@ -93,5 +92,10 @@ public class BookingModel implements Serializable {
   public void putDeviceCalendarEvents(String device, List<CalendarEvent> deviceCalendarEvents){
     this.deviceCalendarEvents.put(device, deviceCalendarEvents);
   }
+
+public List<String> getProjects() {
+	// TODO Auto-generated method stub
+	return user.getProject();
+}
   
 }

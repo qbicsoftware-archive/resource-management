@@ -734,4 +734,10 @@ public enum Database {
     return true;
   }
 
+
+public int addDevice(String value, String value2, boolean b) {
+	// TODO Auto-generated method stub
+	return 0;
+}
+
 }

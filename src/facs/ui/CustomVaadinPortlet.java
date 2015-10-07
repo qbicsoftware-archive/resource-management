@@ -19,7 +19,7 @@ import com.vaadin.server.VaadinRequest;
  * Usually it doesn't need any changes.
  * 
  */
-public class CustomVaadinPortlet extends VaadinPortlet {
+  public class CustomVaadinPortlet extends VaadinPortlet {
   private static final long serialVersionUID = -13615405654173335L;
 
   private class CustomVaadinPortletService extends VaadinPortletService {

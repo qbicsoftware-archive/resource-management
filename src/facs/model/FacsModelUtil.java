@@ -15,9 +15,12 @@ public class FacsModelUtil {
 
   public static BookingModel getNoviceBookingModel(String remoteUser) {
     ArrayList<String> kostenstelle =new ArrayList<String>();
-    kostenstelle.add("QBIC");
-    kostenstelle.add("Sand");
-    UserBean user = new UserBean(0, "David Novice", Constants.NOVICE_ROLE, "active", kostenstelle);
+    ArrayList<String> projectName = new ArrayList<String>();
+    kostenstelle.add("Kostenstelle A");
+    kostenstelle.add("Kostenstelle B");
+    projectName.add("Pro1");
+    projectName.add("Pro2");
+    UserBean user = new UserBean(0, "David Novice", Constants.NOVICE_ROLE, "active", kostenstelle, projectName);
     
     BookingModel bm = new BookingModel(user);
     DeviceBean db1 = new DeviceBean(0, "Device 1","desc1", false);
