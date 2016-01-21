@@ -8,24 +8,32 @@ public class UserBean implements Serializable{
   private static final long serialVersionUID = 7355810127461052570L;
   
   private int id = -1;
+  private String user_ldap = "";
   private String name = "";
-  private String workinggroup = "";
+  private String group = ""; 
+  private String workgroup = "";
   private String institute = "";
   private String role = "";
   private String email = "";
   private String phone = "";
   private String status = "";
-  private List<String> Kostenstelle = new ArrayList<String>();
-  private List<String> ProjectName = new ArrayList<String>();
+  private String kostenstelle = "";
+  private String project = "";
+  //private List<String> Kostenstelle = new ArrayList<String>();
+  //private List<String> ProjectName = new ArrayList<String>();
   
-  public UserBean(int id, String name, String role, String status, List<String> kostenstelle, List<String> projectName) {
+  public UserBean(int id, String user_ldap, String name, String group, String role, String status, String kostenstelle, String project) {
     super();
     this.id = id;
+    this.user_ldap = user_ldap;
+    this.group = group;
     this.name = name;
     this.role = role;
     this.status = status;
-    Kostenstelle = kostenstelle;
-    ProjectName = projectName;
+    this.kostenstelle = kostenstelle;
+    this.project = project;
+    //Kostenstelle = kostenstelle;
+    //ProjectName = projectName;
   }
 
   public UserBean() {
@@ -41,6 +49,14 @@ public class UserBean implements Serializable{
 
   public String getName() {
     return name;
+  }
+  
+  public void setLDAP(String user_ldap) {
+	  this.user_ldap = user_ldap;
+  }
+  
+  public String getLDAP() {
+	  return user_ldap;
   }
 
   public void setName(String name) {
@@ -63,6 +79,31 @@ public class UserBean implements Serializable{
     this.status = status;
   }
 
+  public String getKostenstelle() {
+	  return kostenstelle;
+  }
+  
+  public void setGroupID(String group) {
+	    this.group = group;
+  }
+  
+  public String getGroupID() {
+	  return group;
+  }
+  
+  public void setKostenstelle(String kostenstelle) {
+	  this.kostenstelle = kostenstelle;
+  }
+  
+  public String getProject() {
+	  return project;
+  }
+  
+  public void setProject(String project) {
+	  this.project = project;
+  }
+  
+  /*
   public List<String> getKostenstelle() {
     return Kostenstelle;
   }
@@ -71,6 +112,7 @@ public class UserBean implements Serializable{
     Kostenstelle = kostenstelle;
   }
   
+  
   public List<String> getProject() {
 	    return ProjectName;
   }
@@ -78,13 +120,14 @@ public class UserBean implements Serializable{
   public void setProject(List<String> projectName) {
 	    ProjectName = projectName;
   }
+  */
 
-  public String getWorkinggroup() {
-    return workinggroup;
+  public String getWorkgroup() {
+    return workgroup;
   }
 
-  public void setWorkinggroup(String workinggroup) {
-    this.workinggroup = workinggroup;
+  public void setWorkgroup(String workgroup) {
+    this.workgroup = workgroup;
   }
 
   public String getInstitute() {
@@ -115,7 +158,7 @@ public class UserBean implements Serializable{
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((Kostenstelle == null) ? 0 : Kostenstelle.hashCode());
+    result = prime * result + ((kostenstelle == null) ? 0 : kostenstelle.hashCode());
     result = prime * result + ((email == null) ? 0 : email.hashCode());
     result = prime * result + id;
     result = prime * result + ((institute == null) ? 0 : institute.hashCode());
@@ -123,7 +166,8 @@ public class UserBean implements Serializable{
     result = prime * result + ((role == null) ? 0 : role.hashCode());
     result = prime * result + ((status == null) ? 0 : status.hashCode());
     result = prime * result + ((phone == null) ? 0 : phone.hashCode());
-    result = prime * result + ((workinggroup == null) ? 0 : workinggroup.hashCode());
+    result = prime * result + ((group == null) ? 0 : group.hashCode());
+    result = prime * result + ((workgroup == null) ? 0 : workgroup.hashCode());
     return result;
   }
 
@@ -136,10 +180,10 @@ public class UserBean implements Serializable{
     if (getClass() != obj.getClass())
       return false;
     UserBean other = (UserBean) obj;
-    if (Kostenstelle == null) {
-      if (other.Kostenstelle != null)
+    if (kostenstelle == null) {
+      if (other.kostenstelle != null)
         return false;
-    } else if (!Kostenstelle.equals(other.Kostenstelle))
+    } else if (!kostenstelle.equals(other.kostenstelle))
       return false;
     if (email == null) {
       if (other.email != null)
@@ -173,18 +217,18 @@ public class UserBean implements Serializable{
         return false;
     } else if (!phone.equals(other.phone))
       return false;
-    if (workinggroup == null) {
-      if (other.workinggroup != null)
+    if (workgroup == null) {
+      if (other.workgroup != null)
         return false;
-    } else if (!workinggroup.equals(other.workinggroup))
+    } else if (!workgroup.equals(other.workgroup))
       return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "UserBean [id=" + id + ", name=" + name + ", workinggroup=" + workinggroup
+    return "UserBean [id=" + id + ", name=" + name + ", workgroup=" + workgroup
         + ", institute=" + institute + ", role=" + role + ", email=" + email + ", telephon="
-        + phone + ", status=" + status + ", Kostenstelle=" + Kostenstelle + "]";
+        + phone + ", status=" + status + ", kostenstelle=" + kostenstelle + "]";
   }
 }

@@ -57,6 +57,7 @@ public class Statistics extends CustomComponent {
   Button downloadBill = new Button("download Bill");
   private GeneratedPropertyContainer gpcontainer;
   
+  
   public Statistics() {
     this.setCaption(CAPTION);
 
@@ -72,7 +73,7 @@ public class Statistics extends CustomComponent {
     gpcontainer = new GeneratedPropertyContainer(container);
 
     Grid grid = new Grid(gpcontainer);
-    grid.setWidth("800px");
+    grid.setWidth("100%");
     grid.setHeightByRows(5);
     grid.setHeightMode(HeightMode.ROW);
 
@@ -137,10 +138,14 @@ public class Statistics extends CustomComponent {
     downloadBill.setEnabled(false);
     layout.addComponent(downloadBill);
     
+    layout.setMargin(true); 
+    layout.setSpacing(true); 
+    
     createBill.addClickListener(new ClickListener(){
       private File bill;
       private FileDownloader fileDownloader;
 
+      
       @Override
       public void buttonClick(ClickEvent event) {
         String basepath = VaadinService.getCurrent()
@@ -213,6 +218,7 @@ public class Statistics extends CustomComponent {
 
   }
 
+  
   /**
    * adds a new filter to the header row
    * 
@@ -272,6 +278,7 @@ public class Statistics extends CustomComponent {
     headerCellDevice.setComponent(filterField);
   }
 
+  
   public void addRowFilter(Grid grid, final String propertyId) {
 
   }

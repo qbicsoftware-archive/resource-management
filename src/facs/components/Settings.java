@@ -17,6 +17,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
@@ -32,6 +33,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
+import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 import facs.db.DBManager;
@@ -40,6 +42,7 @@ import facs.model.DeviceBean;
 public class Settings extends CustomComponent{
   private static final long serialVersionUID = 2183973381935176872L;
   private Grid devicesGrid;
+  
   
   public Settings(User user){
     
@@ -54,12 +57,21 @@ public class Settings extends CustomComponent{
     setCompositionRoot(settings);
   }
 
+  
   private Component newDeviceGrid() {
     VerticalLayout devicesLayout = new VerticalLayout();
     devicesLayout.setCaption("Devices");
     HorizontalLayout buttonLayout = new HorizontalLayout();
     Button add = new Button("Add");
     add.setIcon(FontAwesome.PLUS);
+    
+    //there will now be space around the test component
+    //components added to the test component will now not stick together but have space between them
+    devicesLayout.setMargin(true); 
+    devicesLayout.setSpacing(true); 
+    buttonLayout.setMargin(true); 
+    buttonLayout.setSpacing(true); 
+    
     add.addClickListener(new ClickListener(){
 
       @Override
@@ -70,30 +82,31 @@ public class Settings extends CustomComponent{
     });
     buttonLayout.addComponent(add);
     BeanItemContainer<DeviceBean> devices = getDevices();
-    GeneratedPropertyContainer gpc =
-        new GeneratedPropertyContainer(devices);
     
-    gpc.addGeneratedProperty("delete",
-        new PropertyValueGenerator<String>() {
+    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(devices);
+    gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
       @Override
-      public String getValue(Item item, Object itemId,
-                             Object propertyId) {
+      public String getValue(Item item, Object itemId, Object propertyId) {
+          //return FontAwesome.TRASH_O.getHtml(); // The caption
           return "Delete"; // The caption
+
       }
 
       @Override
       public Class<String> getType() {
           return String.class;
       }
-  });    
+  });     
+    
+    
     devicesGrid = new Grid(gpc);
  // Create a grid
-    devicesGrid.setWidth("800px");
-    devicesGrid.setHeight("400px");
+    
+    devicesGrid.setWidth("100%");
     devicesGrid.setSelectionMode(SelectionMode.SINGLE);
- // Render a button that deletes the data row (item)
-    devicesGrid.getColumn("delete")
-        .setRenderer(new ButtonRenderer(new ClickableRenderer.RendererClickListener(){
+    devicesGrid.getColumn("delete").setRenderer(new HtmlRenderer());
+    // Render a button that deletes the data row (item)
+    devicesGrid.getColumn("delete").setRenderer(new ButtonRenderer(new ClickableRenderer.RendererClickListener(){
           @Override
           public void click(RendererClickEvent event) {
             removeDevice((DeviceBean)event.getItemId());
@@ -105,9 +118,11 @@ public class Settings extends CustomComponent{
     devicesLayout.addComponent(buttonLayout);
     devicesLayout.addComponent(devicesGrid);
     
+    //TODO filtering
+    //HeaderRow filterRow = devicesGrid.prependHeaderRow();
+    
     return devicesLayout;
   }
-
 
 
   private BeanItemContainer<DeviceBean> getDevices() {
@@ -117,7 +132,6 @@ public class Settings extends CustomComponent{
     devices.addAll(devs);
     return devices;
   }
-  
   
   
   protected void removeDevice(DeviceBean db) {
@@ -131,6 +145,7 @@ public class Settings extends CustomComponent{
       Notification.show("Failed to remove device from database.", Type.ERROR_MESSAGE);
     }
   }
+ 
   
   private void addNewDevice() {
     final Window subWindow = new Window("Add Device");
@@ -163,6 +178,11 @@ public class Settings extends CustomComponent{
     buttons.setSpacing(true);
     form.addComponent(buttons);
     subWindow.setContent(form);
+    
+    form.setMargin(true); 
+    form.setSpacing(true); 
+    buttons.setMargin(true); 
+    buttons.setSpacing(true); 
     
     // Center it in the browser window
     subWindow.center();

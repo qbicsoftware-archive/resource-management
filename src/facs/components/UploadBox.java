@@ -34,8 +34,8 @@ import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
-  private final String UPLOAD_CAPTION = "Upload statistics here";
-  private final String CAPTION = "Upload device statistics";
+  private final String UPLOAD_CAPTION = "Upload Statistics Here";
+  private final String CAPTION = "Upload Device Statistics";
   // Put upload in this memory buffer that grows automatically
   ByteArrayOutputStream os = new ByteArrayOutputStream(10240);
   // Name of the uploaded file
@@ -49,6 +49,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   private HashMap<String, Integer> deviceNameToId;
   private NativeSelect devices;
   private Grid occupationGrid;
+  
   
   public UploadBox() {
     this.setCaption(CAPTION);
@@ -90,10 +91,14 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     panelContent.addComponent(progress);
     panelContent.addComponent(occupationGrid);
     
+    panelContent.setMargin(true); 
+    panelContent.setSpacing(true); 
+    
     progress.setVisible(false);
 
     setCompositionRoot(panel);
   }
+  
   
   @Override
   public OutputStream receiveUpload(String filename, String mimeType) {
@@ -102,6 +107,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     return os;
   }
 
+  
   @Override
   public void updateProgress(long readBytes, long contentLength) {
     progress.setVisible(true);
@@ -112,6 +118,8 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       progress.setValue(((float) readBytes) / ((float) contentLength));
     }
   }
+  
+  
   @Override
   public void uploadSucceeded(SucceededEvent event) {
     progress.setVisible(false);
@@ -145,14 +153,17 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         Notification.Type.HUMANIZED_MESSAGE);  
   }
 
+  
   private void addBeansToGrid(BeanItemContainer<MachineOccupationBean> container) {
     
   }
 
+  
   private String getCurrentDevice() {
     return (String)devices.getValue();
   }
 
+  
   @Override
   public void uploadFailed(FailedEvent event) {
     Notification.show("Upload failed",

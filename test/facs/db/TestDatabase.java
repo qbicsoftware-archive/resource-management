@@ -2,6 +2,7 @@ package facs.db;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -12,10 +13,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import facs.model.DeviceBean;
+import facs.model.MachineOccupationBean;
 
 public class TestDatabase {
   private String hostname = "localhost";
-  private String port = "3306";
+  private String port = "8889";
   private String sql_database = "facs_facility";
   private String username = "facs";
   private String password = "facs";
@@ -44,14 +46,15 @@ public class TestDatabase {
     String deviceName = "Device 1";
     String deviceDescription =  "some description1";
     boolean deviceUsageIsRestricted = false;
-    int deviceId = db.addDevice(deviceName,deviceDescription,deviceUsageIsRestricted );
-    System.out.println(deviceId);
+    int deviceId = db.addDevice(deviceName, deviceDescription, deviceUsageIsRestricted);
+    System.out.println("DeviceId: " + deviceId);
     assertTrue(deviceId != -1);
     DeviceBean devbean = db.getDeviceById(deviceId);
     assertEquals(devbean.getId(), deviceId);
     assertEquals(devbean.getName(), deviceName);
     assertEquals(devbean.getDescription(), deviceDescription);
-    assertEquals(devbean.isRestricted(), deviceUsageIsRestricted);
+    assertEquals(devbean.getRestriction(), deviceUsageIsRestricted);
+    System.out.println("Devbean: "+ deviceName);
   }
 
   @Test
@@ -97,13 +100,13 @@ public class TestDatabase {
     DeviceBean bean = db.getDeviceById(deviceId);
     bean.setName("updatedDeviceName");
     bean.setDescription("updated resource");
-    bean.setRestricted(true);
+    bean.setRestriction(true);
     db.updateDevice(bean);
     DeviceBean updatedBean = db.getDeviceById(deviceId);
     assertEquals(bean.getId(), updatedBean.getId());
     assertEquals(bean.getName(), updatedBean.getName());
     assertEquals(bean.getDescription(), updatedBean.getDescription());
-    assertEquals(bean.isRestricted(), updatedBean.isRestricted());    
+    assertEquals(bean.getRestriction(), updatedBean.getRestriction());    
   }
   
   @Test
@@ -118,6 +121,28 @@ public class TestDatabase {
     String description = "";
     int kostenstellenId = 1;
 
+  }
+  @Test
+  public void getUserByid(){
+    db.getUserById(6);
+  }
+  
+  @Test
+  public void getCostByResourceAndUserIds(){
+    float cost = db.getCostByResourceAndUserIds(7,1);
+    System.out.println(cost);
+  }
+  
+  @Test
+  public void getPhysicalBlocks(){
+    List<MachineOccupationBean> mbeans = db.getPhysicalTimeBlocks();
+    for(MachineOccupationBean bean: mbeans){
+      System.out.println(bean.getDeviceId());
+      System.out.println(bean.getStart());
+      System.out.println(bean.getEnd());
+    }
+    //what kind of test is that?
+    fail();
   }
   
   @Test

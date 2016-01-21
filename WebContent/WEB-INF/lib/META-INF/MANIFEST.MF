@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Vaadin-Package-Version: 1
+Vaadin-Addon: confirmdialog-2.1.3.jar
+Vaadin-License-Title: Apache License 2.0
+Implementation-Vendor: Run Uilder
+Implementation-Title: ConfirmDialog
+Implementation-Version: 2.1.3

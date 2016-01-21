@@ -3,6 +3,8 @@ package facs.model;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +30,8 @@ public class BookingModel implements Serializable {
     liferayUser = user;
   }
 
-  public boolean isAllowedToBook() {
-    return user != null;
+  public boolean isNotAllowed() {
+    return user.getLDAP().isEmpty();
   }
 
   public List<DeviceBean> getDevices() {
@@ -63,25 +65,44 @@ public class BookingModel implements Serializable {
     this.devices = dbs;    
   }
 
-  public float cost(java.util.Date start, java.util.Date end, String currentDevice) {
-    long frame = end.getTime() - start.getTime();
-    return frame * 0.025f;
+  public double cost(java.util.Date start, java.util.Date end, int deviceCost) {
+    double frame = ((end.getTime() - start.getTime())/360000);
+    //System.out.println("Cost: "+ deviceCost + " Frame: "+ frame);
+    double calcCost = (frame * deviceCost)/10;
+    //System.out.println("CalcCost: " +calcCost);
+    return (frame * deviceCost)/10;
   }
 
   public String userName() {
     return user.getName();
   }
-
-  public List<String> getKostenStellen() {
-    return user.getKostenstelle();
+  
+  public String getLDAP() {
+	  return user.getLDAP();
+  }
+  
+  public String getKostenstelle() {
+	  return user.getKostenstelle();
+  }
+  
+  public String getGroupID() {
+	  return user.getGroupID();
   }
 
   public List<CalendarEvent> getAllEvents(String device) {
+	    if(deviceCalendarEvents.containsKey(device)){
+	      return deviceCalendarEvents.get(device);
+	    }
+	    return null;
+  }
+  
+  public List<CalendarEvent> getAllEvents(String device, String userLDAP) {
     if(deviceCalendarEvents.containsKey(device)){
       return deviceCalendarEvents.get(device);
     }
     return null;
   }
+  
   /**
    * sets a map for devices and 
    * @param deviceCalendarEvents
@@ -89,13 +110,21 @@ public class BookingModel implements Serializable {
   public void setDeviceCalendarEvents(Map<String, List<CalendarEvent>> deviceCalendarEvents){
     this.deviceCalendarEvents = deviceCalendarEvents;
   }
+  
   public void putDeviceCalendarEvents(String device, List<CalendarEvent> deviceCalendarEvents){
     this.deviceCalendarEvents.put(device, deviceCalendarEvents);
   }
 
-public List<String> getProjects() {
-	// TODO Auto-generated method stub
-	return user.getProject();
-}
+  public String getProject() {
+	if (user.getProject()==null)
+		return "";
+	else
+		return user.getProject();
+  }
+
+  public String getInstitute() {
+	 return user.getInstitute();
+  }
+
   
 }

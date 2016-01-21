@@ -8,14 +8,14 @@ public class DeviceBean implements Serializable {
   private int id;
   private String name;
   private String description;
-  private boolean restricted; 
+  private boolean restriction; 
   
-  public DeviceBean(int id, String name, String description, boolean restricted) {
+  public DeviceBean(int id, String name, String description, boolean restriction) {
     super();
     this.id = id;
     this.name = name;
     this.setDescription(description);
-    this.setRestricted(restricted);
+    this.setRestriction(restriction);
   }
 
   public int getId() {
@@ -38,11 +38,12 @@ public class DeviceBean implements Serializable {
     this.description = description;
   }
 
-  public boolean isRestricted() {
-    return restricted;
+  public boolean getRestriction() {
+    return restriction;
   }
 
-  public void setRestricted(boolean restricted) {
-    this.restricted = restricted;
+  public void setRestriction(boolean restriction) {
+    this.restriction = restriction;
   }
+  
 }
