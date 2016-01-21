@@ -21,7 +21,9 @@ import com.vaadin.ui.components.calendar.event.CalendarEvent;
 import facs.model.DeviceBean;
 import facs.model.MachineOccupationBean;
 import facs.model.UserBean;
+
 import facs.model.BookingBean;
+
 
 public enum Database {
   Instance;
@@ -827,6 +829,21 @@ public void userLogin(String user_ldap) {
 	    
 	    return kostenstelle;
 	  }
+  public String getKostenstelleByUserIdOld(int userId){
+    String sql = "SELECT cost_locations.name FROM cost_locations INNER JOIN  users_cost_locations_junction ON users_cost_locations_junction.cost_location_id=cost_locations.cost_location_id WHERE users_cost_locations_junction.user_id = ?";
+    String kostenstelle = "";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setInt(1, userId);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        kostenstelle = rs.getString("name");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    
+    return kostenstelle;
+  }
 
   public void addCategory(String name) {
     String sql = "INSERT INTO kostenstelle (kostenstelle_code) VALUES(?)";
@@ -1232,7 +1249,12 @@ public void userLogin(String user_ldap) {
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         devbean =
+
             new DeviceBean(deviceId, rs.getString("device_name"), rs.getString("description"), rs.getBoolean("restriction"));
+
+            //new DeviceBean(deviceId, rs.getString("name"), rs.getString("descr"),
+              //  rs.getBoolean("restricted"));
+
       }
       statement.close();
     } catch (SQLException e) {
@@ -1341,8 +1363,13 @@ private void rollback(Connection conn, boolean closeConnection) {
     try (Connection conn = login(); Statement statement = conn.createStatement()) {
       ResultSet rs = statement.executeQuery(sql);
       while (rs.next()) {
+
         list.add(new DeviceBean(rs.getInt("device_id"), rs.getString("device_name"), rs
             .getString("description"), rs.getBoolean("restriction")));
+
+        //list.add(new DeviceBean(rs.getInt("resource_id"), rs.getString("name"), rs
+            //.getString("descr"), rs.getBoolean("restricted")));
+
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -1604,6 +1631,28 @@ private void rollback(Connection conn, boolean closeConnection) {
     return userId;
   }
 
+  public List<MachineOccupationBean> getPhysicalTimeBlocks(){
+    String sql = "SELECT * FROM physical_time_blocks";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while(rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("resource_id"));
+        m.setUserFullName(rs.getString("resource_user_name"));
+        m.setUserName(rs.getString("resource_specific_id"));
+        m.setStart(rs.getTimestamp("start_time"));
+        m.setEnd(rs.getTimestamp("end_time"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+  
   /**
    * Adds a physical time block into the database. BE AWARE: It is added without further checking.
    * If you want to be sure that this time block was not added check it with isPhysicalTimeBlock
@@ -1654,7 +1703,8 @@ private void rollback(Connection conn, boolean closeConnection) {
     return true;
   }
 
-
+/*
+<<<<<<< HEAD
 public boolean addUserGroup(String name) {
 	    String sql = "INSERT INTO usergroups (name) VALUES(?)";
 	    // The following statement is an try-with-resources statement, which declares two resources,
@@ -1783,6 +1833,7 @@ public UserBean getUserById(int userId) {
  * @param resourceId
  * @return
  */
+  /*
 public float getCostByResourceAndUserIds(int userId, int resourceId) {
   // select group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=7 AND group_resource_cost.resource_id=3;
   String sql = "SELECT group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=? AND group_resource_cost.resource_id=?";
@@ -1801,5 +1852,101 @@ public float getCostByResourceAndUserIds(int userId, int resourceId) {
   }   
   return cost;
 }
+=======*/
+  public boolean addUserGroup(String name) {
+    String sql = "INSERT INTO usergroups (name) VALUES(?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, name);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }   
+  return true;
+  }
+
+
+  public boolean addResourceCostPerGroup(int resourceId, String usergroup, float cost) {
+    // INSERT INTO group_resource_cost (usergroup,resource_id, cost) VALUES ('test2',1,25.24);
+    String sql = "INSERT INTO group_resource_cost (usergroup,resource_id, cost) VALUES (?,?,?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, usergroup);
+      statement.setInt(2,resourceId);
+      statement.setFloat(3, cost);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }   
+  return true;   
+    
+  }
+
+  public UserBean getUserById(int userId) {
+    String sql = "select users.user_id, users.name, users.workgroup, institute.name from users inner join institute on users.institute_id=institute.institute_id where users.user_id = ?";
+    //1 2 3 4
+    UserBean ret = new UserBean();
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      
+      statement.setInt(1, userId);
+      ResultSet rs = statement.executeQuery();
+      if(rs.next()){
+        ret.setId(rs.getInt(1));
+        ret.setName(rs.getString(2));
+        ret.setWorkinggroup(rs.getString(3));
+        ret.setInstitute(rs.getString(4));
+        //TODO get the correct ones
+        List<String> kostenStelle = new ArrayList<String>();
+        String k = getKostenstelleByUserId(ret.getId());        
+        kostenStelle.add(k.isEmpty()?"unknown":k);
+        ret.setKostenstelle(kostenStelle);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }   
+    return ret;
+  }
+
+  /**
+   * Trys to get cost (per hour?) of a resource for a given user. User have to have a usergroup which has a cost value for that resource.
+   * Returns -1 if it can not find a value in the database.
+   * @param userId
+   * @param resourceId
+   * @return
+   */
+  /*
+  public float getCostByResourceAndUserIds(int userId, int resourceId) {
+    // select group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=7 AND group_resource_cost.resource_id=3;
+    String sql = "SELECT group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=? AND group_resource_cost.resource_id=?";
+    float cost = -1f; 
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+     
+      statement.setInt(1, userId);
+      statement.setInt(2, resourceId);
+      ResultSet rs = statement.executeQuery();
+      if(rs.next()){     
+        cost = rs.getFloat("cost");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }   
+    return cost;
+
+  }
+>>>>>>> branch 'master' of https://github.com/qbicsoftware/resource-management.git*/
 
 }

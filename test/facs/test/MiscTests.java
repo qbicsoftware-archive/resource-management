@@ -208,7 +208,13 @@ public class MiscTests {
         }
         case "LSR Fortessa":{
           DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Admin", 0);
+          /*
+<<<<<<< HEAD
           DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 5);
+=======
+          DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Abteilung", 7.5f);
+>>>>>>> branch 'master' of https://github.com/qbicsoftware/resource-management.git
+*/
           DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Intern", 25);
           DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 1", 30);
           DBManager.getDatabaseInstance().addResourceCostPerGroup(device.getId(),"Extern 2", 40);          
