@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
+ * planning resources for services and integration of relevant data into the common portal infrastructure.
+ * Copyright (C) 2016 Aydın Can Polatkan
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see http://www.gnu.org/licenses/.
+ *******************************************************************************/
 package facs.components;
 
 import java.math.BigDecimal;
@@ -59,19 +75,22 @@ import elemental.json.JsonArray;
 import facs.db.DBManager;
 import facs.model.BookingBean;
 import facs.model.BookingModel;
+import facs.model.UserBean;
 
 public class BookAdmin extends CustomComponent{
   private static final long serialVersionUID = 2183973381935176872L;
   //private Grid devicesGrid;
   private Grid devicesGridConfirm;
   private Grid devicesGridTrash;
+  
   private Map<String, Grid> gridMap = new HashMap<String, Grid>();
+
   private VerticalLayout layoutButtons =  new VerticalLayout();
   private HorizontalLayout layoutListSelect = new HorizontalLayout();
+  
   private ListSelect userDevice;
   private ListSelect userGroup;
   private ListSelect userRole;
-  
   
   public BookAdmin(User user){
 	  
@@ -165,9 +184,9 @@ public class BookAdmin extends CustomComponent{
 			  setCompositionRoot(errorLayout);
 			  return;
 		}
-	    
-	  
+		
 		this.setCaption("Booking Manager");
+
 	    final TabSheet bookAdmin = new TabSheet();
 	    bookAdmin.addStyleName(ValoTheme.TABSHEET_FRAMED);
 	    
@@ -195,10 +214,10 @@ public class BookAdmin extends CustomComponent{
 			}
 	  	}
 	  	);
-	    
+	  	   
 	    //upload csv files of devices
 	    //settings.addTab(new UploadBox());
-	    layoutButtons.addComponent(bookAdmin);
+	  	layoutButtons.addComponent(bookAdmin);
 	    layoutButtons.addComponent(refresh);
 	    
 	    layoutListSelect.addComponent(userDevice);
@@ -236,7 +255,6 @@ public class BookAdmin extends CustomComponent{
     
   }
 
-  
   private Component newDeviceGrid(final String deviceName) {
     VerticalLayout devicesLayout = new VerticalLayout();
     devicesLayout.setCaption(deviceName);
@@ -312,7 +330,7 @@ public class BookAdmin extends CustomComponent{
 	    //buttonLayout.addComponent(add);
 	    
 	    BeanItemContainer<BookingBean> booking = getDeletedBookings();
-	    
+	    		
 	    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(booking);
 	    
 	    gpc.addGeneratedProperty("restore", new PropertyValueGenerator<String>() {

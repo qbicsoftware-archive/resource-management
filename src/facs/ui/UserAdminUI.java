@@ -27,12 +27,13 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 import facs.components.BookAdmin;
+import facs.components.UserAdmin;
 import facs.model.BookingModel;
 import facs.model.FacsModelUtil;
 
 @SuppressWarnings("serial")
 @Theme("valo")
-public class BookAdminUI extends UI {
+public class UserAdminUI extends UI {
   //@WebServlet(value = "/*", asyncSupported = true)
   //@VaadinServletConfiguration(productionMode = false, ui = StatisticsUI.class)
   @Widgetset("com.vaadin.DefaultWidgetSet")
@@ -55,8 +56,8 @@ public class BookAdminUI extends UI {
 	  
 	  try {
 		  BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
-		  BookAdmin bookAdmin = new BookAdmin(null);
-		  setContent(bookAdmin);
+		  UserAdmin userAdmin = new UserAdmin(null);
+		  setContent(userAdmin);
 	  }
 	  catch(Exception e){
 		  setContent(errorView());

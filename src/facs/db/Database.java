@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
+ * planning resources for services and integration of relevant data into the common portal infrastructure.
+ * Copyright (C) 2016 Aydın Can Polatkan
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see http://www.gnu.org/licenses/.
+ *******************************************************************************/
 package facs.db;
 
 import java.sql.Connection;
@@ -607,6 +623,26 @@ public void userLogin(String user_ldap) {
 		      e.printStackTrace();
 		    }
 	    return bookings;
+	 }
+  
+  
+  public java.util.List<UserBean> getUsers() {
+	   ArrayList<UserBean> users = new ArrayList<UserBean>();
+	    String sql = "SELECT * FROM user INNER JOIN groups ON user.group_id=groups.group_id INNER JOIN workgroups ON user.workgroup_id=workgroups.workgroup_id;";
+
+	    try (Connection conn = login(); 
+	    		PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+		      ResultSet rs = statement.executeQuery();
+		      while (rs.next()) {
+		    	  users.add(new UserBean(rs.getString("user_ldap"), rs.getInt("user_id"), rs.getString("user_name"), rs.getString("group_name"), rs.getString("workgroup_name"), rs.getString("institute_name") ,rs.getString("kostenstelle"),rs.getString("project"), rs.getString("email"), rs.getString("phone")));
+		      
+		      }
+		    conn.close();
+		    } catch (SQLException e) {
+		      e.printStackTrace();
+		    }
+	    return users;
 	 }
   
   public java.util.List<BookingBean> getDeletedBookings() {
