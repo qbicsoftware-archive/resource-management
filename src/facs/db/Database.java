@@ -682,6 +682,26 @@ public void userLogin(String user_ldap) {
 		    }
 	    return bookings;
 	 }
+  
+  public java.util.List<BookingBean> getMyBookingsGrid(String uuid) {
+	   ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
+	    String sql = "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE confirmation IS NOT NULL AND deleted IS NULL AND booking.user_ldap = ?";
+
+	    try (Connection conn = login(); 
+	    		PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+	    	  statement.setString(1,uuid);
+		      ResultSet rs = statement.executeQuery();
+		      while (rs.next()) {
+		    	  bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("user_name"), rs.getString("phone"), rs.getString("device_name"), rs.getTimestamp("start"), 
+		    			  rs.getTimestamp("end"), rs.getString("service"), rs.getDouble("price"), rs.getBoolean("confirmation")));
+		      }
+		    conn.close();
+		    } catch (SQLException e) {
+		      e.printStackTrace();
+		    }
+	    return bookings;
+	 }
+
 
   public ArrayList<CalendarEvent> getAllMyBookings(String uuid, String device_name) {
 	   ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();

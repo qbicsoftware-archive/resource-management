@@ -29,17 +29,24 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+import javax.swing.GroupLayout.Alignment;
+
 import org.vaadin.dialogs.ConfirmDialog;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.event.Action;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Calendar;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
@@ -50,6 +57,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.components.calendar.CalendarDateRange;
 import com.vaadin.ui.components.calendar.CalendarComponentEvents.EventMoveHandler;
@@ -67,14 +75,19 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import facs.db.DBManager;
 import facs.db.Database;
+import facs.model.BookingBean;
 import facs.model.BookingModel;
 import facs.model.Constants;
 import facs.model.FacsModelUtil;
+import facs.model.UserBean;
 
 public class Booking  extends CustomComponent{
   private static final long serialVersionUID = -4396068933947619408L;
  
   private HorizontalLayout cal = new HorizontalLayout();
+  private GridLayout gridLayout = new GridLayout(6,6);
+  
+  
   private BookingModel bookingModel;
   private NativeSelect selectedDevice;
   private Map<String, Calendar> bookMap = new HashMap<String, Calendar>();
@@ -84,6 +97,8 @@ public class Booking  extends CustomComponent{
   private Date referenceDate;
   //private NativeSelect selectedProject;
   private NativeSelect selectedService;
+  private Grid myBookings;
+  
   
   private static Database db;
   
@@ -95,17 +110,21 @@ public class Booking  extends CustomComponent{
 	  this.referenceDate = referenceDate;
 	  
 	  Label infoLabel = new Label();
-	  infoLabel.addStyleName("h5");
+	  infoLabel.addStyleName("h3");
+	  
+	  Label selectDeviceLabel = new Label();
+	  selectDeviceLabel.addStyleName("h4");
+	  selectDeviceLabel.setValue("Please Select a Device");
 	  
 	  final Label versionLabel = new Label();
-	  versionLabel.addStyleName("h5");
-	  versionLabel.setValue("Version 0.1.160120");
+	  versionLabel.addStyleName("h3");
+	  versionLabel.setValue("Version 0.1.160201");
 	  
 	  showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)]+", "+ bookingModel.userName()+"!","");
 	  
 	  Date dNow = new Date();
 	  SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-	  System.out.println(ft.format(dNow) + "  INFO  Flow Cytometry Book initiated! - User: "+ bookingModel.getLDAP() +" "+ versionLabel);
+	  System.out.println(ft.format(dNow) + "  INFO  Calendar initiated! - User: "+ bookingModel.getLDAP() +" "+ versionLabel);
 	 
 	  // only users who are allowed to book devices will be able to do so
 	  if (bookingModel.isNotAllowed()) {
@@ -202,6 +221,8 @@ public class Booking  extends CustomComponent{
 	  Button submit = new Button(submitTitle);
 	  submit.setIcon(FontAwesome.CALENDAR);
 	  submit.setDescription("Please select a device and a time frame at first then click 'BOOK'!");
+	  submit.setSizeFull();
+	  
 	  //submit.setVisible(false);
 	  
 	  submit.addClickListener(new ClickListener() {
@@ -214,9 +235,10 @@ public class Booking  extends CustomComponent{
 	     }
 	  });
 	  
-	  String buttonTitle = "";
+	  String buttonTitle = "Refresh";
 	  	Button refresh = new Button(buttonTitle);
 	  	refresh.setIcon(FontAwesome.REFRESH);
+	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
 	  
 	  	refresh.addClickListener(new ClickListener() {
@@ -227,6 +249,7 @@ public class Booking  extends CustomComponent{
 			}
 	  	});
 	
+	  	/*
 	  HorizontalLayout selectDeviceLayout = new HorizontalLayout();
 	  
 	  //add components to the horizontal and vertical layouts
@@ -236,6 +259,7 @@ public class Booking  extends CustomComponent{
 
 	  bookDeviceLayout.addComponent(submit);
 	  bookDeviceLayout.addComponent(refresh);
+	  bookDeviceLayout.addComponent(myBookings());
 	  bookDeviceLayout.addComponent(versionLabel);
 
 	  submit.setVisible(true);
@@ -246,9 +270,31 @@ public class Booking  extends CustomComponent{
 	  //components added to the test component will now not stick together but have space between them
 	  selectDeviceLayout.setMargin(true); 
 	  selectDeviceLayout.setSpacing(true); 
+	  
 	  bookDeviceLayout.setMargin(true); 
 	  bookDeviceLayout.setSpacing(true);
+	  
 	  book.setContent(bookDeviceLayout);
+	  
+	  setCompositionRoot(book);
+	  */
+	  	gridLayout.setWidth("100%");	
+	  
+	//add components to the horizontal and vertical layouts
+	  gridLayout.addComponent(infoLabel,0,0,3,0);
+	  gridLayout.addComponent(versionLabel,4,0,5,0);
+	  
+	  gridLayout.addComponent(selectDeviceLabel,0,1);
+	  gridLayout.addComponent(selectedDevice,1,1,2,1);
+	  
+	  gridLayout.addComponent(cal,0,2,5,2);
+	  gridLayout.addComponent(refresh,0,3);
+	  gridLayout.addComponent(submit,1,3,5,3);
+
+	  gridLayout.addComponent(myBookings(),0,5,5,5);
+	  
+	  gridLayout.setSpacing(true);
+	  book.setContent(gridLayout);
 	  setCompositionRoot(book);
   }
   
@@ -256,6 +302,44 @@ public class Booking  extends CustomComponent{
 	  cal.removeAllComponents();
 	  cal.addComponent(bookMap.get(getCurrentDevice()));
   }
+  
+  private Component myBookings() {
+	    VerticalLayout devicesLayout = new VerticalLayout();
+	    //devicesLayout.setCaption("");
+	    //HorizontalLayout buttonLayout = new HorizontalLayout();
+	    
+	    //there will now be space around the test component
+	    //components added to the test component will now not stick together but have space between them
+	    devicesLayout.setMargin(true); 
+	    devicesLayout.setSpacing(true); 
+	    
+	    BeanItemContainer<BookingBean> users = getBookings(bookingModel.getLDAP());
+	    //System.out.println(bookingModel.getLDAP());
+	    
+	    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
+	    
+	    myBookings = new Grid(gpc);
+	    // Create a grid
+	    
+	    myBookings.setWidth("100%");
+	    myBookings.setSelectionMode(SelectionMode.SINGLE);
+	    myBookings.setEditorEnabled(true);
+	    
+	    devicesLayout.addComponent(myBookings);
+	    
+	    //TODO filtering
+	    //HeaderRow filterRow = devicesGrid.prependHeaderRow();
+	    
+	    return devicesLayout;
+	}
+  
+  private BeanItemContainer<BookingBean> getBookings(String LDAP) {
+	    BeanItemContainer<BookingBean> bookingList = new BeanItemContainer<BookingBean>(BookingBean.class);
+	    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyBookingsGrid(LDAP);
+	    assert bookings != null;
+	    bookingList.addAll(bookings);
+	    return bookingList;
+}
   
   private void Notification(String title, String description, String type) {
 	  Notification notify = new Notification(title,description);
@@ -579,7 +663,7 @@ public class Booking  extends CustomComponent{
   }
 
   NativeSelect initCalendars(List<String> devices) {
-	  String selectDeviceCaption = "Select Device";
+	  String selectDeviceCaption = "";
 	  String selectDeviceDescription = "Please select a device to ask for a booking request or to book!";
 	  NativeSelect selectDevice = new NativeSelect();
 	  selectDevice.addItems(devices);

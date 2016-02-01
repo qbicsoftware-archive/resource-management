@@ -93,7 +93,7 @@ public class UserAdmin extends CustomComponent{
 	  
 	  	Date dNow = new Date();
 	  	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-	  	System.out.println(ft.format(dNow) + "  INFO  Flow Cytometry User Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
+	  	System.out.println(ft.format(dNow) + "  INFO  Calendar User Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
 	  
 	  	Label infoLabel = new Label();
 	  	infoLabel.addStyleName("h5");
