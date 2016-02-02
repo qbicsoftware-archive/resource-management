@@ -1546,7 +1546,7 @@ private void rollback(Connection conn, boolean closeConnection) {
     if (fullName == null)
       return userId;
 
-    String sql = "SELECT user_id FROM users WHERE name = ?";
+    String sql = "SELECT user_id FROM user WHERE user_name = ?";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -1754,18 +1754,18 @@ public boolean addResourceCostPerGroup(int resourceId, String usergroup, float c
   }
 
 public List<MachineOccupationBean> getPhysicalTimeBlocks(){
-    String sql = "SELECT * FROM physical_time_blocks";
+    String sql = "SELECT * FROM logs";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
 
       ResultSet rs = statement.executeQuery();
       while(rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
-        m.setDeviceId(rs.getInt("resource_id"));
-        m.setUserFullName(rs.getString("resource_user_name"));
-        m.setUserName(rs.getString("resource_specific_id"));
-        m.setStart(rs.getTimestamp("start_time"));
-        m.setEnd(rs.getTimestamp("end_time"));
+        m.setDeviceId(rs.getInt("device_id"));
+        m.setUserFullName(rs.getString("user_full_name"));
+        m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
         obean.add(m);
       }
       statement.close();
