@@ -71,6 +71,8 @@ import com.vaadin.ui.components.calendar.event.CalendarEvent;
 import com.vaadin.ui.components.calendar.event.EditableCalendarEvent;
 import com.vaadin.ui.components.calendar.handler.BasicEventMoveHandler;
 import com.vaadin.ui.components.calendar.handler.BasicEventResizeHandler;
+import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 import facs.db.DBManager;
@@ -118,7 +120,7 @@ public class Booking  extends CustomComponent{
 	  
 	  final Label versionLabel = new Label();
 	  versionLabel.addStyleName("h3");
-	  versionLabel.setValue("Version 0.1.160201");
+	  versionLabel.setValue("Version 0.1.160208");
 	  
 	  showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)]+", "+ bookingModel.userName()+"!","");
 	  
@@ -298,6 +300,17 @@ public class Booking  extends CustomComponent{
 	  setCompositionRoot(book);
   }
   
+  private void setRenderers(Grid grid) {
+	    grid.getColumn("price").setRenderer(new NumberRenderer("%1$.2f €"));
+
+	    grid.getColumn("start").setRenderer(
+	        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));
+
+	    grid.getColumn("end").setRenderer(
+	        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN)); 
+  }
+  
+  
   protected void setCalendar() {
 	  cal.removeAllComponents();
 	  cal.addComponent(bookMap.get(getCurrentDevice()));
@@ -324,7 +337,7 @@ public class Booking  extends CustomComponent{
 	    myBookings.setWidth("100%");
 	    myBookings.setSelectionMode(SelectionMode.SINGLE);
 	    myBookings.setEditorEnabled(true);
-	    
+	    setRenderers(myBookings);
 	    devicesLayout.addComponent(myBookings);
 	    
 	    //TODO filtering

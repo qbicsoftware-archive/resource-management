@@ -66,6 +66,8 @@ import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer;
+import com.vaadin.ui.renderers.DateRenderer;
+import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.themes.ValoTheme;
@@ -294,6 +296,7 @@ public class BookAdmin extends CustomComponent{
     gridMap.get(deviceName).getColumn("delete").setRenderer(new HtmlRenderer());
     gridMap.get(deviceName).removeColumn("confirmation");
     gridMap.get(deviceName).removeColumn("deviceName");
+    setRenderers(gridMap.get(deviceName));
     gridMap.get(deviceName).setColumnOrder("ID","service","start","end","username","phone","price");
     
     // Render a button that deletes the data row (item)
@@ -314,6 +317,7 @@ public class BookAdmin extends CustomComponent{
     
     return devicesLayout;
   }
+
   
   private Component deletedBookingsGrid() {
 	    VerticalLayout devicesLayout = new VerticalLayout();
@@ -370,7 +374,7 @@ public class BookAdmin extends CustomComponent{
 	    devicesGridTrash.setSelectionMode(SelectionMode.SINGLE);
 	    devicesGridTrash.getColumn("delete").setRenderer(new HtmlRenderer());
 	    devicesGridTrash.getColumn("restore").setRenderer(new HtmlRenderer());
-	    
+	    setRenderers(devicesGridTrash);
 	    devicesGridTrash.setColumnOrder("ID","deviceName","service","start","end","username","phone","price");
 	    
 	    // Render a button that deletes the data row (item)
@@ -465,7 +469,7 @@ public class BookAdmin extends CustomComponent{
 	    devicesGridConfirm.setSelectionMode(SelectionMode.SINGLE);
 	    devicesGridConfirm.getColumn("delete").setRenderer(new HtmlRenderer());
 	    devicesGridConfirm.getColumn("confirm").setRenderer(new HtmlRenderer());
-	    
+	    setRenderers(devicesGridConfirm);
 	    devicesGridConfirm.setColumnOrder("ID","confirmation","deviceName","service","start","end","username","phone","price");
 	    
 	    // Render a button that deletes the data row (item)
@@ -545,6 +549,15 @@ public class BookAdmin extends CustomComponent{
     }
   }
   
+  private void setRenderers(Grid grid) {
+	    grid.getColumn("price").setRenderer(new NumberRenderer("%1$.2f €"));
+
+	    grid.getColumn("start").setRenderer(
+	        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));
+
+	    grid.getColumn("end").setRenderer(
+	        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));    
+  }		
   
   private void refresh(BeanItemContainer<BookingBean> item) {
       MethodProperty<String> p = (MethodProperty<String>) ((Item) item).getItemProperty("stock");

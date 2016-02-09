@@ -90,7 +90,7 @@ public class Statistics extends CustomComponent {
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
     Grid grid = new Grid(gpcontainer);
-    grid.setWidth("1000px");
+    grid.setWidth("100%");
     grid.setHeightByRows(10);
     grid.setHeightMode(HeightMode.ROW);
     
@@ -125,7 +125,6 @@ public class Statistics extends CustomComponent {
     HeaderRow filterRow = grid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
-
 
     VerticalLayout layout = new VerticalLayout();
     layout.addComponent(grid);
@@ -205,9 +204,7 @@ public class Statistics extends CustomComponent {
       
     });
     setCompositionRoot(layout);
-    
-    
-    
+
   }
   
 

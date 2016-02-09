@@ -790,7 +790,7 @@ public enum Database {
   
 	public java.util.List<BookingBean> getMyBookingsGrid(String uuid) {
 	   ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
-	    String sql = "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE confirmation IS NOT NULL AND deleted IS NULL AND booking.user_ldap = ?";
+	    String sql = "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE deleted IS NULL AND booking.user_ldap = ?";
 
 	    try (Connection conn = login(); 
 	    		PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
