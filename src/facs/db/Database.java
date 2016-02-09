@@ -1,7 +1,7 @@
 /*******************************************************************************
  * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
  * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan
+ * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -1854,7 +1854,7 @@ public enum Database {
 	}
 
 	public UserBean getUserById(int userId) {
-	    String sql = "select users.user_id, users.name, users.workgroup, institute.name from users inner join institute on users.institute_id=institute.institute_id where users.user_id = ?";
+	    String sql = "SELECT user.user_id, user.user_name, workgroups.workgroup_name, workgroups.institute_name FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
 	    //1 2 3 4
 	    UserBean ret = new UserBean();
 	    try (Connection conn = login();
@@ -1882,19 +1882,19 @@ public enum Database {
 	/**
 	 * Trys to get cost (per hour?) of a resource for a given user. User have to have a usergroup which has a cost value for that resource.
 	 * Returns -1 if it can not find a value in the database.
-	 * @param userId
-	 * @param resourceId
+	 * @param uuid
+	 * @param calendar_id
 	 * @return
 	 */
-	public float getCostByResourceAndUserIds(int userId, int resourceId) {
+	public float getCostByResourceAndUserIds(int uuid, int calendar_id) {
 	  // select group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=7 AND group_resource_cost.resource_id=3;
-	  String sql = "SELECT group_resource_cost.cost from group_resource_cost INNER JOIN user_usergroup ON group_resource_cost.usergroup=user_usergroup.usergroup WHERE user_usergroup.user_id=? AND group_resource_cost.resource_id=?";
+	  String sql = "SELECT cost from costs INNER JOIN user ON costs.group_id = user.group_id WHERE user.user_id=? AND costs.calendar_id=?";
 	  float cost = -1f; 
 	  try (Connection conn = login();
 	      PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 	   
-	    statement.setInt(1, userId);
-	    statement.setInt(2, resourceId);
+	    statement.setInt(1, uuid);
+	    statement.setInt(2, calendar_id);
 	    ResultSet rs = statement.executeQuery();
 	    if(rs.next()){     
 	      cost = rs.getFloat("cost");

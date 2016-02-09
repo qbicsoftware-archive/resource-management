@@ -1,7 +1,7 @@
 /*******************************************************************************
  * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
  * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan
+ * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -139,9 +139,8 @@ public class Statistics extends CustomComponent {
 
       @Override
       public void buttonClick(ClickEvent event) {
-        String basepath = VaadinService.getCurrent()
-            .getBaseDirectory().getAbsolutePath();
-       Paths.get(basepath, "WEB-INF/billingTemplates");
+        String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+        Paths.get(basepath, "WEB-INF/billingTemplates");
         
         try {
           Billing billing = new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
@@ -233,6 +232,7 @@ public class Statistics extends CustomComponent {
     for(MachineOccupationBean mobean: mobeans){
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
       List<String> kostenStelle = new ArrayList<String>();
+      //String kostenStelle;
       kostenStelle.add("unknown");
       String institute = "unknown";
       UserBean user = userId>0?DBManager.getDatabaseInstance().getUserById(userId):null;
@@ -241,9 +241,10 @@ public class Statistics extends CustomComponent {
       if(user != null){
         //kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
-        System.out.println(user.getId() + "*********************************************************************" + mobean.getDeviceId());
         
-        cost = getCost(user.getId(), mobean.getStart(),end,mobean.getDeviceId());
+        System.out.println(user.getId() + " ************************************* " + mobean.getDeviceId());
+        
+        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
       grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(), kostenStelle.get(0), mobean.getStart(), end, cost, institute);
     }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
  * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan
+ * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -50,8 +50,6 @@ import org.apache.velocity.runtime.log.LogChute;
 
 /**
  * Create a bill with given information.
- * 
- * @author wojnar
  * 
  */
 public class Billing {
@@ -237,8 +235,6 @@ public class Billing {
    * Format example: date 21.12.2015 time frame 40:20h description 'for real this will be a longer
    * exxample. I am a veeeerrrryyyyyy llooooonnnnggggg description, that basically describes
    * nothing' cost 3.50
-   * 
-   * @author wojnar
    * 
    */
   public class CostEntry {
