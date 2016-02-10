@@ -103,6 +103,7 @@ public class UserAdmin extends CustomComponent{
 	  	refresh.setIcon(FontAwesome.REFRESH);
 	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
+	  	refresh.addStyleName(ValoTheme.BUTTON_FRIENDLY);
 	  	
 	  	Button updateUser = new Button(buttonTitle);
 	  	updateUser.setIcon(FontAwesome.WRENCH);
@@ -134,7 +135,7 @@ public class UserAdmin extends CustomComponent{
 			  return;
 		}
 		
-		this.setCaption("Booking Manager");
+		this.setCaption("User Manager");
 
 	    final TabSheet userAdmin = new TabSheet();
 		userAdmin.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -158,7 +159,7 @@ public class UserAdmin extends CustomComponent{
 		gridLayout.addComponent(refresh,0,2);
 		  
 		gridLayout.setSpacing(true);
-
+		gridLayout.setSizeFull();
 		setCompositionRoot(gridLayout);
 
     

@@ -30,6 +30,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 
 import com.liferay.portal.kernel.jmx.model.MBean;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
@@ -37,8 +38,11 @@ import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
+import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -49,13 +53,19 @@ import com.vaadin.ui.Grid.FooterCell;
 import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
 import facs.model.MachineOccupationBean;
 import facs.model.UserBean;
@@ -74,31 +84,31 @@ public class Statistics extends CustomComponent {
   private final String instituteCaption = "Institute"; 
   private final String CAPTION = "Usage/Statistics";
 
-  Button createBill = new Button("create Bill");
-  Button downloadBill = new Button("download Bill");
+  Button createBill = new Button("Invoice");
+  Button downloadBill = new Button("Download Invoice");
   private GeneratedPropertyContainer gpcontainer;
-
   
-  
+  private GridLayout gridLayout = new GridLayout(6,6);
   
   public Statistics() {
     this.setCaption(CAPTION);
     init();
   }
+  
   private void init(){
+	  
+	Date dNow = new Date();
+	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+	System.out.println(ft.format(dNow) + "  INFO  Statistics accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
+	  
     // Add some generated properties
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
     Grid grid = new Grid(gpcontainer);
     grid.setWidth("100%");
-    grid.setHeightByRows(10);
-    grid.setHeightMode(HeightMode.ROW);
-    
     setRenderers(grid);
     fillRows(grid);
     
-    
-
     // compute total costs
     float totalCosts = 0.0f;
     for (Object itemId : gpcontainer.getItemIds())
@@ -126,11 +136,21 @@ public class Statistics extends CustomComponent {
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
 
-    VerticalLayout layout = new VerticalLayout();
-    layout.addComponent(grid);
-    layout.addComponent(createBill);
-    downloadBill.setEnabled(false);
-    layout.addComponent(downloadBill);
+    Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+  	infoLabel.addStyleName("h3");
+  	
+    createBill.setSizeFull();
+    downloadBill.setSizeFull();
+      
+    gridLayout.setWidth("100%");	
+	  
+	//add components to the grid layout
+	gridLayout.addComponent(infoLabel,4,0,5,0);	  
+	gridLayout.addComponent(grid,0,1,5,1);
+	gridLayout.addComponent(createBill,0,3,3,3);
+	gridLayout.addComponent(downloadBill,4,3,5,3);
+	  
+	gridLayout.setSpacing(true);
     
     createBill.addClickListener(new ClickListener(){
       private File bill;
@@ -193,9 +213,9 @@ public class Statistics extends CustomComponent {
           fileDownloader = new FileDownloader(new FileResource(bill));
           fileDownloader.extend(downloadBill);
           downloadBill.setEnabled(true);
-          Notification.show("Bill is ready");
+          showSuccessfulNotification("Congratulations!","Bill is ready");
         } catch (Exception e) {
-          Notification.show("Error occured while trying to create bill. Please log out and contact your sysadmin",Notification.Type.ERROR_MESSAGE);
+          showErrorNotification("What the heck!","An error occured while trying to create the invoice. The common problem occurs to be: cannot run program 'pdflatex'");
           e.printStackTrace();
         }
         
@@ -203,11 +223,10 @@ public class Statistics extends CustomComponent {
       }
       
     });
-    setCompositionRoot(layout);
+    setCompositionRoot(gridLayout);
 
   }
-  
-
+ 
   private void setRenderers(Grid grid) {
     grid.getColumn(costCaption).setRenderer(new NumberRenderer("%1$.2f €"));
 
@@ -351,15 +370,20 @@ public class Statistics extends CustomComponent {
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
 
-
-    VerticalLayout layout = new VerticalLayout();
-    layout.addComponent(grid);
-    layout.addComponent(createBill);
-    downloadBill.setEnabled(false);
-    layout.addComponent(downloadBill);
+  	Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+  	infoLabel.addStyleName("h3");
     
-    layout.setMargin(true); 
-    layout.setSpacing(true); 
+    gridLayout.setWidth("100%");	
+	  
+	//add components to the grid layout
+	gridLayout.addComponent(infoLabel,4,0,5,0);	  
+	gridLayout.addComponent(grid,0,1,5,1);
+	gridLayout.addComponent(createBill,0,3,2,3);
+	gridLayout.addComponent(downloadBill,3,4,5,4);
+	  
+	gridLayout.setSpacing(true);
+	
+    //downloadBill.setEnabled(false);
     
     createBill.addClickListener(new ClickListener(){
       private File bill;
@@ -424,9 +448,9 @@ public class Statistics extends CustomComponent {
           fileDownloader = new FileDownloader(new FileResource(bill));
           fileDownloader.extend(downloadBill);
           downloadBill.setEnabled(true);
-          Notification.show("Bill is ready");
+          showSuccessfulNotification("Congratulations!","Bill is ready");
         } catch (Exception e) {
-          Notification.show("Error occured while trying to create bill. Please log out and contact your sysadmin",Notification.Type.ERROR_MESSAGE);
+          showErrorNotification("What the heck!","Error occured while trying to create bill. Please log out and contact your sysadmin");
           e.printStackTrace();
         }
         
@@ -434,7 +458,7 @@ public class Statistics extends CustomComponent {
       }
       
     });
-    setCompositionRoot(layout);
+    setCompositionRoot(gridLayout);
     
   }
 
@@ -497,7 +521,32 @@ public class Statistics extends CustomComponent {
     });
     headerCellDevice.setComponent(filterField);
   }
-
+  
+  private void showErrorNotification(String title, String description) {
+	  Notification notify = new Notification(title,description);
+	  notify.setDelayMsec(16000);
+	  notify.setPosition(Position.TOP_CENTER);
+	  notify.setIcon(FontAwesome.FROWN_O);
+	  notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+	  notify.show(Page.getCurrent());
+  }
+  
+  private void showNotification(String title, String description) {
+	  Notification notify = new Notification(title,description);
+	  notify.setDelayMsec(8000);
+	  notify.setPosition(Position.TOP_CENTER);
+	  notify.setIcon(FontAwesome.MEH_O);
+	  notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+	  notify.show(Page.getCurrent());
+  }
+  private void showSuccessfulNotification(String title, String description) {
+	  Notification notify = new Notification(title,description);
+	  notify.setDelayMsec(8000);
+	  notify.setPosition(Position.TOP_CENTER);
+	  notify.setIcon(FontAwesome.SMILE_O);
+	  notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+	  notify.show(Page.getCurrent());
+  }
   
   public void addRowFilter(Grid grid, final String propertyId) {
 

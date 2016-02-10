@@ -98,7 +98,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     
     // Put the upload and image display in a panel
     Panel panel = new Panel(UPLOAD_CAPTION);
-    panel.setWidth("600px");
+    panel.setWidth("100%");
     VerticalLayout panelContent = new VerticalLayout();
     panelContent.setSpacing(true);
     panel.setContent(panelContent);

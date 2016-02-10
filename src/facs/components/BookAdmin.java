@@ -108,6 +108,7 @@ public class BookAdmin extends CustomComponent{
 	  	refresh.setIcon(FontAwesome.REFRESH);
 	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
+	  	refresh.addStyleName(ValoTheme.BUTTON_FRIENDLY);
 	  	
 	  	String buttonUpdateTitle = "Update";
 	  	Button updateUser = new Button(buttonUpdateTitle);
@@ -193,7 +194,7 @@ public class BookAdmin extends CustomComponent{
 			  return;
 		}
 		
-		this.setCaption("Booking Manager");
+		this.setCaption("Admin");
 
 	    final TabSheet bookAdmin = new TabSheet();
 	    bookAdmin.addStyleName(ValoTheme.TABSHEET_FRAMED);
@@ -235,9 +236,9 @@ public class BookAdmin extends CustomComponent{
 		gridLayout.addComponent(userRole,2,4,3,4);
 		gridLayout.addComponent(userGroup,4,4,5,4);
 		gridLayout.addComponent(updateUser,0,5,5,5);
-		  
+		gridLayout.setSizeFull();
+		
 		gridLayout.setSpacing(true);
-
 		setCompositionRoot(gridLayout);
 	    
 	    /* JavaScript to update the Grid
@@ -271,10 +272,6 @@ public class BookAdmin extends CustomComponent{
     //components added to the test component will now not stick together but have space between them
     devicesLayout.setMargin(true); 
     devicesLayout.setSpacing(true); 
-    //buttonLayout.setMargin(true); 
-    //buttonLayout.setSpacing(true); 
-    
-    //buttonLayout.addComponent(add);
     
     BeanItemContainer<BookingBean> booking = getBookingList(deviceName);
     

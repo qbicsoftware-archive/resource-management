@@ -75,10 +75,13 @@ public class Settings extends CustomComponent{
 
   
   private Component newDeviceGrid() {
+	
     VerticalLayout devicesLayout = new VerticalLayout();
     devicesLayout.setCaption("Devices");
+    
     HorizontalLayout buttonLayout = new HorizontalLayout();
     Button add = new Button("Add");
+    
     add.setIcon(FontAwesome.PLUS);
     
     //there will now be space around the test component

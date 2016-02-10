@@ -140,8 +140,7 @@ public class Booking  extends CustomComponent{
 	  
 	  this.setCaption("Book Instrument");
 	  Panel book = new Panel("Book Instrument");
-	  book.addStyleName(ValoTheme.PANEL_WELL);
-	  //VerticalLayout bookDeviceLayout = new VerticalLayout();
+	  book.addStyleName(ValoTheme.PANEL_BORDERLESS);
 	  
 	  DBManager.getDatabaseInstance();  
 	  db = Database.Instance;
@@ -237,11 +236,12 @@ public class Booking  extends CustomComponent{
 	     }
 	  });
 	  
-	  String buttonTitle = "Refresh";
+	  	String buttonTitle = "Refresh";
 	  	Button refresh = new Button(buttonTitle);
 	  	refresh.setIcon(FontAwesome.REFRESH);
 	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
+	  	refresh.addStyleName(ValoTheme.BUTTON_FRIENDLY);
 	  
 	  	refresh.addClickListener(new ClickListener() {
 			private static final long serialVersionUID = -3610721151565496269L;
@@ -250,36 +250,7 @@ public class Booking  extends CustomComponent{
 				refreshDataSources();
 			}
 	  	});
-	
-	  	/*
-	  HorizontalLayout selectDeviceLayout = new HorizontalLayout();
-	  
-	  //add components to the horizontal and vertical layouts
-	  selectDeviceLayout.addComponent(selectedDevice);
-	  bookDeviceLayout.addComponent(selectDeviceLayout);
-	  bookDeviceLayout.addComponent(cal);
 
-	  bookDeviceLayout.addComponent(submit);
-	  bookDeviceLayout.addComponent(refresh);
-	  bookDeviceLayout.addComponent(myBookings());
-	  bookDeviceLayout.addComponent(versionLabel);
-
-	  submit.setVisible(true);
-	  selectedService.setVisible(false);
-	  selectDeviceLayout.addComponent(selectedService);
-	  
-	  //there will now be space around the test component
-	  //components added to the test component will now not stick together but have space between them
-	  selectDeviceLayout.setMargin(true); 
-	  selectDeviceLayout.setSpacing(true); 
-	  
-	  bookDeviceLayout.setMargin(true); 
-	  bookDeviceLayout.setSpacing(true);
-	  
-	  book.setContent(bookDeviceLayout);
-	  
-	  setCompositionRoot(book);
-	  */
 	  gridLayout.setWidth("100%");	
 	  
 	  //add components to the grid layout
@@ -296,6 +267,8 @@ public class Booking  extends CustomComponent{
 	  gridLayout.addComponent(myBookings(),0,5,5,5);
 	  
 	  gridLayout.setSpacing(true);
+	  gridLayout.setSizeFull();
+	  
 	  book.setContent(gridLayout);
 	  setCompositionRoot(book);
   }
@@ -319,7 +292,6 @@ public class Booking  extends CustomComponent{
   private Component myBookings() {
 	    VerticalLayout devicesLayout = new VerticalLayout();
 	    //devicesLayout.setCaption("");
-	    //HorizontalLayout buttonLayout = new HorizontalLayout();
 	    
 	    //there will now be space around the test component
 	    //components added to the test component will now not stick together but have space between them
