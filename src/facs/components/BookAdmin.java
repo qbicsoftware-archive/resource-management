@@ -50,6 +50,7 @@ import com.vaadin.ui.Calendar;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
@@ -86,9 +87,8 @@ public class BookAdmin extends CustomComponent{
   private Grid devicesGridTrash;
   
   private Map<String, Grid> gridMap = new HashMap<String, Grid>();
-
-  private VerticalLayout layoutButtons =  new VerticalLayout();
-  private HorizontalLayout layoutListSelect = new HorizontalLayout();
+  
+  private GridLayout gridLayout = new GridLayout(6,6);
   
   private ListSelect userDevice;
   private ListSelect userGroup;
@@ -100,22 +100,26 @@ public class BookAdmin extends CustomComponent{
 	  	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 	  	System.out.println(ft.format(dNow) + "  INFO  Calendar Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
 	  
-	  	Label infoLabel = new Label();
-	  	infoLabel.addStyleName("h5");
+	  	Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+	  	infoLabel.addStyleName("h3");
 	  
-	  	String buttonTitle = "";
-	  	Button refresh = new Button(buttonTitle);
+	  	String buttonRefreshTitle = "Refresh";
+	  	Button refresh = new Button(buttonRefreshTitle);
 	  	refresh.setIcon(FontAwesome.REFRESH);
+	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
 	  	
-	  	Button updateUser = new Button(buttonTitle);
+	  	String buttonUpdateTitle = "Update";
+	  	Button updateUser = new Button(buttonUpdateTitle);
 	  	updateUser.setIcon(FontAwesome.WRENCH);
+	  	updateUser.setSizeFull();
 	  	updateUser.setDescription("Click here to update your user role and group!");
 	  	
 	  	userDevice = new ListSelect("Select a device");
 	  	userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
 	  	userDevice.setRows(6);
 	  	userDevice.setNullSelectionAllowed(false);
+	  	userDevice.setSizeFull();
 	  	userDevice.setImmediate(true);
 	  	/*userDevice.addValueChangeListener(e -> Notification.show("Device:",
                 String.valueOf(e.getProperty().getValue()),
@@ -125,6 +129,7 @@ public class BookAdmin extends CustomComponent{
 	  	userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
 	  	userGroup.setRows(6);
 	  	userGroup.setNullSelectionAllowed(false);
+	  	userGroup.setSizeFull();
 	  	userGroup.setImmediate(true);
 	  	/*userGroup.addValueChangeListener(e -> Notification.show("User Group:",
                 String.valueOf(e.getProperty().getValue()),
@@ -134,6 +139,7 @@ public class BookAdmin extends CustomComponent{
 	  	userRole.addItems(DBManager.getDatabaseInstance().getUserRoles());
         userRole.setRows(6);
         userRole.setNullSelectionAllowed(false);
+        userRole.setSizeFull();
 	  	userRole.setImmediate(true);
 	  	/*userRole.addValueChangeListener(e -> Notification.show("User Role:",
                 String.valueOf(e.getProperty().getValue()),
@@ -202,6 +208,8 @@ public class BookAdmin extends CustomComponent{
 	    }
 	   
 	    bookAdmin.addTab(deletedBookingsGrid());
+	    
+	    
 	  	
 	  	bookAdmin.addSelectedTabChangeListener(new SelectedTabChangeListener() {
 
@@ -216,25 +224,22 @@ public class BookAdmin extends CustomComponent{
 			}
 	  	}
 	  	);
-	  	   
-	    //upload csv files of devices
-	    //settings.addTab(new UploadBox());
-	  	layoutButtons.addComponent(bookAdmin);
-	    layoutButtons.addComponent(refresh);
+	  	      
+	    gridLayout.setWidth("100%");	
+		  
+		//add components to the grid layout
+		gridLayout.addComponent(infoLabel,4,0,5,0);	  
+		gridLayout.addComponent(bookAdmin,0,1,5,1);
+		gridLayout.addComponent(refresh,0,2);
+		gridLayout.addComponent(userDevice,0,4,1,4);
+		gridLayout.addComponent(userRole,2,4,3,4);
+		gridLayout.addComponent(userGroup,4,4,5,4);
+		gridLayout.addComponent(updateUser,0,5,5,5);
+		  
+		gridLayout.setSpacing(true);
+
+		setCompositionRoot(gridLayout);
 	    
-	    layoutListSelect.addComponent(userDevice);
-	    layoutListSelect.addComponent(userRole);
-	    layoutListSelect.addComponent(userGroup);
-	    layoutListSelect.addComponent(updateUser);
-	    layoutListSelect.setMargin(true);
-	    layoutListSelect.setSpacing(true);
-	    layoutButtons.addComponent(layoutListSelect);
-	    
-	    layoutButtons.setMargin(true); 
-	    layoutButtons.setSpacing(true);
-	    
-	    //setCompositionRoot(bookAdmin);
-	    setCompositionRoot(layoutButtons);
 	    /* JavaScript to update the Grid
 	    try
 	    {       

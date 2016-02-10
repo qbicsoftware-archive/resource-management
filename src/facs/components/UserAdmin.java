@@ -50,6 +50,7 @@ import com.vaadin.ui.Calendar;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
@@ -86,8 +87,7 @@ public class UserAdmin extends CustomComponent{
   
   private Map<String, Grid> gridMap = new HashMap<String, Grid>();
 
-  private VerticalLayout layoutButtons =  new VerticalLayout();
-  private HorizontalLayout layoutListSelect = new HorizontalLayout();
+  private GridLayout gridLayout = new GridLayout(6,6);
   
   public UserAdmin(User user){
 	  
@@ -95,12 +95,13 @@ public class UserAdmin extends CustomComponent{
 	  	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 	  	System.out.println(ft.format(dNow) + "  INFO  Calendar User Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
 	  
-	  	Label infoLabel = new Label();
-	  	infoLabel.addStyleName("h5");
+	  	Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+	  	infoLabel.addStyleName("h3");
 	  
-	  	String buttonTitle = "";
+	  	String buttonTitle = "Refresh";
 	  	Button refresh = new Button(buttonTitle);
 	  	refresh.setIcon(FontAwesome.REFRESH);
+	  	refresh.setSizeFull();
 	  	refresh.setDescription("Click here to reload the data from the database!");
 	  	
 	  	Button updateUser = new Button(buttonTitle);
@@ -148,17 +149,17 @@ public class UserAdmin extends CustomComponent{
 	  	}
 	  	);
 	  	   
-	  	layoutButtons.addComponent(userAdmin);
-	    layoutButtons.addComponent(refresh);
+	    
+	    gridLayout.setWidth("100%");	
+		  
+		//add components to the grid layout
+		gridLayout.addComponent(infoLabel,4,0,5,0);	  
+		gridLayout.addComponent(userAdmin,0,1,5,1);
+		gridLayout.addComponent(refresh,0,2);
+		  
+		gridLayout.setSpacing(true);
 
-	    layoutListSelect.setMargin(true);
-	    layoutListSelect.setSpacing(true);
-	    layoutButtons.addComponent(layoutListSelect);
-	    
-	    layoutButtons.setMargin(true); 
-	    layoutButtons.setSpacing(true);
-	    
-	    setCompositionRoot(layoutButtons);
+		setCompositionRoot(gridLayout);
 
     
   }

@@ -291,6 +291,34 @@ public enum Database {
 		  return userrole;
 	}
 	
+	/**
+  	 * Returns the user name by querying the user ID
+  	 * 
+  	 * @param uuid
+  	 * @return
+  	 */
+	public String getUserNameByUserID(String uuid) {
+		  String userrole = "V";
+		  
+		  String sql = "SELECT user_name FROM user WHERE user_ldap = ?";
+		  try (Connection conn = login(); 
+		    		PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			  
+			  statement.setString(1, uuid);
+		      ResultSet rs = statement.executeQuery();
+		      while (rs.next()) {
+			    	  userrole = (String)rs.getString(1);
+			  }
+			      // nothing will be in the database, until you commit it!
+			      // conn.commit();
+		  } 
+		  catch (SQLException e) {
+			      e.printStackTrace();
+		  }
+		  
+		  return userrole;
+	}
+	
 	
 	/**
   	 * Returns the user ID from the user table by using users LDAP ID

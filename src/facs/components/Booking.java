@@ -120,7 +120,7 @@ public class Booking  extends CustomComponent{
 	  
 	  final Label versionLabel = new Label();
 	  versionLabel.addStyleName("h3");
-	  versionLabel.setValue("Version 0.1.160208");
+	  versionLabel.setValue("Version 0.1.160209");
 	  
 	  showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)]+", "+ bookingModel.userName()+"!","");
 	  
@@ -141,7 +141,7 @@ public class Booking  extends CustomComponent{
 	  this.setCaption("Book Instrument");
 	  Panel book = new Panel("Book Instrument");
 	  book.addStyleName(ValoTheme.PANEL_WELL);
-	  VerticalLayout bookDeviceLayout = new VerticalLayout();
+	  //VerticalLayout bookDeviceLayout = new VerticalLayout();
 	  
 	  DBManager.getDatabaseInstance();  
 	  db = Database.Instance;
@@ -213,7 +213,7 @@ public class Booking  extends CustomComponent{
 		  infoLabel.setValue(bookingModel.userName() + " · Kostenstelle: " + bookingModel.getKostenstelle() + " · Project: " + bookingModel.getProject() + " · Institute: "+ bookingModel.getInstitute());
 	  }
 	
-	  bookDeviceLayout.addComponent(infoLabel);
+	  //bookDeviceLayout.addComponent(infoLabel);
 	  cal.setLocale(Locale.getDefault());
 	  cal.setImmediate(true);
 	  selectedService.setImmediate(true);
@@ -280,9 +280,9 @@ public class Booking  extends CustomComponent{
 	  
 	  setCompositionRoot(book);
 	  */
-	  	gridLayout.setWidth("100%");	
+	  gridLayout.setWidth("100%");	
 	  
-	//add components to the horizontal and vertical layouts
+	  //add components to the grid layout
 	  gridLayout.addComponent(infoLabel,0,0,3,0);
 	  gridLayout.addComponent(versionLabel,4,0,5,0);
 	  
