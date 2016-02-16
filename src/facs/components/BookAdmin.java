@@ -100,7 +100,7 @@ public class BookAdmin extends CustomComponent{
 	  	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 	  	System.out.println(ft.format(dNow) + "  INFO  Calendar Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
 	  
-	  	Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+	  	Label infoLabel = new Label(DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()) + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
 	  	infoLabel.addStyleName("h3");
 	  
 	  	String buttonRefreshTitle = "Refresh";
@@ -198,6 +198,7 @@ public class BookAdmin extends CustomComponent{
 
 	    final TabSheet bookAdmin = new TabSheet();
 	    bookAdmin.addStyleName(ValoTheme.TABSHEET_FRAMED);
+	    bookAdmin.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
 	    
 	    ArrayList<String> deviceNames = new ArrayList<String>();
 	    deviceNames = DBManager.getDatabaseInstance().getDeviceNames();
@@ -229,7 +230,7 @@ public class BookAdmin extends CustomComponent{
 	    gridLayout.setWidth("100%");	
 		  
 		//add components to the grid layout
-		gridLayout.addComponent(infoLabel,4,0,5,0);	  
+		gridLayout.addComponent(infoLabel,0,0,3,0);
 		gridLayout.addComponent(bookAdmin,0,1,5,1);
 		gridLayout.addComponent(refresh,0,2);
 		gridLayout.addComponent(userDevice,0,4,1,4);

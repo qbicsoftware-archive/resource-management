@@ -136,7 +136,7 @@ public class Statistics extends CustomComponent {
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
 
-    Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+  	Label infoLabel = new Label(DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()) + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
   	infoLabel.addStyleName("h3");
   	
     createBill.setSizeFull();
@@ -145,10 +145,10 @@ public class Statistics extends CustomComponent {
     gridLayout.setWidth("100%");	
 	  
 	//add components to the grid layout
-	gridLayout.addComponent(infoLabel,4,0,5,0);	  
+	gridLayout.addComponent(infoLabel,0,0,3,0); 
 	gridLayout.addComponent(grid,0,1,5,1);
-	gridLayout.addComponent(createBill,0,3,3,3);
-	gridLayout.addComponent(downloadBill,4,3,5,3);
+	gridLayout.addComponent(createBill,0,3);
+	gridLayout.addComponent(downloadBill,1,3);
 	  
 	gridLayout.setSpacing(true);
     
@@ -376,7 +376,7 @@ public class Statistics extends CustomComponent {
     gridLayout.setWidth("100%");	
 	  
 	//add components to the grid layout
-	gridLayout.addComponent(infoLabel,4,0,5,0);	  
+	gridLayout.addComponent(infoLabel,0,0,3,0); 
 	gridLayout.addComponent(grid,0,1,5,1);
 	gridLayout.addComponent(createBill,0,3,2,3);
 	gridLayout.addComponent(downloadBill,3,4,5,4);

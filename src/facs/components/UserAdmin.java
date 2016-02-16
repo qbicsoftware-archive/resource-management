@@ -93,9 +93,9 @@ public class UserAdmin extends CustomComponent{
 	  
 	  	Date dNow = new Date();
 	  	SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-	  	System.out.println(ft.format(dNow) + "  INFO  Calendar User Admin accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
+	  	System.out.println(ft.format(dNow) + "  INFO  Calendar User Manager accessed! - User: "+LiferayAndVaadinUtils.getUser().getScreenName());
 	  
-	  	Label infoLabel = new Label(LiferayAndVaadinUtils.getUser().getScreenName() + " · " + DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()));
+	  	Label infoLabel = new Label(DBManager.getDatabaseInstance().getUserNameByUserID(LiferayAndVaadinUtils.getUser().getScreenName()) + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
 	  	infoLabel.addStyleName("h3");
 	  
 	  	String buttonTitle = "Refresh";
@@ -154,7 +154,7 @@ public class UserAdmin extends CustomComponent{
 	    gridLayout.setWidth("100%");	
 		  
 		//add components to the grid layout
-		gridLayout.addComponent(infoLabel,4,0,5,0);	  
+		gridLayout.addComponent(infoLabel,0,0,3,0);  
 		gridLayout.addComponent(userAdmin,0,1,5,1);
 		gridLayout.addComponent(refresh,0,2);
 		  

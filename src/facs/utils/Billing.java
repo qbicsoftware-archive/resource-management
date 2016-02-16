@@ -202,12 +202,14 @@ public class Billing {
         new ArrayList<String>(Arrays.asList("pdflatex", "-interaction=nonstopmode",
             tempTexFile.getName()));
     String basename = FilenameUtils.getBaseName(tempTexFile.getName());
+
     String fileNamme = basename + ".pdf";
     File resultFile = Paths.get(tempTexFile.getParent(), fileNamme).toFile();
     // Runtime rt = Runtime.getRuntime();
     // Process p = rt.exec(cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(tempTexFile.getParentFile());
+    System.out.println("Basename: "+basename+" fileNamme: "+ fileNamme);
     Process p = pb.start();
 
     int exitValue = p.waitFor();

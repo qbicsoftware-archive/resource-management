@@ -120,7 +120,7 @@ public class Booking  extends CustomComponent{
 	  
 	  final Label versionLabel = new Label();
 	  versionLabel.addStyleName("h3");
-	  versionLabel.setValue("Version 0.1.160209");
+	  versionLabel.setValue("Version 0.1.160216");
 	  
 	  showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)]+", "+ bookingModel.userName()+"!","");
 	  
@@ -138,8 +138,8 @@ public class Booking  extends CustomComponent{
 		  return;
 	  }
 	  
-	  this.setCaption("Book Instrument");
-	  Panel book = new Panel("Book Instrument");
+	  this.setCaption("");
+	  Panel book = new Panel("");
 	  book.addStyleName(ValoTheme.PANEL_BORDERLESS);
 	  
 	  DBManager.getDatabaseInstance();  
@@ -148,7 +148,7 @@ public class Booking  extends CustomComponent{
 
 	  selectedDevice = initCalendars(bookingModel.getDevicesNames());
 	  
-	  selectedService = new NativeSelect("Select Service");
+	  selectedService = new NativeSelect("Please select a service:");
 	  selectedService.setDescription("Please select the service you would like to receive!");
 	  
 	  selectedDevice.addValueChangeListener(new ValueChangeListener() {
@@ -157,6 +157,7 @@ public class Booking  extends CustomComponent{
 	    @Override
 	    public void valueChange(ValueChangeEvent event) {
 	    versionLabel.setValue(db.getUserRoleDescByLDAPId(bookingModel.getLDAP(),getCurrentDevice()));
+	  	
 	      if (bookMap.containsKey(getCurrentDevice())) {
 	    	  cal.removeAllComponents();
 	    	  setCalendar();
@@ -257,12 +258,15 @@ public class Booking  extends CustomComponent{
 	  gridLayout.addComponent(infoLabel,0,0,3,0);
 	  gridLayout.addComponent(versionLabel,4,0,5,0);
 	  
-	  gridLayout.addComponent(selectDeviceLabel,0,1);
-	  gridLayout.addComponent(selectedDevice,1,1,2,1);
+	  //gridLayout.addComponent(selectDeviceLabel,0,1);
+	  gridLayout.addComponent(selectedDevice,0,1);
+	  gridLayout.addComponent(selectedService,0,2);
+	  selectedService.setVisible(false);
 	  
-	  gridLayout.addComponent(cal,0,2,5,2);
-	  gridLayout.addComponent(refresh,0,3);
-	  gridLayout.addComponent(submit,1,3,5,3);
+	  gridLayout.addComponent(cal,0,3,5,3);
+	  
+	  gridLayout.addComponent(refresh,0,4);
+	  gridLayout.addComponent(submit,1,4,5,4);
 
 	  gridLayout.addComponent(myBookings(),0,5,5,5);
 	  
@@ -648,7 +652,7 @@ public class Booking  extends CustomComponent{
   }
 
   NativeSelect initCalendars(List<String> devices) {
-	  String selectDeviceCaption = "";
+	  String selectDeviceCaption = "Please select a device:";
 	  String selectDeviceDescription = "Please select a device to ask for a booking request or to book!";
 	  NativeSelect selectDevice = new NativeSelect();
 	  selectDevice.addItems(devices);

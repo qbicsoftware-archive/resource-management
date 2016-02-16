@@ -206,6 +206,7 @@ public class Settings extends CustomComponent{
     // Center it in the browser window
     subWindow.center();
     subWindow.setModal(true);
+    subWindow.setWidth("50%");
     // Open it in the UI
     UI.getCurrent().addWindow(subWindow);
     
