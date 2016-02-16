@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -27,6 +27,9 @@ import java.util.HashMap;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
@@ -42,11 +45,11 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 import facs.db.DBManager;
 import facs.model.DeviceBean;
 import facs.model.MachineOccupationBean;
-import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
@@ -57,29 +60,30 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   // Name of the uploaded file
   String filename;
   ProgressBar progress = new ProgressBar(0.0f);
-  
-  //TODO if success or failed show message
+
+  // TODO if success or failed show message
   Label finishedMessage = new Label("");
-  
-  final String  cvsSplitBy = ",";
+
+  final String cvsSplitBy = ",";
   private HashMap<String, Integer> deviceNameToId;
   private NativeSelect devices;
   private Grid occupationGrid;
-  
-  
+
+
   public UploadBox() {
     this.setCaption(CAPTION);
-    //there has to be a device selected.
+    // there has to be a device selected.
     devices = new NativeSelect("Devices");
-    devices.setDescription("Select a device in order to upload information for that specific devices.");
+    devices
+        .setDescription("Select a device in order to upload information for that specific devices.");
     devices.setNullSelectionAllowed(false);
-    deviceNameToId = new HashMap<String, Integer>(); 
-    for(DeviceBean bean : DBManager.getDatabaseInstance().getDevices()){
+    deviceNameToId = new HashMap<String, Integer>();
+    for (DeviceBean bean : DBManager.getDatabaseInstance().getDevices()) {
       deviceNameToId.put(bean.getName(), bean.getId());
       devices.addItem(bean.getName());
     }
     occupationGrid = new Grid();
-    
+
     // Create the upload component and handle all its events
     final Upload upload = new Upload();
     upload.setReceiver(this);
@@ -87,15 +91,15 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     upload.addFailedListener(this);
     upload.addSucceededListener(this);
     upload.setVisible(false);
-  
-    //one can only upload csvs, if a device was selected.
+
+    // one can only upload csvs, if a device was selected.
     devices.addValueChangeListener(new ValueChangeListener() {
       @Override
       public void valueChange(ValueChangeEvent event) {
         upload.setVisible(event.getProperty().getValue() != null);
       }
     });
-    
+
     // Put the upload and image display in a panel
     Panel panel = new Panel(UPLOAD_CAPTION);
     panel.setWidth("100%");
@@ -106,16 +110,16 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     panelContent.addComponent(upload);
     panelContent.addComponent(progress);
     panelContent.addComponent(occupationGrid);
-    
-    panelContent.setMargin(true); 
-    panelContent.setSpacing(true); 
-    
+
+    panelContent.setMargin(true);
+    panelContent.setSpacing(true);
+
     progress.setVisible(false);
 
     setCompositionRoot(panel);
   }
-  
-  
+
+
   @Override
   public OutputStream receiveUpload(String filename, String mimeType) {
     this.filename = filename;
@@ -123,7 +127,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     return os;
   }
 
-  
+
   @Override
   public void updateProgress(long readBytes, long contentLength) {
     progress.setVisible(true);
@@ -134,56 +138,87 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       progress.setValue(((float) readBytes) / ((float) contentLength));
     }
   }
-  
-  
+
   @Override
   public void uploadSucceeded(SucceededEvent event) {
     progress.setVisible(false);
     String line = "";
 
     try {
-      BeanItemContainer<MachineOccupationBean> container = new BeanItemContainer<MachineOccupationBean>(MachineOccupationBean.class);
-      
+      BeanItemContainer<MachineOccupationBean> container =
+          new BeanItemContainer<MachineOccupationBean>(MachineOccupationBean.class);
+
       StringReader sr = new StringReader(os.toString());
       BufferedReader br = new BufferedReader(sr);
-      
-      //skip header
+
+      // skip header
       br.readLine();
-      //read body
+      // read body
       while ((line = br.readLine()) != null) {
         String[] userInfo = line.split(cvsSplitBy);
         MachineOccupationBean bean = new MachineOccupationBean();
         bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
         container.addBean(bean);
-        //System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd() + " login time: " + Formatter.toHoursAndMinutes(bean.getEnd().getTime() - bean.getStart().getTime()));
+        // System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd() +
+        // " login time: " + Formatter.toHoursAndMinutes(bean.getEnd().getTime() -
+        // bean.getStart().getTime()));
         occupationGrid.setContainerDataSource(container);
       }
       addBeansToGrid(container);
     } catch (IOException | ParseException e) {
       e.printStackTrace();
-      Notification.show("Can not read uploaded file.",
-          Notification.Type.ERROR_MESSAGE);
+      showErrorNotification("Can't read uploaded file.",
+          "An error occured during the upload process. Make sure that you didn't upload a corrupted file.");
       return;
     }
-    Notification.show("Upload successful",
-        Notification.Type.HUMANIZED_MESSAGE);  
+    showSuccessfulNotification("Nailed it! Upload successful.",
+        "Hopefully all good! Successful uploads expectedly lead to successful parsing of the documents.");
   }
 
-  
+
+  private void showErrorNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(16000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.FROWN_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+  private void showNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(8000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.MEH_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+  private void showSuccessfulNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(8000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.SMILE_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+
   private void addBeansToGrid(BeanItemContainer<MachineOccupationBean> container) {
-    
+
   }
 
-  
+
   private String getCurrentDevice() {
-    return (String)devices.getValue();
+    return (String) devices.getValue();
   }
 
-  
+
   @Override
   public void uploadFailed(FailedEvent event) {
-    Notification.show("Upload failed",
-        Notification.Type.ERROR_MESSAGE);   
+    showErrorNotification(
+        "oops! Upload failed, reason unknown!",
+        "Obviously there is a problem, please ask yourself the following questions: Did I do everything correctly? Did I focus on my work? If the answers are 'Yes' please call a technician.");
   }
 
 }

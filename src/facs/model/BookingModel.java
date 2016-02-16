@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -19,8 +19,6 @@ package facs.model;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,14 +28,14 @@ import com.vaadin.ui.components.calendar.event.CalendarEvent;
 
 public class BookingModel implements Serializable {
   private static final long serialVersionUID = -3559766268838702415L;
- 
+
   private UserBean user;
   private User liferayUser;
   private List<DeviceBean> devices;
 
   private Map<String, List<CalendarEvent>> deviceCalendarEvents;
-  
-  
+
+
   public BookingModel(UserBean user) {
     this.user = user;
   }
@@ -53,17 +51,17 @@ public class BookingModel implements Serializable {
   public List<DeviceBean> getDevices() {
     return devices;
   }
-  
+
   public List<String> getDevicesNames() {
     ArrayList<String> names = new ArrayList<String>();
-    for(DeviceBean d: devices){
+    for (DeviceBean d : devices) {
       names.add(d.getName());
     }
     return names;
   }
 
   /**
-   * get calendar events +- days of the given date 
+   * get calendar events +- days of the given date
    * 
    * @param date
    * @int days
@@ -78,69 +76,70 @@ public class BookingModel implements Serializable {
   }
 
   public void setDevices(List<DeviceBean> dbs) {
-    this.devices = dbs;    
+    this.devices = dbs;
   }
 
   public double cost(java.util.Date start, java.util.Date end, int deviceCost) {
-    double frame = ((end.getTime() - start.getTime())/360000);
-    //System.out.println("Cost: "+ deviceCost + " Frame: "+ frame);
-    double calcCost = (frame * deviceCost)/10;
-    //System.out.println("CalcCost: " +calcCost);
-    return (frame * deviceCost)/10;
+    double frame = ((end.getTime() - start.getTime()) / 360000);
+    // System.out.println("Cost: "+ deviceCost + " Frame: "+ frame);
+    double calcCost = (frame * deviceCost) / 10;
+    // System.out.println("CalcCost: " +calcCost);
+    return (frame * deviceCost) / 10;
   }
 
   public String userName() {
     return user.getName();
   }
-  
+
   public String getLDAP() {
-	  return user.getLDAP();
+    return user.getLDAP();
   }
-  
+
   public String getKostenstelle() {
-	  return user.getKostenstelle();
+    return user.getKostenstelle();
   }
-  
+
   public String getGroupID() {
-	  return user.getGroupID();
+    return user.getGroupID();
   }
 
   public List<CalendarEvent> getAllEvents(String device) {
-	    if(deviceCalendarEvents.containsKey(device)){
-	      return deviceCalendarEvents.get(device);
-	    }
-	    return null;
-  }
-  
-  public List<CalendarEvent> getAllEvents(String device, String userLDAP) {
-    if(deviceCalendarEvents.containsKey(device)){
+    if (deviceCalendarEvents.containsKey(device)) {
       return deviceCalendarEvents.get(device);
     }
     return null;
   }
-  
+
+  public List<CalendarEvent> getAllEvents(String device, String userLDAP) {
+    if (deviceCalendarEvents.containsKey(device)) {
+      return deviceCalendarEvents.get(device);
+    }
+    return null;
+  }
+
   /**
-   * sets a map for devices and 
+   * sets a map for devices and
+   * 
    * @param deviceCalendarEvents
    */
-  public void setDeviceCalendarEvents(Map<String, List<CalendarEvent>> deviceCalendarEvents){
+  public void setDeviceCalendarEvents(Map<String, List<CalendarEvent>> deviceCalendarEvents) {
     this.deviceCalendarEvents = deviceCalendarEvents;
   }
-  
-  public void putDeviceCalendarEvents(String device, List<CalendarEvent> deviceCalendarEvents){
+
+  public void putDeviceCalendarEvents(String device, List<CalendarEvent> deviceCalendarEvents) {
     this.deviceCalendarEvents.put(device, deviceCalendarEvents);
   }
 
   public String getProject() {
-	if (user.getProject()==null)
-		return "";
-	else
-		return user.getProject();
+    if (user.getProject() == null)
+      return "";
+    else
+      return user.getProject();
   }
 
   public String getInstitute() {
-	 return user.getInstitute();
+    return user.getInstitute();
   }
 
-  
+
 }

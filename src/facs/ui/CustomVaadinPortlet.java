@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -35,7 +35,7 @@ import com.vaadin.server.VaadinRequest;
  * Usually it doesn't need any changes.
  * 
  */
-  public class CustomVaadinPortlet extends VaadinPortlet {
+public class CustomVaadinPortlet extends VaadinPortlet {
   private static final long serialVersionUID = -13615405654173335L;
 
   private class CustomVaadinPortletService extends VaadinPortletService {
@@ -49,12 +49,12 @@ import com.vaadin.server.VaadinRequest;
       super(portlet, config);
     }
 
-    protected boolean allowServePrecompressedResource(javax.servlet.http.HttpServletRequest request,
-        java.lang.String url){
-          return false;
-      
+    protected boolean allowServePrecompressedResource(
+        javax.servlet.http.HttpServletRequest request, java.lang.String url) {
+      return false;
+
     }
-    
+
     /**
      * This method is used to determine the uri for Vaadin resources like theme or widgetset. It's
      * overriden to point to this web application context, instead of ROOT context

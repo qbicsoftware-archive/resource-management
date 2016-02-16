@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -19,15 +19,15 @@ package facs.model;
 
 import java.io.Serializable;
 
-public class InstituteBean implements Serializable{
+public class InstituteBean implements Serializable {
   private static final long serialVersionUID = 4413126249488373976L;
-  
+
   private String name = "";
   private String street = "";
   private String postalCode = "";
   private String city = "";
   private String shortName = "";
-  
+
   public InstituteBean(String name, String street, String postalCode, String city, String shortName) {
     super();
     this.name = name;
@@ -36,9 +36,9 @@ public class InstituteBean implements Serializable{
     this.city = city;
     this.shortName = shortName;
   }
-  
-  public InstituteBean(){
-    
+
+  public InstituteBean() {
+
   }
 
   public String getName() {
@@ -135,5 +135,5 @@ public class InstituteBean implements Serializable{
     return "InstituteBean [name=" + name + ", street=" + street + ", postalCode=" + postalCode
         + ", city=" + city + ", shortName=" + shortName + "]";
   }
-  
+
 }

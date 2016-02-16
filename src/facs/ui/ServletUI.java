@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -16,8 +16,6 @@
  *******************************************************************************/
 package facs.ui;
 
-import java.util.Date;
-
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
@@ -31,52 +29,51 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
-import facs.components.BookAdmin;
-import facs.components.Booking;
 import facs.components.Settings;
 import facs.components.Statistics;
 import facs.model.BookingModel;
 import facs.model.FacsModelUtil;
-
 
 @SuppressWarnings("serial")
 @Theme("valo")
 public class ServletUI extends UI {
 
   @WebServlet(value = "/*", asyncSupported = true)
-  @VaadinServletConfiguration(productionMode = false, ui = ServletUI.class, widgetset = "facs.ui.widgetset.FacsWidgetset")
+  @VaadinServletConfiguration(productionMode = false, ui = ServletUI.class,
+      widgetset = "facs.ui.widgetset.FacsWidgetset")
   public static class Servlet extends VaadinServlet {
   }
 
   @Override
   protected void init(VaadinRequest request) {
-    //Date referenceDate = new java.util.Date();
-    //BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel(request.getRemoteUser());
-	try {
-		BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
-	    TabSheet tabs = new TabSheet();
-	    //tabs.addComponent(new Booking(bookingModel, referenceDate));
+    // Date referenceDate = new java.util.Date();
+    // BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel(request.getRemoteUser());
+    try {
+      BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
+      TabSheet tabs = new TabSheet();
+      // tabs.addComponent(new Booking(bookingModel, referenceDate));
 
-	    // statistics
-	    Statistics statistics = new Statistics();
-	    tabs.addComponent(statistics);
-	    tabs.addComponent(new Settings(null));
-	    setContent(tabs);
-	}
-	
-	catch(Exception e){
-		  setContent(errorView());
-		  e.printStackTrace();
-	}
-	
-	
+      // statistics
+      Statistics statistics = new Statistics();
+      tabs.addComponent(statistics);
+      tabs.addComponent(new Settings(null));
+      setContent(tabs);
+    }
+
+    catch (Exception e) {
+      setContent(errorView());
+      e.printStackTrace();
+    }
+
+
   }
-  
+
   private Component errorView() {
-	    Label label = new Label();
-	    label.addStyleName(ValoTheme.LABEL_FAILURE);
-	    label.setIcon(FontAwesome.FROWN_O);
-	    label.setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact info@qbic.uni-tuebingen.de");
-	    return label;
+    Label label = new Label();
+    label.addStyleName(ValoTheme.LABEL_FAILURE);
+    label.setIcon(FontAwesome.FROWN_O);
+    label
+        .setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact info@qbic.uni-tuebingen.de");
+    return label;
   }
 }

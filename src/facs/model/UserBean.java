@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -17,16 +17,14 @@
 package facs.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-public class UserBean implements Serializable{
+public class UserBean implements Serializable {
   private static final long serialVersionUID = 7355810127461052570L;
-  
+
   private int id = -1;
   private String user_ldap = "";
   private String name = "";
-  private String group = ""; 
+  private String group = "";
   private String workgroup = "";
   private String institute = "";
   private String role = "";
@@ -35,10 +33,12 @@ public class UserBean implements Serializable{
   private String status = "";
   private String kostenstelle = "";
   private String project = "";
-  //private List<String> Kostenstelle = new ArrayList<String>();
-  //private List<String> ProjectName = new ArrayList<String>();
-  
-  public UserBean(int id, String user_ldap, String name, String group, String role, String status, String kostenstelle, String project) {
+
+  // private List<String> Kostenstelle = new ArrayList<String>();
+  // private List<String> ProjectName = new ArrayList<String>();
+
+  public UserBean(int id, String user_ldap, String name, String group, String role, String status,
+      String kostenstelle, String project) {
     super();
     this.id = id;
     this.user_ldap = user_ldap;
@@ -48,28 +48,28 @@ public class UserBean implements Serializable{
     this.status = status;
     this.kostenstelle = kostenstelle;
     this.project = project;
-    //Kostenstelle = kostenstelle;
-    //ProjectName = projectName;
+    // Kostenstelle = kostenstelle;
+    // ProjectName = projectName;
   }
-  
-  public UserBean(String user_ldap, int id, String name, String group, String workgroup, String institute, String kostenstelle, String project, String email, String phone) {
-	    super();
-	    this.user_ldap = user_ldap;
-	    this.id = id;
-	    this.name = name;
-	    this.group = group;
-	    this.workgroup = workgroup;
-	    this.institute = institute;
-	    this.kostenstelle = kostenstelle;
-	    this.project = project;
-	    this.email = email;
-	    this.phone = phone;
-	    this.kostenstelle = kostenstelle;
-	    this.project = project;
-	  }
 
-  public UserBean() {
+  public UserBean(String user_ldap, int id, String name, String group, String workgroup,
+      String institute, String kostenstelle, String project, String email, String phone) {
+    super();
+    this.user_ldap = user_ldap;
+    this.id = id;
+    this.name = name;
+    this.group = group;
+    this.workgroup = workgroup;
+    this.institute = institute;
+    this.kostenstelle = kostenstelle;
+    this.project = project;
+    this.email = email;
+    this.phone = phone;
+    this.kostenstelle = kostenstelle;
+    this.project = project;
   }
+
+  public UserBean() {}
 
   public int getId() {
     return id;
@@ -82,13 +82,13 @@ public class UserBean implements Serializable{
   public String getName() {
     return name;
   }
-  
+
   public void setLDAP(String user_ldap) {
-	  this.user_ldap = user_ldap;
+    this.user_ldap = user_ldap;
   }
-  
+
   public String getLDAP() {
-	  return user_ldap;
+    return user_ldap;
   }
 
   public void setName(String name) {
@@ -112,47 +112,39 @@ public class UserBean implements Serializable{
   }
 
   public String getKostenstelle() {
-	  return kostenstelle;
+    return kostenstelle;
   }
-  
+
   public void setGroupID(String group) {
-	    this.group = group;
+    this.group = group;
   }
-  
+
   public String getGroupID() {
-	  return group;
+    return group;
   }
-  
+
   public void setKostenstelle(String kostenstelle) {
-	  this.kostenstelle = kostenstelle;
+    this.kostenstelle = kostenstelle;
   }
-  
+
   public String getProject() {
-	  return project;
+    return project;
   }
-  
+
   public void setProject(String project) {
-	  this.project = project;
+    this.project = project;
   }
-  
+
   /*
-  public List<String> getKostenstelle() {
-    return Kostenstelle;
-  }
-  
-  public void setKostenstelle(List<String> kostenstelle) {
-    Kostenstelle = kostenstelle;
-  }
-  
-  
-  public List<String> getProject() {
-	    return ProjectName;
-  }
-  
-  public void setProject(List<String> projectName) {
-	    ProjectName = projectName;
-  }
-  */
+   * public List<String> getKostenstelle() { return Kostenstelle; }
+   * 
+   * public void setKostenstelle(List<String> kostenstelle) { Kostenstelle = kostenstelle; }
+   * 
+   * 
+   * public List<String> getProject() { return ProjectName; }
+   * 
+   * public void setProject(List<String> projectName) { ProjectName = projectName; }
+   */
 
   public String getWorkgroup() {
     return workgroup;
@@ -259,8 +251,8 @@ public class UserBean implements Serializable{
 
   @Override
   public String toString() {
-    return "UserBean [id=" + id + ", name=" + name + ", workgroup=" + workgroup
-        + ", institute=" + institute + ", role=" + role + ", email=" + email + ", telephon="
-        + phone + ", status=" + status + ", kostenstelle=" + kostenstelle + "]";
+    return "UserBean [id=" + id + ", name=" + name + ", workgroup=" + workgroup + ", institute="
+        + institute + ", role=" + role + ", email=" + email + ", telephon=" + phone + ", status="
+        + status + ", kostenstelle=" + kostenstelle + "]";
   }
 }

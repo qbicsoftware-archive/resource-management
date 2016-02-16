@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -26,7 +26,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
-import facs.components.BookAdmin;
 import facs.components.UserAdmin;
 import facs.model.BookingModel;
 import facs.model.FacsModelUtil;
@@ -34,45 +33,45 @@ import facs.model.FacsModelUtil;
 @SuppressWarnings("serial")
 @Theme("valo")
 public class UserAdminUI extends UI {
-  //@WebServlet(value = "/*", asyncSupported = true)
-  //@VaadinServletConfiguration(productionMode = false, ui = StatisticsUI.class)
+  // @WebServlet(value = "/*", asyncSupported = true)
+  // @VaadinServletConfiguration(productionMode = false, ui = StatisticsUI.class)
   @Widgetset("com.vaadin.DefaultWidgetSet")
   public static class Servlet extends VaadinServlet {
-    
+
     /**
-     * See https://www.liferay.com/community/forums/-/message_boards/message/56507472
-     * and https://dev.vaadin.com/ticket/18494. 
-     * and https://vaadin.com/blog/-/blogs/how-we-improved-the-startup-time-in-7-5
-     * for more information
+     * See https://www.liferay.com/community/forums/-/message_boards/message/56507472 and
+     * https://dev.vaadin.com/ticket/18494. and
+     * https://vaadin.com/blog/-/blogs/how-we-improved-the-startup-time-in-7-5 for more information
      */
-    /*@Override
-    protected boolean allowServePrecompressedResource(javax.servlet.http.HttpServletRequest request,
-        java.lang.String url){
-      return false;
-    }*/
+    /*
+     * @Override protected boolean
+     * allowServePrecompressedResource(javax.servlet.http.HttpServletRequest request,
+     * java.lang.String url){ return false; }
+     */
   }
+
   @Override
   protected void init(VaadinRequest request) {
-	  
-	  try {
-		  BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
-		  UserAdmin userAdmin = new UserAdmin(null);
-		  setContent(userAdmin);
-	  }
-	  catch(Exception e){
-		  setContent(errorView());
-		  e.printStackTrace();
-	  }
+
+    try {
+      BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
+      UserAdmin userAdmin = new UserAdmin(null);
+      setContent(userAdmin);
+    } catch (Exception e) {
+      setContent(errorView());
+      e.printStackTrace();
+    }
   }
-  
+
   private Component errorView() {
-	    Label label = new Label();
-	    label.addStyleName(ValoTheme.LABEL_FAILURE);
-	    label.setIcon(FontAwesome.FROWN_O);
-	    label.setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact info@qbic.uni-tuebingen.de");
-	    return label;
+    Label label = new Label();
+    label.addStyleName(ValoTheme.LABEL_FAILURE);
+    label.setIcon(FontAwesome.FROWN_O);
+    label
+        .setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact info@qbic.uni-tuebingen.de");
+    return label;
   }
-	  
-  
-  
+
+
+
 }

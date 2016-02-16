@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -18,38 +18,35 @@ package facs.db;
 
 public class DBManager {
 
-	  /*
-  // local testing  
+  // local testing
   private static String hostname = "localhost";
   private static String port = "8889";
   private static String sql_database = "facs_facility";
   private static String username = "facs";
   private static String password = "facs";
 
+  // portal testing
+  // private static String hostname = "portal-testing.am10.uni-tuebingen.de";
+  // private static String port = "3306";
+  // private static String sql_database = "facs_facility";
+  // private static String username = "mariadbuser";
+  // private static String password = "dZAmDa9-Ysq_Zv1AGygQ";
 
-  // portal testing  
-  private static String hostname = "portal-testing.am10.uni-tuebingen.de";
-  private static String port = "3306";
-  private static String sql_database = "facs_facility";
-  private static String username = "mariadbuser";
-  private static String password = "dZAmDa9-Ysq_Zv1AGygQ";
-  */
+  // portal production
+  // private static String hostname = "localhost";
+  // private static String port = "3306";
+  // private static String sql_database = "facs_facility";
+  // private static String username = "iigpo01";
+  // private static String password = "Eehae2ui6goaphae0ugiegh8";
 
-  // portal production  
-  private static String hostname = "localhost";
-  private static String port = "3306";
-  private static String sql_database = "facs_facility";
-  private static String username = "iigpo01";
-  private static String password = "Eehae2ui6goaphae0ugiegh8";
 
-	
   public static Database getDatabaseInstance() {
     String jdbcUrl = "jdbc:mysql://" + hostname + ":"
-    /*String jdbcUrl = "jdbc:mariadb://" + hostname + ":"*/
-        + port + "/" + sql_database;
-    //System.out.println("DBManager: ON");  
+    /* String jdbcUrl = "jdbc:mariadb://" + hostname + ":" */
+    + port + "/" + sql_database;
+    // System.out.println("DBManager: ON");
     Database.Instance.init(username, password, jdbcUrl);
-     return Database.Instance;
+    return Database.Instance;
   }
-  
+
 }
