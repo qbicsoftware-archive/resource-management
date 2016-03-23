@@ -47,15 +47,7 @@ public class MachineOccupationBean implements Serializable {
 
   }
 
-  /**
-   * is not generic enough. Might go wrong with different csvs from different devices
-   * 
-   * @param info
-   * @param deviceId
-   * @throws ParseException
-   * @deprecated
-   */
-  @Deprecated
+
   public void setBean(String[] info, int deviceId) throws ParseException {
     if (info == null || info.length != 15) {
       throw new IllegalArgumentException("info is not what it supposed to be:" + info.toString());
@@ -76,6 +68,7 @@ public class MachineOccupationBean implements Serializable {
     serialno = info[13];
     custom = info[14];
     corrupted = false;
+    System.out.println("Parsing in Progress 1");
   }
 
   public int getId() {

@@ -117,7 +117,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h3");
-    versionLabel.setValue("Version 0.1.160216");
+    versionLabel.setValue("Version 0.1.160322");
 
     showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
         + bookingModel.userName() + "!", "");
@@ -249,6 +249,7 @@ public class Booking extends CustomComponent {
       @Override
       public void buttonClick(ClickEvent event) {
         refreshDataSources();
+
       }
     });
 
@@ -310,7 +311,7 @@ public class Booking extends CustomComponent {
 
     myBookings = new Grid(gpc);
     // Create a grid
-
+    myBookings.setStyleName("my-style");
     myBookings.setWidth("100%");
     myBookings.setSelectionMode(SelectionMode.SINGLE);
     myBookings.setEditorEnabled(true);

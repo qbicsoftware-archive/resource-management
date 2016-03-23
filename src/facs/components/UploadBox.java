@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.text.ParseException;
 import java.util.HashMap;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -50,9 +49,14 @@ import com.vaadin.ui.themes.ValoTheme;
 import facs.db.DBManager;
 import facs.model.DeviceBean;
 import facs.model.MachineOccupationBean;
+import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private final String UPLOAD_CAPTION = "Upload Statistics Here";
   private final String CAPTION = "Upload Device Statistics";
   // Put upload in this memory buffer that grows automatically
@@ -62,7 +66,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   ProgressBar progress = new ProgressBar(0.0f);
 
   // TODO if success or failed show message
-  Label finishedMessage = new Label("");
+  Label finishedMessage = new Label("Finito!");
 
   final String cvsSplitBy = ",";
   private HashMap<String, Integer> deviceNameToId;
@@ -83,6 +87,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       devices.addItem(bean.getName());
     }
     occupationGrid = new Grid();
+    occupationGrid.setSizeFull();
 
     // Create the upload component and handle all its events
     final Upload upload = new Upload();
@@ -94,6 +99,11 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
 
     // one can only upload csvs, if a device was selected.
     devices.addValueChangeListener(new ValueChangeListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
       @Override
       public void valueChange(ValueChangeEvent event) {
         upload.setVisible(event.getProperty().getValue() != null);
@@ -127,7 +137,6 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     return os;
   }
 
-
   @Override
   public void updateProgress(long readBytes, long contentLength) {
     progress.setVisible(true);
@@ -157,15 +166,16 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       while ((line = br.readLine()) != null) {
         String[] userInfo = line.split(cvsSplitBy);
         MachineOccupationBean bean = new MachineOccupationBean();
-        bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
+        bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())), deviceNameToId);
+        // bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
         container.addBean(bean);
-        // System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd() +
-        // " login time: " + Formatter.toHoursAndMinutes(bean.getEnd().getTime() -
-        // bean.getStart().getTime()));
+        System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd()
+            + " login time: "
+            + Formatter.toHoursAndMinutes(bean.getEnd().getTime() - bean.getStart().getTime()));
         occupationGrid.setContainerDataSource(container);
       }
       addBeansToGrid(container);
-    } catch (IOException | ParseException e) {
+    } catch (IOException e) {
       e.printStackTrace();
       showErrorNotification("Can't read uploaded file.",
           "An error occured during the upload process. Make sure that you didn't upload a corrupted file.");

@@ -59,7 +59,7 @@ public class BookAdminUI extends UI {
       setContent(bookAdmin);
     } catch (Exception e) {
       setContent(errorView());
-      e.printStackTrace();
+      // e.printStackTrace();
     }
   }
 

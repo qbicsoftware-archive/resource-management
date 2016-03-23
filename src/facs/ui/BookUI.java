@@ -62,7 +62,7 @@ public class BookUI extends UI {
       setContent(new Booking(bookingModel, referenceDate));
     } catch (Exception e) {
       setContent(errorView());
-      e.printStackTrace();
+      // e.printStackTrace();
     }
   }
 

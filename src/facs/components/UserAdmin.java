@@ -131,7 +131,6 @@ public class UserAdmin extends CustomComponent {
       }
     });
 
-
     gridLayout.setWidth("100%");
 
     // add components to the grid layout

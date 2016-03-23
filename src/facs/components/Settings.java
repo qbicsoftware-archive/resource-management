@@ -120,7 +120,8 @@ public class Settings extends CustomComponent {
     devicesGrid = new Grid(gpc);
     // Create a grid
 
-    devicesGrid.setWidth("100%");
+    // devicesGrid.setWidth("100%");
+    devicesGrid.setSizeFull();
     devicesGrid.setSelectionMode(SelectionMode.SINGLE);
     devicesGrid.getColumn("delete").setRenderer(new HtmlRenderer());
     // Render a button that deletes the data row (item)

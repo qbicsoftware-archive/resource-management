@@ -180,6 +180,7 @@ public class BookAdmin extends CustomComponent {
       }
     });
 
+
     // only admins are allowed to see the admin panel ;)
     if (!DBManager.getDatabaseInstance()
         .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
@@ -193,6 +194,8 @@ public class BookAdmin extends CustomComponent {
       setCompositionRoot(errorLayout);
       return;
     }
+
+
 
     this.setCaption("Admin");
 
@@ -290,7 +293,6 @@ public class BookAdmin extends CustomComponent {
 
     gridMap.put(deviceName, new Grid(gpc));
     // Create a grid
-
 
     gridMap.get(deviceName).setWidth("100%");
     gridMap.get(deviceName).setSelectionMode(SelectionMode.SINGLE);

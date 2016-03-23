@@ -1,7 +1,7 @@
 /*******************************************************************************
- * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like booking devices or
- * planning resources for services and integration of relevant data into the common portal infrastructure.
- * Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
+ * booking devices or planning resources for services and integration of relevant data into the
+ * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -209,7 +209,7 @@ public class Billing {
     // Process p = rt.exec(cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(tempTexFile.getParentFile());
-    System.out.println("Basename: "+basename+" fileNamme: "+ fileNamme);
+    System.out.println("Basename: " + basename + " fileNamme: " + fileNamme);
     Process p = pb.start();
 
     int exitValue = p.waitFor();
@@ -308,6 +308,7 @@ public class Billing {
      * This init() will be invoked once by the LogManager to give you the current RuntimeServices
      * intance
      */
+    @Override
     public void init(RuntimeServices rsvc) {
       // do nothing
     }
@@ -315,6 +316,7 @@ public class Billing {
     /**
      * This is the method that you implement for Velocity to call with log messages.
      */
+    @Override
     public void log(int level, String message) {
       System.out.println("[" + String.valueOf(level) + "] " + message);
     }
@@ -322,6 +324,7 @@ public class Billing {
     /**
      * This is the method that you implement for Velocity to call with log messages.
      */
+    @Override
     public void log(int level, String message, Throwable t) {
       /* do something useful */
     }
@@ -330,6 +333,7 @@ public class Billing {
      * This is the method that you implement for Velocity to check whether a specified log level is
      * enabled.
      */
+    @Override
     public boolean isLevelEnabled(int level) {
       /* do something useful */
       return true;

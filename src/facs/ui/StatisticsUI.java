@@ -59,7 +59,7 @@ public class StatisticsUI extends UI {
       setContent(statistics);
     } catch (Exception e) {
       setContent(errorView());
-      e.printStackTrace();
+      // e.printStackTrace();
     }
   }
 
