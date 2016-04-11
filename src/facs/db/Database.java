@@ -1677,6 +1677,7 @@ public enum Database {
       e.printStackTrace();
     }
     return userId;
+
   }
 
   /**
@@ -1922,7 +1923,7 @@ public enum Database {
 
   public UserBean getUserById(int userId) {
     String sql =
-        "SELECT user.user_id, user.user_name, workgroups.workgroup_name, workgroups.institute_name FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
+        "SELECT user.user_id, user.user_name, user.kostenstelle, workgroups.workgroup_name, workgroups.institute_name FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
     // 1 2 3 4
     UserBean ret = new UserBean();
     try (Connection conn = login();
@@ -1933,12 +1934,14 @@ public enum Database {
       if (rs.next()) {
         ret.setId(rs.getInt(1));
         ret.setName(rs.getString(2));
-        ret.setWorkgroup(rs.getString(3));
-        ret.setInstitute(rs.getString(4));
-        // TODO get the correct ones
-        List<String> kostenStelle = new ArrayList<String>();
-        String k = getKostenstelleByUserId(ret.getId());
-        kostenStelle.add(k.isEmpty() ? "unknown" : k);
+        ret.setKostenstelle(rs.getString(3));
+        ret.setWorkgroup(rs.getString(4));
+        ret.setInstitute(rs.getString(5));
+        // TODO get the correct ones - when one user has more than one kostenstelle then reimplement
+        // using the code below
+        // List<String> kostenStelle = new ArrayList<String>();
+        // String k = getKostenstelleByUserId(ret.getId());
+        // kostenStelle.add(k.isEmpty() ? "unknown" : k);
         // ret.setKostenstelle(kostenStelle);
       }
     } catch (SQLException e) {

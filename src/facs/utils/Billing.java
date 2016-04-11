@@ -57,6 +57,13 @@ public class Billing {
   File templatesPath;
   // name of the current template file
   String templateFileName;
+
+  // pdflatex path for local development
+  String pdflatexPath = "/Library/TeX/texbin/pdflatex";
+
+  // pdflatex path for testing and production
+  // String pdflatexPath = "pdflatex";
+
   Template template;
 
   File tempTexFile;
@@ -199,7 +206,7 @@ public class Billing {
     bw.close();
 
     List<String> cmd =
-        new ArrayList<String>(Arrays.asList("pdflatex", "-interaction=nonstopmode",
+        new ArrayList<String>(Arrays.asList(pdflatexPath, "-interaction=nonstopmode",
             tempTexFile.getName()));
     String basename = FilenameUtils.getBaseName(tempTexFile.getName());
 

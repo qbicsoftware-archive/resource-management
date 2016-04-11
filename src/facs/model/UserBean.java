@@ -65,7 +65,6 @@ public class UserBean implements Serializable {
     this.project = project;
     this.email = email;
     this.phone = phone;
-    this.kostenstelle = kostenstelle;
     this.project = project;
   }
 

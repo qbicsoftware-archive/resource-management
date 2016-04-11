@@ -30,6 +30,8 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.event.SelectionEvent;
+import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
@@ -46,6 +48,7 @@ import com.vaadin.ui.Grid.FooterCell;
 import com.vaadin.ui.Grid.FooterRow;
 import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -70,6 +73,7 @@ public class Statistics extends CustomComponent {
   private final String startCaption = "Start";
   private final String endCaption = "End";
   private final String costCaption = "Cost";
+  private final String nameCaption = "Name";
   private final String instituteCaption = "Institute";
   private final String CAPTION = "Usage/Statistics";
 
@@ -95,6 +99,7 @@ public class Statistics extends CustomComponent {
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
     Grid grid = new Grid(gpcontainer);
+
     grid.setWidth("100%");
     setRenderers(grid);
     fillRows(grid);
@@ -145,7 +150,28 @@ public class Statistics extends CustomComponent {
 
     gridLayout.setSpacing(true);
 
+
+    grid.setSelectionMode(SelectionMode.SINGLE);
+
+    grid.addSelectionListener(new SelectionListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public void select(SelectionEvent event) {
+        Notification.show("Select row: " + grid.getSelectedRow());
+
+      }
+    });
+
     createBill.addClickListener(new ClickListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -153,6 +179,7 @@ public class Statistics extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
         Paths.get(basepath, "WEB-INF/billingTemplates");
+
 
         try {
           Billing billing =
@@ -163,14 +190,14 @@ public class Statistics extends CustomComponent {
           billing.setRecieverPostalCode("D-12345");
           billing.setRecieverCity("Berlin");
 
-          billing.setSenderName("Dr. Stella Autenrieth");
-          billing.setSenderFunction("Geschaeftsfuehrerin");
-          billing.setSenderPostalCode("sender postal");
-          billing.setSenderCity("Tuebingen");
-          billing.setSenderStreet("Auf der Morgenstelle 42");
-          billing.setSenderPhone("+49-7071-29-72163");
-          billing.setSenderEmail("qbic@qbic.uni");
-          billing.setSenderUrl("qbic.uni-tuebingen.de");
+          billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
+          billing.setSenderFunction("Leiterin");
+          billing.setSenderPostalCode("72076");
+          billing.setSenderCity("Tübingen");
+          billing.setSenderStreet("Otfried-Müller-Straße 10");
+          billing.setSenderPhone("+49 (0) 7071 29-83156");
+          billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
+          billing.setSenderUrl("www.medizin.uni-tuebingen.de");
           billing.setSenderFaculty("Medizinischen Fakultät");
 
           billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
@@ -191,7 +218,7 @@ public class Statistics extends CustomComponent {
             Date start = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
             SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
             String date = ft.format(start);
-            String description = "no description available";
+            String description = "No Description is Available";
             String time_frame = Formatter.toHoursAndMinutes(timeFrame);
             entries.add(billing.new CostEntry(date, time_frame, description, cost));
           }
@@ -212,7 +239,8 @@ public class Statistics extends CustomComponent {
           fileDownloader = new FileDownloader(new FileResource(bill));
           fileDownloader.extend(downloadBill);
           downloadBill.setEnabled(true);
-          showSuccessfulNotification("Congratulations!", "Bill is ready");
+          showSuccessfulNotification("Congratulations!",
+              "Invoice is created and available for download.");
         } catch (Exception e) {
           showErrorNotification(
               "What the heck!",
@@ -249,24 +277,29 @@ public class Statistics extends CustomComponent {
     List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getPhysicalTimeBlocks();
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
-      List<String> kostenStelle = new ArrayList<String>();
+
+      // List<String> kostenStelle = new ArrayList<String>();
       // String kostenStelle;
-      kostenStelle.add("unknown");
+      // kostenStelle.add("unknown");
+
+      String kostenStelle = "unknown";
       String institute = "unknown";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       float cost = -1.f;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
-        // kostenStelle = user.getKostenstelle();
+        System.out.println("userId: " + userId);
+        System.out.println("name: " + mobean.getUserFullName());
+        kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
-
         System.out.println(user.getId() + " ************************************* "
             + mobean.getDeviceId());
-
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
       grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
-          kostenStelle.get(0), mobean.getStart(), end, cost, institute);
+          kostenStelle, mobean.getStart(), end, cost, mobean.getUserFullName(), institute);
+      // System.out.println("User: " + user.getName() + " Kostenstelle:" + kostenStelle);
+      // kostenStelle.get(0), mobean.getStart(), end, cost, institute);
     }
 
   }
@@ -275,11 +308,12 @@ public class Statistics extends CustomComponent {
     float cost = 0f;
     float costPerHour =
         DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+    System.out.println("Cost per Hour: " + costPerHour);
     if (costPerHour > 0) {
       float hoursUsed = Formatter.toHours(start, end);
-      System.out.println(hoursUsed);
+      System.out.println("Hours Used: " + hoursUsed);
       cost = hoursUsed * costPerHour;
-      System.out.println(cost);
+      System.out.println("Cost: " + cost);
     }
     return cost;
   }
@@ -297,6 +331,7 @@ public class Statistics extends CustomComponent {
     container.addContainerProperty(startCaption, Date.class, null);
     container.addContainerProperty(endCaption, Date.class, null);
     container.addContainerProperty(costCaption, Float.class, null);
+    container.addContainerProperty(nameCaption, String.class, null);
     container.addContainerProperty(instituteCaption, String.class, null);
     return container;
   }
@@ -314,6 +349,7 @@ public class Statistics extends CustomComponent {
     container.addContainerProperty(startCaption, Date.class, null);
     container.addContainerProperty(endCaption, Date.class, null);
     container.addContainerProperty(costCaption, Float.class, null);
+    container.addContainerProperty(nameCaption, String.class, null);
     // Add some generated properties
     gpcontainer = new GeneratedPropertyContainer(container);
 
@@ -399,7 +435,6 @@ public class Statistics extends CustomComponent {
       private File bill;
       private FileDownloader fileDownloader;
 
-
       @Override
       public void buttonClick(ClickEvent event) {
         String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
@@ -414,14 +449,14 @@ public class Statistics extends CustomComponent {
           billing.setRecieverPostalCode("D-12345");
           billing.setRecieverCity("Berlin");
 
-          billing.setSenderName("Dr. Stella Autenrieth");
-          billing.setSenderFunction("Geschaeftsfuehrerin");
-          billing.setSenderPostalCode("sender postal");
-          billing.setSenderCity("Tuebingen");
-          billing.setSenderStreet("Auf der Morgenstelle 42");
-          billing.setSenderPhone("+49-7071-29-72163");
-          billing.setSenderEmail("qbic@qbic.uni");
-          billing.setSenderUrl("qbic.uni-tuebingen.de");
+          billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
+          billing.setSenderFunction("Leiterin");
+          billing.setSenderPostalCode("72076");
+          billing.setSenderCity("Tübingen");
+          billing.setSenderStreet("Otfried-Müller-Straße 10");
+          billing.setSenderPhone("+49 (0) 7071 29-83156");
+          billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
+          billing.setSenderUrl("https://www.medizin.uni-tuebingen.de");
           billing.setSenderFaculty("Medizinischen Fakultät");
 
           billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
@@ -442,7 +477,7 @@ public class Statistics extends CustomComponent {
             Date start = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
             SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
             String date = ft.format(start);
-            String description = "no description available";
+            String description = "No Description is Available";
             String time_frame = Formatter.toHoursAndMinutes(timeFrame);
             entries.add(billing.new CostEntry(date, time_frame, description, cost));
           }
@@ -463,13 +498,13 @@ public class Statistics extends CustomComponent {
           fileDownloader = new FileDownloader(new FileResource(bill));
           fileDownloader.extend(downloadBill);
           downloadBill.setEnabled(true);
-          showSuccessfulNotification("Congratulations!", "Bill is ready");
+          showSuccessfulNotification("Congratulations!",
+              "Invoice is created and available for download.");
         } catch (Exception e) {
           showErrorNotification("What the heck!",
-              "Error occured while trying to create bill. Please log out and contact your sysadmin");
+              "Error occured while trying to create bill. Please log out and contact your sysadmin.");
           e.printStackTrace();
         }
-
 
       }
 
