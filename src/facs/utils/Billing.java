@@ -101,23 +101,23 @@ public class Billing {
     return templateFileName;
   }
 
-  public void setRecieverInstitution(String institution) {
+  public void setReceiverInstitution(String institution) {
     context.put("institute", institution);
   }
 
-  public void setRecieverPI(String pi) {
+  public void setReceiverPI(String pi) {
     context.put("PI", pi);
   }
 
-  public void setRecieverStreet(String street) {
+  public void setReceiverStreet(String street) {
     context.put("street", street);
   }
 
-  public void setRecieverPostalCode(String postalCode) {
+  public void setReceiverPostalCode(String postalCode) {
     context.put("postalcode", postalCode);
   }
 
-  public void setRecieverCity(String city) {
+  public void setReceiverCity(String city) {
     context.put("city", city);
   }
 

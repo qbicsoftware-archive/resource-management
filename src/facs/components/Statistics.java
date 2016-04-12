@@ -77,8 +77,19 @@ public class Statistics extends CustomComponent {
   private final String instituteCaption = "Institute";
   private final String CAPTION = "Usage/Statistics";
 
+  String ReceiverPI = null;
+  String ReceiverInstitute = null;
+  String ReceiverStreet = null;
+  String ReceiverPostcode = null;
+  String ReceiverCity = null;
+
+  String ProjectDescription = null;
+  String ProjectShortDescription = null;
+  String ProjectNumber = null;
+
   Button createBill = new Button("Invoice");
   Button downloadBill = new Button("Download Invoice");
+
   private GeneratedPropertyContainer gpcontainer;
 
   private GridLayout gridLayout = new GridLayout(6, 6);
@@ -89,6 +100,9 @@ public class Statistics extends CustomComponent {
   }
 
   private void init() {
+
+    createBill.setEnabled(false);
+    downloadBill.setEnabled(false);
 
     Date dNow = new Date();
     SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
@@ -149,21 +163,27 @@ public class Statistics extends CustomComponent {
     gridLayout.addComponent(downloadBill, 1, 3);
 
     gridLayout.setSpacing(true);
-
-
     grid.setSelectionMode(SelectionMode.SINGLE);
+
+
 
     grid.addSelectionListener(new SelectionListener() {
 
       /**
-       * 
+       * select rows for creating invoices
        */
       private static final long serialVersionUID = 1L;
 
+
       @Override
       public void select(SelectionEvent event) {
-        Notification.show("Select row: " + grid.getSelectedRow());
+        Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
+            + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
 
+        ReceiverPI =
+            (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
+                .getValue();
+        createBill.setEnabled(true);
       }
     });
 
@@ -178,52 +198,78 @@ public class Statistics extends CustomComponent {
       @Override
       public void buttonClick(ClickEvent event) {
         String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+
         Paths.get(basepath, "WEB-INF/billingTemplates");
 
+        System.out.println("Basepath: " + basepath);
 
         try {
+
           Billing billing =
               new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
-          billing.setRecieverInstitution("BER - Berliner Flughafen");
-          billing.setRecieverPI("Klaus Wowereit");
-          billing.setRecieverStreet("am berliner flughafen 12");
-          billing.setRecieverPostalCode("D-12345");
-          billing.setRecieverCity("Berlin");
 
-          billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
-          billing.setSenderFunction("Leiterin");
-          billing.setSenderPostalCode("72076");
-          billing.setSenderCity("Tübingen");
-          billing.setSenderStreet("Otfried-Müller-Straße 10");
-          billing.setSenderPhone("+49 (0) 7071 29-83156");
-          billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
-          billing.setSenderUrl("www.medizin.uni-tuebingen.de");
-          billing.setSenderFaculty("Medizinischen Fakultät");
+          int setUserId = DBManager.getDatabaseInstance().findUserByFullName(ReceiverPI);
 
-          billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
-          billing.setProjectShortDescription("jede Menge Extras.");
-          billing.setProjectNumber("QA2014016");
+          if (setUserId > 0) {
+            UserBean user =
+                setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
+
+            System.out.println("-------- > -------- > Street: " + user.getStreet() + " Postcode: "
+                + user.getPostcode() + " City: " + user.getCity());
+
+            billing.setReceiverPI(ReceiverPI);
+            billing.setReceiverInstitution(user.getInstitute());
+            billing.setReceiverStreet(user.getStreet());
+            billing.setReceiverPostalCode(user.getPostcode());
+            billing.setReceiverCity(user.getCity());
+
+            billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
+            billing.setSenderFunction("Leiterin");
+            billing.setSenderPostalCode("72076");
+            billing.setSenderCity("Tübingen");
+            billing.setSenderStreet("Otfried-Müller-Straße 10");
+            billing.setSenderPhone("+49 (0) 7071 29-83156");
+            billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
+            billing.setSenderUrl("www.medizin.uni-tuebingen.de");
+            billing.setSenderFaculty("Medizinischen Fakultät");
+
+            if (user.getKostenstelle() != null)
+              billing.setProjectDescription("Kostenstelle: " + user.getKostenstelle());
+            else
+              billing.setProjectDescription("Keine kostenstelle verfügbar.");
+
+            billing.setProjectShortDescription("Dieses Angebot beinhaltet jede Menge Extras.");
+
+            if (user.getProject() != null)
+              billing.setProjectNumber("Kostenstelle: " + user.getKostenstelle());
+            else
+              billing.setProjectNumber("Keine project nummer verfügbar.");
+
+          }
+
+          float cost =
+              ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
+                  .getValue()).floatValue();
+          long s =
+              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
+                  .getValue()).getTime();
+          long e =
+              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), endCaption)
+                  .getValue()).getTime();
+          long timeFrame = e - s;
+          Date start =
+              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
+                  .getValue());
+          SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
+          String date = ft.format(start);
+          String description = "No Description is Available";
+          String time_frame = Formatter.toHoursAndMinutes(timeFrame);
 
           ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
-          for (Object itemId : gpcontainer.getItemIds()) {
-            float cost =
-                ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
-                    .floatValue();
-            long s =
-                ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue())
-                    .getTime();
-            long e =
-                ((Date) gpcontainer.getContainerProperty(itemId, endCaption).getValue()).getTime();
-            long timeFrame = e - s;
-            Date start = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
-            SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
-            String date = ft.format(start);
-            String description = "No Description is Available";
-            String time_frame = Formatter.toHoursAndMinutes(timeFrame);
-            entries.add(billing.new CostEntry(date, time_frame, description, cost));
-          }
+          entries.add(billing.new CostEntry(date, time_frame, description, cost));
           billing.setCostEntries(entries);
           float totalCosts = 0.0f;
+
           for (Object itemId : gpcontainer.getItemIds()) {
             totalCosts +=
                 ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
@@ -241,13 +287,62 @@ public class Statistics extends CustomComponent {
           downloadBill.setEnabled(true);
           showSuccessfulNotification("Congratulations!",
               "Invoice is created and available for download.");
-        } catch (Exception e) {
+          downloadBill.setEnabled(true);
+        }
+
+        catch (Exception e) {
           showErrorNotification(
               "What the heck!",
               "An error occured while trying to create the invoice. The common problem occurs to be: cannot run program 'pdflatex'");
           e.printStackTrace();
         }
 
+        // for all entries
+        /*
+         * try { Billing billing = new Billing(Paths.get(basepath,
+         * "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
+         * billing.setRecieverInstitution("BER - Berliner Flughafen");
+         * billing.setRecieverPI("Klaus Something");
+         * billing.setRecieverStreet("am berliner flughafen 12");
+         * billing.setRecieverPostalCode("D-12345"); billing.setRecieverCity("Berlin");
+         * 
+         * billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
+         * billing.setSenderFunction("Leiterin"); billing.setSenderPostalCode("72076");
+         * billing.setSenderCity("Tübingen"); billing.setSenderStreet("Otfried-Müller-Straße 10");
+         * billing.setSenderPhone("+49 (0) 7071 29-83156");
+         * billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
+         * billing.setSenderUrl("www.medizin.uni-tuebingen.de");
+         * billing.setSenderFaculty("Medizinischen Fakultät");
+         * 
+         * billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
+         * billing.setProjectShortDescription("jede Menge Extras.");
+         * billing.setProjectNumber("QA2014016");
+         * 
+         * ArrayList<CostEntry> entries = new ArrayList<CostEntry>(); for (Object itemId :
+         * gpcontainer.getItemIds()) { float cost = ((Number)
+         * gpcontainer.getContainerProperty(itemId, costCaption).getValue()) .floatValue(); long s =
+         * ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue()) .getTime();
+         * long e = ((Date) gpcontainer.getContainerProperty(itemId,
+         * endCaption).getValue()).getTime(); long timeFrame = e - s; Date start = ((Date)
+         * gpcontainer.getContainerProperty(itemId, startCaption).getValue()); SimpleDateFormat ft =
+         * new SimpleDateFormat("dd.MM.yyyy"); String date = ft.format(start); String description =
+         * "No Description is Available"; String time_frame =
+         * Formatter.toHoursAndMinutes(timeFrame); entries.add(billing.new CostEntry(date,
+         * time_frame, description, cost)); } billing.setCostEntries(entries); float totalCosts =
+         * 0.0f; for (Object itemId : gpcontainer.getItemIds()) { totalCosts += ((Number)
+         * gpcontainer.getContainerProperty(itemId, costCaption).getValue()) .floatValue(); }
+         * 
+         * billing.setTotalCost(String.format("%1$.2f", totalCosts));
+         * 
+         * bill = billing.createPdf(); System.out.println(bill.getAbsolutePath()); if
+         * (fileDownloader != null) downloadBill.removeExtension(fileDownloader); fileDownloader =
+         * new FileDownloader(new FileResource(bill)); fileDownloader.extend(downloadBill);
+         * downloadBill.setEnabled(true); showSuccessfulNotification("Congratulations!",
+         * "Invoice is created and available for download."); } catch (Exception e) {
+         * showErrorNotification( "What the heck!",
+         * "An error occured while trying to create the invoice. The common problem occurs to be: cannot run program 'pdflatex'"
+         * ); e.printStackTrace(); }
+         */
 
       }
 
@@ -275,6 +370,7 @@ public class Statistics extends CustomComponent {
    */
   private void fillRows(Grid grid) {
     List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getPhysicalTimeBlocks();
+
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
 
@@ -443,11 +539,11 @@ public class Statistics extends CustomComponent {
         try {
           Billing billing =
               new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
-          billing.setRecieverInstitution("BER - Berliner Flughafen");
-          billing.setRecieverPI("Klaus Wowereit");
-          billing.setRecieverStreet("am berliner flughafen 12");
-          billing.setRecieverPostalCode("D-12345");
-          billing.setRecieverCity("Berlin");
+          billing.setReceiverInstitution("BER - Berliner Flughafen");
+          billing.setReceiverPI("Klaus Wowereit");
+          billing.setReceiverStreet("am berliner flughafen 12");
+          billing.setReceiverPostalCode("D-12345");
+          billing.setReceiverCity("Berlin");
 
           billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
           billing.setSenderFunction("Leiterin");

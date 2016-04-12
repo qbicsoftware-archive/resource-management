@@ -742,9 +742,9 @@ public enum Database {
       while (rs.next()) {
         users.add(new UserBean(rs.getString("user_ldap"), rs.getInt("user_id"), rs
             .getString("user_name"), rs.getString("group_name"), rs.getString("workgroup_name"), rs
+            .getString("street"), rs.getString("postcode"), rs.getString("city"), rs
             .getString("institute_name"), rs.getString("kostenstelle"), rs.getString("project"), rs
             .getString("email"), rs.getString("phone")));
-
       }
       conn.close();
     } catch (SQLException e) {
@@ -1923,7 +1923,7 @@ public enum Database {
 
   public UserBean getUserById(int userId) {
     String sql =
-        "SELECT user.user_id, user.user_name, user.kostenstelle, workgroups.workgroup_name, workgroups.institute_name FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
+        "SELECT user.user_id, user.user_name, user.kostenstelle, workgroups.workgroup_name, workgroups.institute_name, workgroups.street, workgroups.postcode, workgroups.city, user.project FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
     // 1 2 3 4
     UserBean ret = new UserBean();
     try (Connection conn = login();
@@ -1937,6 +1937,10 @@ public enum Database {
         ret.setKostenstelle(rs.getString(3));
         ret.setWorkgroup(rs.getString(4));
         ret.setInstitute(rs.getString(5));
+        ret.setStreet(rs.getString(6));
+        ret.setPostCode(rs.getString(7));
+        ret.setCity(rs.getString(8));
+        ret.setProject(rs.getString(9));
         // TODO get the correct ones - when one user has more than one kostenstelle then reimplement
         // using the code below
         // List<String> kostenStelle = new ArrayList<String>();

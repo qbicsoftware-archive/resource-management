@@ -26,6 +26,9 @@ public class UserBean implements Serializable {
   private String name = "";
   private String group = "";
   private String workgroup = "";
+  private String street = "";
+  private String postcode;
+  private String city = "";
   private String institute = "";
   private String role = "";
   private String email = "";
@@ -37,8 +40,8 @@ public class UserBean implements Serializable {
   // private List<String> Kostenstelle = new ArrayList<String>();
   // private List<String> ProjectName = new ArrayList<String>();
 
-  public UserBean(int id, String user_ldap, String name, String group, String role, String status,
-      String kostenstelle, String project) {
+  public UserBean(int id, String user_ldap, String name, String group, String street,
+      String postcode, String city, String role, String status, String kostenstelle, String project) {
     super();
     this.id = id;
     this.user_ldap = user_ldap;
@@ -48,18 +51,25 @@ public class UserBean implements Serializable {
     this.status = status;
     this.kostenstelle = kostenstelle;
     this.project = project;
+    this.city = city;
+    this.postcode = postcode;
+    this.street = street;
     // Kostenstelle = kostenstelle;
     // ProjectName = projectName;
   }
 
   public UserBean(String user_ldap, int id, String name, String group, String workgroup,
-      String institute, String kostenstelle, String project, String email, String phone) {
+      String street, String postcode, String city, String institute, String kostenstelle,
+      String project, String email, String phone) {
     super();
     this.user_ldap = user_ldap;
     this.id = id;
     this.name = name;
     this.group = group;
     this.workgroup = workgroup;
+    this.street = street;
+    this.postcode = postcode;
+    this.city = city;
     this.institute = institute;
     this.kostenstelle = kostenstelle;
     this.project = project;
@@ -151,6 +161,30 @@ public class UserBean implements Serializable {
 
   public void setWorkgroup(String workgroup) {
     this.workgroup = workgroup;
+  }
+
+  public String getStreet() {
+    return street;
+  }
+
+  public void setStreet(String street) {
+    this.street = street;
+  }
+
+  public String getPostcode() {
+    return postcode;
+  }
+
+  public void setPostCode(String postcode) {
+    this.postcode = postcode;
+  }
+
+  public String getCity() {
+    return city;
+  }
+
+  public void setCity(String city) {
+    this.city = city;
   }
 
   public String getInstitute() {
