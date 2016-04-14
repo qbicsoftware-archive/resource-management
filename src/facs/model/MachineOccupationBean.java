@@ -47,11 +47,10 @@ public class MachineOccupationBean implements Serializable {
 
   }
 
-
   public void setBean(String[] info, int deviceId) throws ParseException {
-    if (info == null || info.length != 15) {
-      throw new IllegalArgumentException("info is not what it supposed to be:" + info.toString());
-    }
+    // if (info == null || info.length != 14) {
+    // throw new IllegalArgumentException("info is not what it supposed to be:" + info.toString());
+    // }
     id = -1;
     this.deviceId = deviceId;
     userName = info[0];
@@ -63,12 +62,11 @@ public class MachineOccupationBean implements Serializable {
     SimpleDateFormat stmp = new SimpleDateFormat("hh:mm:ss a MMMMMM dd yyyy");
     start = stmp.parse(info[6] + " " + info[7]);
     end = stmp.parse(info[8] + " " + info[9]);
-    buildVersion = info[11];
-    cytometer = info[12];
-    serialno = info[13];
-    custom = info[14];
+    buildVersion = info[10];
+    cytometer = info[11];
+    serialno = info[12];
+    custom = info[13];
     corrupted = false;
-    System.out.println("Parsing in Progress 1");
   }
 
   public int getId() {
@@ -214,14 +212,12 @@ public class MachineOccupationBean implements Serializable {
     id = -1;
     this.deviceId = deviceId;
     userName = setParameter(row, headerNumbers, "User Name");
-
     userFullName = setParameter(row, headerNumbers, "Full Name");
-
     application = setParameter(row, headerNumbers, "Application");
     role = setParameter(row, headerNumbers, "Role");
     department = setParameter(row, headerNumbers, "Department");
     institution = setParameter(row, headerNumbers, "Institution");
-
+    System.out.println("List: " + userName + " " + userFullName + " " + application + " " + role);
     if (userName.isEmpty() && userFullName.isEmpty())
       corrupted = true;
 
@@ -229,14 +225,14 @@ public class MachineOccupationBean implements Serializable {
     try {
       start = setFormat(row, headerNumbers, "LogIn Time", "LogIn Date", stmp);
     } catch (ParseException e) {
-      System.out.println(stmp.format(new Date()) + " log: " + e.getMessage());
+      // System.out.println(stmp.format(new Date()) + " log: " + e.getMessage());
       start = null;
       corrupted = true;
     }
     try {
       end = setFormat(row, headerNumbers, "LogOut Time", "LogOut Date", stmp);
     } catch (ParseException e) {
-      System.out.println(stmp.format(new Date()) + " log: " + e.getMessage());
+      // System.out.println(stmp.format(new Date()) + " log: " + e.getMessage());
       end = null;
       corrupted = true;
     }

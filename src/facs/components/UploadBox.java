@@ -34,7 +34,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
@@ -49,7 +48,6 @@ import com.vaadin.ui.themes.ValoTheme;
 import facs.db.DBManager;
 import facs.model.DeviceBean;
 import facs.model.MachineOccupationBean;
-import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
@@ -85,6 +83,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     for (DeviceBean bean : DBManager.getDatabaseInstance().getDevices()) {
       deviceNameToId.put(bean.getName(), bean.getId());
       devices.addItem(bean.getName());
+      System.out.println("Bean.getName: " + bean.getName() + " Bean.getId: " + bean.getId());
     }
     occupationGrid = new Grid();
     occupationGrid.setSizeFull();
@@ -99,10 +98,11 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
 
     // one can only upload csvs, if a device was selected.
     devices.addValueChangeListener(new ValueChangeListener() {
+
       /**
        * 
        */
-      private static final long serialVersionUID = 1L;
+      private static final long serialVersionUID = 7890499571475184208L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -111,11 +111,11 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     });
 
     // Put the upload and image display in a panel
-    Panel panel = new Panel(UPLOAD_CAPTION);
-    panel.setWidth("100%");
+    // Panel panel = new Panel(UPLOAD_CAPTION);
+    // panel.setWidth("100%");
     VerticalLayout panelContent = new VerticalLayout();
     panelContent.setSpacing(true);
-    panel.setContent(panelContent);
+    // panel.setContent(panelContent);
     panelContent.addComponent(devices);
     panelContent.addComponent(upload);
     panelContent.addComponent(progress);
@@ -126,7 +126,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
 
     progress.setVisible(false);
 
-    setCompositionRoot(panel);
+    setCompositionRoot(panelContent);
   }
 
 
@@ -150,7 +150,9 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
 
   @Override
   public void uploadSucceeded(SucceededEvent event) {
+
     progress.setVisible(false);
+
     String line = "";
 
     try {
@@ -167,14 +169,20 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         String[] userInfo = line.split(cvsSplitBy);
         MachineOccupationBean bean = new MachineOccupationBean();
         bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())), deviceNameToId);
-        // bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
+        System.out.println("UserInfo: " + userInfo + " deviceNameToId: "
+            + deviceNameToId.get((getCurrentDevice())) + " " + deviceNameToId);
+        try {
+          bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
+        } catch (Exception e) {
+          // e.printStackTrace();
+        }
         container.addBean(bean);
-        System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd()
-            + " login time: "
-            + Formatter.toHoursAndMinutes(bean.getEnd().getTime() - bean.getStart().getTime()));
+        // System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd()
+        // + " login time: "
+        // + Formatter.toHoursAndMinutes(bean.getEnd().getTime() - bean.getStart().getTime()));
         occupationGrid.setContainerDataSource(container);
       }
-      addBeansToGrid(container);
+      // addBeansToGrid(container);
     } catch (IOException e) {
       e.printStackTrace();
       showErrorNotification("Can't read uploaded file.",

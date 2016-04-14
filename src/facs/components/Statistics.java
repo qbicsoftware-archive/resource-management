@@ -87,7 +87,7 @@ public class Statistics extends CustomComponent {
   String ProjectShortDescription = null;
   String ProjectNumber = null;
 
-  Button createBill = new Button("Invoice");
+  Button createBill = new Button("Create Invoice");
   Button downloadBill = new Button("Download Invoice");
 
   private GeneratedPropertyContainer gpcontainer;
@@ -169,17 +169,17 @@ public class Statistics extends CustomComponent {
 
     grid.addSelectionListener(new SelectionListener() {
 
-      /**
-       * select rows for creating invoices
-       */
-      private static final long serialVersionUID = 1L;
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -2683274060620429050L;
 
       @Override
       public void select(SelectionEvent event) {
-        Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
-            + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
-
+        // Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
+        // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
+        downloadBill.setEnabled(false);
         ReceiverPI =
             (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
                 .getValue();
@@ -188,10 +188,11 @@ public class Statistics extends CustomComponent {
     });
 
     createBill.addClickListener(new ClickListener() {
+
       /**
        * 
        */
-      private static final long serialVersionUID = 1L;
+      private static final long serialVersionUID = 5512585967145932560L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -201,21 +202,19 @@ public class Statistics extends CustomComponent {
 
         Paths.get(basepath, "WEB-INF/billingTemplates");
 
-        System.out.println("Basepath: " + basepath);
+        // System.out.println("Basepath: " + basepath);
 
         try {
-
-          Billing billing =
-              new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
 
           int setUserId = DBManager.getDatabaseInstance().findUserByFullName(ReceiverPI);
 
           if (setUserId > 0) {
+
+            Billing billing =
+                new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
+
             UserBean user =
                 setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
-
-            System.out.println("-------- > -------- > Street: " + user.getStreet() + " Postcode: "
-                + user.getPostcode() + " City: " + user.getCity());
 
             billing.setReceiverPI(ReceiverPI);
             billing.setReceiverInstitution(user.getInstitute());
@@ -245,55 +244,65 @@ public class Statistics extends CustomComponent {
             else
               billing.setProjectNumber("Keine project nummer verfügbar.");
 
+            float cost =
+                ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
+                    .getValue()).floatValue();
+            long s =
+                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
+                    .getValue()).getTime();
+            long e =
+                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), endCaption)
+                    .getValue()).getTime();
+            long timeFrame = e - s;
+            Date start =
+                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
+                    .getValue());
+            SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
+            String date = ft.format(start);
+            String description = "No Description is Available";
+            String time_frame = Formatter.toHoursAndMinutes(timeFrame);
+
+            ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
+            entries.add(billing.new CostEntry(date, time_frame, description, cost));
+            billing.setCostEntries(entries);
+            float totalCosts = 0.0f;
+
+            // calculates the total cost of items
+            // for (Object itemId : gpcontainer.getItemIds()) {
+            // totalCosts +=
+            // ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
+            // .floatValue();
+            // }
+
+            totalCosts =
+                ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
+                    .getValue()).floatValue();
+
+            billing.setTotalCost(String.format("%1$.2f", totalCosts));
+
+            bill = billing.createPdf();
+            // System.out.println(bill.getAbsolutePath());
+            if (fileDownloader != null)
+              downloadBill.removeExtension(fileDownloader);
+            fileDownloader = new FileDownloader(new FileResource(bill));
+            fileDownloader.extend(downloadBill);
+            downloadBill.setEnabled(true);
+            showSuccessfulNotification("Congratulations!",
+                "Invoice is created and available for download.");
+            downloadBill.setEnabled(true);
+          } else {
+            createBill.setEnabled(false);
+            downloadBill.setEnabled(false);
+            showErrorNotification(
+                "No such user found!",
+                "An error occured while trying to create the invoice. The common problem occurs to be: this no such user in the database.");
           }
-
-          float cost =
-              ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
-                  .getValue()).floatValue();
-          long s =
-              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
-                  .getValue()).getTime();
-          long e =
-              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), endCaption)
-                  .getValue()).getTime();
-          long timeFrame = e - s;
-          Date start =
-              ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
-                  .getValue());
-          SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
-          String date = ft.format(start);
-          String description = "No Description is Available";
-          String time_frame = Formatter.toHoursAndMinutes(timeFrame);
-
-          ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
-          entries.add(billing.new CostEntry(date, time_frame, description, cost));
-          billing.setCostEntries(entries);
-          float totalCosts = 0.0f;
-
-          for (Object itemId : gpcontainer.getItemIds()) {
-            totalCosts +=
-                ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
-                    .floatValue();
-          }
-
-          billing.setTotalCost(String.format("%1$.2f", totalCosts));
-
-          bill = billing.createPdf();
-          System.out.println(bill.getAbsolutePath());
-          if (fileDownloader != null)
-            downloadBill.removeExtension(fileDownloader);
-          fileDownloader = new FileDownloader(new FileResource(bill));
-          fileDownloader.extend(downloadBill);
-          downloadBill.setEnabled(true);
-          showSuccessfulNotification("Congratulations!",
-              "Invoice is created and available for download.");
-          downloadBill.setEnabled(true);
         }
 
         catch (Exception e) {
           showErrorNotification(
               "What the heck!",
-              "An error occured while trying to create the invoice. The common problem occurs to be: cannot run program 'pdflatex'");
+              "An error occured while trying to create the invoice. The common problem occurs to be: this no such user or it can not run program 'pdflatex'.");
           e.printStackTrace();
         }
 
@@ -384,12 +393,12 @@ public class Statistics extends CustomComponent {
       float cost = -1.f;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
-        System.out.println("userId: " + userId);
-        System.out.println("name: " + mobean.getUserFullName());
+        // System.out.println("userId: " + userId);
+        // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
-        System.out.println(user.getId() + " ************************************* "
-            + mobean.getDeviceId());
+        // System.out.println(user.getId() + " ************************************* "
+        // + mobean.getDeviceId());
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
       grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
@@ -404,12 +413,12 @@ public class Statistics extends CustomComponent {
     float cost = 0f;
     float costPerHour =
         DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
-    System.out.println("Cost per Hour: " + costPerHour);
+    // System.out.println("Cost per Hour: " + costPerHour);
     if (costPerHour > 0) {
       float hoursUsed = Formatter.toHours(start, end);
-      System.out.println("Hours Used: " + hoursUsed);
+      // System.out.println("Hours Used: " + hoursUsed);
       cost = hoursUsed * costPerHour;
-      System.out.println("Cost: " + cost);
+      // System.out.println("Cost: " + cost);
     }
     return cost;
   }
@@ -528,6 +537,10 @@ public class Statistics extends CustomComponent {
     // downloadBill.setEnabled(false);
 
     createBill.addClickListener(new ClickListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 2564802610758479522L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -588,7 +601,7 @@ public class Statistics extends CustomComponent {
           billing.setTotalCost(String.format("%1$.2f", totalCosts));
 
           bill = billing.createPdf();
-          System.out.println(bill.getAbsolutePath());
+          // System.out.println(bill.getAbsolutePath());
           if (fileDownloader != null)
             downloadBill.removeExtension(fileDownloader);
           fileDownloader = new FileDownloader(new FileResource(bill));

@@ -92,6 +92,11 @@ public class Settings extends CustomComponent {
 
     add.addClickListener(new ClickListener() {
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1920052856393517754L;
+
       @Override
       public void buttonClick(ClickEvent event) {
         addNewDevice();
@@ -103,6 +108,12 @@ public class Settings extends CustomComponent {
 
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(devices);
     gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 4398909257922492690L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -127,6 +138,11 @@ public class Settings extends CustomComponent {
     // Render a button that deletes the data row (item)
     devicesGrid.getColumn("delete").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = 1217127696779125401L;
+
           @Override
           public void click(RendererClickEvent event) {
             removeDevice((DeviceBean) event.getItemId());
@@ -209,12 +225,22 @@ public class Settings extends CustomComponent {
     UI.getCurrent().addWindow(subWindow);
 
     discard.addClickListener(new ClickListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -5808910314649620731L;
+
       @Override
       public void buttonClick(ClickEvent event) {
         subWindow.close();
       }
     });
     save.addClickListener(new ClickListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 3748395242651585005L;
+
       @Override
       public void buttonClick(ClickEvent event) {
         if (name.isValid() && description.isValid()) {
