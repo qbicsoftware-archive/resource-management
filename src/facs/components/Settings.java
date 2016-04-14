@@ -16,6 +16,8 @@
  *******************************************************************************/
 package facs.components;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -50,6 +52,7 @@ import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
 import facs.model.DeviceBean;
 
@@ -59,6 +62,11 @@ public class Settings extends CustomComponent {
 
 
   public Settings(User user) {
+
+    Date dNow = new Date();
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    System.out.println(ft.format(dNow) + "  INFO  Settings accessed! - User: "
+        + LiferayAndVaadinUtils.getUser().getScreenName());
 
     this.setCaption("Settings");
     TabSheet settings = new TabSheet();

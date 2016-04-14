@@ -217,7 +217,8 @@ public class MachineOccupationBean implements Serializable {
     role = setParameter(row, headerNumbers, "Role");
     department = setParameter(row, headerNumbers, "Department");
     institution = setParameter(row, headerNumbers, "Institution");
-    System.out.println("List: " + userName + " " + userFullName + " " + application + " " + role);
+    // System.out.println("List: " + userName + " " + userFullName + " " + application + " " +
+    // role);
     if (userName.isEmpty() && userFullName.isEmpty())
       corrupted = true;
 
