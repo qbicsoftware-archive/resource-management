@@ -52,6 +52,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
@@ -155,17 +156,16 @@ public class Statistics extends CustomComponent {
     downloadBill.setSizeFull();
 
     gridLayout.setWidth("100%");
-
+    gridLayout.setCaption("Statistics");
     // add components to the grid layout
     gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
     gridLayout.addComponent(grid, 0, 1, 5, 1);
     gridLayout.addComponent(createBill, 0, 3);
     gridLayout.addComponent(downloadBill, 1, 3);
-
+    gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
+
     grid.setSelectionMode(SelectionMode.SINGLE);
-
-
 
     grid.addSelectionListener(new SelectionListener() {
 
@@ -356,7 +356,14 @@ public class Statistics extends CustomComponent {
       }
 
     });
-    setCompositionRoot(gridLayout);
+
+
+    TabSheet statistics = new TabSheet();
+    statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    statistics.addTab(gridLayout);
+
+
+    setCompositionRoot(statistics);
 
   }
 

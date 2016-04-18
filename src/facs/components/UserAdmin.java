@@ -72,7 +72,7 @@ public class UserAdmin extends CustomComponent {
         new Label(DBManager.getDatabaseInstance().getUserNameByUserID(
             LiferayAndVaadinUtils.getUser().getScreenName())
             + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
-    infoLabel.addStyleName("h3");
+    infoLabel.addStyleName("h4");
 
     String buttonTitle = "Refresh";
     Button refresh = new Button(buttonTitle);

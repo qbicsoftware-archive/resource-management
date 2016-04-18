@@ -177,9 +177,13 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
           // e.printStackTrace();
         }
         container.addBean(bean);
-        // System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd()
-        // + " login time: "
-        // + Formatter.toHoursAndMinutes(bean.getEnd().getTime() - bean.getStart().getTime()));
+        System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd() + " "
+            + bean.getDepartment());
+
+        // TODO: write the function to register the data into the DB.
+
+        // System.out.println(" login time: "+ Formatter.toHoursAndMinutes(bean.getEnd().getTime() -
+        // bean.getStart().getTime()));
         occupationGrid.setContainerDataSource(container);
       }
       // addBeansToGrid(container);
@@ -191,6 +195,11 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     }
     showSuccessfulNotification("Nailed it! Upload successful.",
         "Hopefully all good! Successful uploads expectedly lead to successful parsing of the documents.");
+  }
+
+  private void If(boolean b) {
+    // TODO Auto-generated method stub
+
   }
 
 

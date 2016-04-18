@@ -52,6 +52,7 @@ import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -84,7 +85,6 @@ public class Booking extends CustomComponent {
   private HorizontalLayout cal = new HorizontalLayout();
   private GridLayout gridLayout = new GridLayout(6, 6);
 
-
   private BookingModel bookingModel;
   private NativeSelect selectedDevice;
   private Map<String, Calendar> bookMap = new HashMap<String, Calendar>();
@@ -109,15 +109,15 @@ public class Booking extends CustomComponent {
     this.referenceDate = referenceDate;
 
     Label infoLabel = new Label();
-    infoLabel.addStyleName("h3");
+    infoLabel.addStyleName("h4");
 
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
     selectDeviceLabel.setValue("Please Select a Device");
 
     final Label versionLabel = new Label();
-    versionLabel.addStyleName("h3");
-    versionLabel.setValue("Version 0.1.160414");
+    versionLabel.addStyleName("h4");
+    versionLabel.setValue("Version 0.1.160418");
 
     showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
         + bookingModel.userName() + "!", "");
@@ -139,14 +139,12 @@ public class Booking extends CustomComponent {
       return;
     }
 
-    this.setCaption("");
-    Panel book = new Panel("");
+    Panel book = new Panel();
     book.addStyleName(ValoTheme.PANEL_BORDERLESS);
 
     DBManager.getDatabaseInstance();
     db = Database.Instance;
     db.userLogin(bookingModel.getLDAP());
-
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
     selectedService = new NativeSelect("Please select a service:");
@@ -254,28 +252,35 @@ public class Booking extends CustomComponent {
     });
 
     gridLayout.setWidth("100%");
-
     // add components to the grid layout
-    gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
-    gridLayout.addComponent(versionLabel, 4, 0, 5, 0);
+    gridLayout.addComponent(infoLabel, 0, 4, 3, 4);
+    gridLayout.addComponent(versionLabel, 4, 4, 5, 4);
 
     // gridLayout.addComponent(selectDeviceLabel,0,1);
-    gridLayout.addComponent(selectedDevice, 0, 1);
-    gridLayout.addComponent(selectedService, 0, 2);
+    gridLayout.addComponent(selectedDevice, 0, 0);
+    gridLayout.addComponent(selectedService, 0, 1);
     selectedService.setVisible(false);
 
-    gridLayout.addComponent(cal, 0, 3, 5, 3);
+    gridLayout.addComponent(cal, 0, 2, 5, 2);
 
-    gridLayout.addComponent(refresh, 0, 4);
-    gridLayout.addComponent(submit, 1, 4, 5, 4);
+    gridLayout.addComponent(refresh, 0, 3);
+    gridLayout.addComponent(submit, 1, 3, 5, 3);
 
-    gridLayout.addComponent(myBookings(), 0, 5, 5, 5);
+    // gridLayout.addComponent(myBookings(), 0, 5, 5, 5);
 
+    gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
 
     book.setContent(gridLayout);
-    setCompositionRoot(book);
+
+    TabSheet booking = new TabSheet();
+
+    booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    booking.addTab(book).setCaption("Calendar");
+    booking.addTab(myBookings()).setCaption("My Bookings");;
+    setCompositionRoot(booking);
+
   }
 
   private void setRenderers(Grid grid) {
@@ -296,8 +301,7 @@ public class Booking extends CustomComponent {
 
   private Component myBookings() {
     VerticalLayout devicesLayout = new VerticalLayout();
-    // devicesLayout.setCaption("");
-
+    // devicesLayout.setCaption("My Bookings");
     // there will now be space around the test component
     // components added to the test component will now not stick together but have space between
     // them

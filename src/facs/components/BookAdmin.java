@@ -89,7 +89,7 @@ public class BookAdmin extends CustomComponent {
         new Label(DBManager.getDatabaseInstance().getUserNameByUserID(
             LiferayAndVaadinUtils.getUser().getScreenName())
             + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
-    infoLabel.addStyleName("h3");
+    infoLabel.addStyleName("h4");
 
     String buttonRefreshTitle = "Refresh";
     Button refresh = new Button(buttonRefreshTitle);

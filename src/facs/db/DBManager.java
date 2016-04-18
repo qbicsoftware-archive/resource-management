@@ -33,11 +33,11 @@ public class DBManager {
   // private static String password = "dZAmDa9-Ysq_Zv1AGygQ";
 
   // portal production
-  private static String hostname = "localhost";
-  private static String port = "3306";
-  private static String sql_database = "facs_facility";
-  private static String username = "iigpo01";
-  private static String password = "Eehae2ui6goaphae0ugiegh8";
+  // private static String hostname = "localhost";
+  // private static String port = "3306";
+  // private static String sql_database = "facs_facility";
+  // private static String username = "iigpo01";
+  // private static String password = "Eehae2ui6goaphae0ugiegh8";
 
 
   public static Database getDatabaseInstance() {
