@@ -1778,6 +1778,7 @@ public enum Database {
     return userId;
   }
 
+
   /**
    * Adds a physical time block into the database. BE AWARE: It is added without further checking.
    * If you want to be sure that this time block was not added check it with isPhysicalTimeBlock
@@ -1789,31 +1790,58 @@ public enum Database {
    * @param end
    * @return
    */
-  public boolean addPhysicalTimeBlock(int deviceId, String userName, String userFullName,
-      Date start, Date end) {
+  public boolean addPhysicalTimeBlock(int deviceId, String deviceName, String userName,
+      String userFullName, Date startRound, Date start, Date end, String byUser, float Cost) {
     // select user_id from users where name = '?';
     boolean id = false;
     if (deviceId == -1 || userName == null) {
       return id;
     }
+
+    userFullName = userFullName.replace("\"", "");
+
     String sql =
-        "INSERT INTO physical_time_blocks (resource_id, resource_user_name, resource_specific_id, start_time, end_time) VALUES(?, ?, ?, ?, ?)";
+        "INSERT INTO logs (device_id, device_name, user_name, user_full_name, start_round, start, end, by_user, corrupt, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
     // The following statement is an try-with-resources statement, which declares two resources,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setInt(1, deviceId);
-      statement.setString(2, userFullName);
+      statement.setString(2, deviceName);
       statement.setString(3, userName);
+      statement.setString(4, userFullName);
+
       if (start == null) {
-        statement.setNull(4, java.sql.Types.TIMESTAMP);
-      } else {
-        statement.setTimestamp(4, new Timestamp(start.getTime()));
-      }
-      if (end == null) {
         statement.setNull(5, java.sql.Types.TIMESTAMP);
       } else {
-        statement.setTimestamp(5, new Timestamp(end.getTime()));
+        statement.setTimestamp(5, new Timestamp(startRound.getTime()));
       }
+
+      if (start == null) {
+        statement.setNull(6, java.sql.Types.TIMESTAMP);
+      } else {
+        statement.setTimestamp(6, new Timestamp(start.getTime()));
+      }
+      if (end == null) {
+        statement.setNull(7, java.sql.Types.TIMESTAMP);
+      } else {
+        statement.setTimestamp(7, new Timestamp(end.getTime()));
+      }
+      statement.setString(8, byUser);
+
+      // System.out.println("Username: " + userFullName + " length: " + userFullName.length()
+      // + " is empty: " + userFullName.isEmpty());
+
+      if (userFullName.length() < 2 || end == null || start == null) {
+        int corrupt = 1;
+        statement.setInt(9, corrupt);
+      } else
+        statement.setNull(9, java.sql.Types.INTEGER);
+
+      statement.setFloat(10, Cost);
+
+      // System.out.println("Statement: " + statement);
+
       statement.executeUpdate();
       // if (rs.next()) {
       // id =rs.getInt("id");
@@ -1888,6 +1916,31 @@ public enum Database {
     return obean;
   }
 
+
+  public List<MachineOccupationBean> getMatchedTimeBlocks() {
+
+    String sql =
+        "SELECT logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
+
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceName(rs.getString("logs.device_name"));
+        m.setUserFullName(rs.getString("user.user_name"));
+        m.setStart(rs.getTimestamp("logs.start"));
+        m.setEnd(rs.getTimestamp("logs.end"));
+        m.setCost(rs.getFloat("logs.cost"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
 
 
   public UserBean getUserByLDAPId(String userId) {

@@ -41,6 +41,8 @@ public class MachineOccupationBean implements Serializable {
   private String cytometer;
   private String serialno;
   private String custom;
+  private String deviceName;
+  private Float cost;
   private boolean corrupted;
 
   public MachineOccupationBean() {
@@ -67,6 +69,22 @@ public class MachineOccupationBean implements Serializable {
     serialno = info[12];
     custom = info[13];
     corrupted = false;
+  }
+
+  public float getCost() {
+    return cost;
+  }
+
+  public void setCost(float cost) {
+    this.cost = cost;
+  }
+
+  public String getDeviceName() {
+    return deviceName;
+  }
+
+  public void setDeviceName(String deviceName) {
+    this.deviceName = deviceName;
   }
 
   public int getId() {
@@ -237,6 +255,7 @@ public class MachineOccupationBean implements Serializable {
       end = null;
       corrupted = true;
     }
+
     buildVersion = setParameter(row, headerNumbers, "Build Version");
     cytometer = setParameter(row, headerNumbers, "Cytometer");
     serialno = setParameter(row, headerNumbers, "Serial No");
@@ -255,6 +274,7 @@ public class MachineOccupationBean implements Serializable {
 
     Integer s = headerNumbers.get(time);
     Integer e = headerNumbers.get(date);
+
     return (s == null || s < 0 || s >= row.length || e == null || e < 0 || e >= row.length) ? null
         : parser.parse(row[s] + " " + row[e]);
   }

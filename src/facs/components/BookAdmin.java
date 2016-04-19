@@ -234,7 +234,7 @@ public class BookAdmin extends CustomComponent {
     gridLayout.setWidth("100%");
 
     // add components to the grid layout
-    gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
+    // gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
     gridLayout.addComponent(bookAdmin, 0, 1, 5, 1);
     gridLayout.addComponent(refresh, 0, 2);
     gridLayout.addComponent(userDevice, 0, 4, 1, 4);

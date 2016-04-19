@@ -117,7 +117,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160418");
+    versionLabel.setValue("Version 0.1.160419");
 
     showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
         + bookingModel.userName() + "!", "");

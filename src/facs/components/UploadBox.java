@@ -21,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -45,9 +47,11 @@ import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
 import facs.model.DeviceBean;
 import facs.model.MachineOccupationBean;
+import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
@@ -70,7 +74,6 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   private HashMap<String, Integer> deviceNameToId;
   private NativeSelect devices;
   private Grid occupationGrid;
-
 
   public UploadBox() {
     this.setCaption(CAPTION);
@@ -169,21 +172,39 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         String[] userInfo = line.split(cvsSplitBy);
         MachineOccupationBean bean = new MachineOccupationBean();
         bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())), deviceNameToId);
-        // System.out.println("UserInfo: " + userInfo + " deviceNameToId: "
-        // + deviceNameToId.get((getCurrentDevice())) + " " + deviceNameToId);
+
         try {
           bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
         } catch (Exception e) {
           // e.printStackTrace();
         }
         container.addBean(bean);
-        System.out.println(bean.getUserName() + " " + bean.getStart() + " " + bean.getEnd() + " "
-            + bean.getDepartment());
 
-        // TODO: write the function to register the data into the DB.
+        int userId =
+            DBManager.getDatabaseInstance().findUserByFullName(
+                bean.getUserFullName().replace("\"", ""));
 
-        // System.out.println(" login time: "+ Formatter.toHoursAndMinutes(bean.getEnd().getTime() -
-        // bean.getStart().getTime()));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(bean.getStart());
+
+        int unroundedMinutes = calendar.get(Calendar.MINUTE);
+        int mod = unroundedMinutes % 30;
+        calendar.add(Calendar.MINUTE, mod < 15 ? -mod : (30 - mod));
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        float cost = -1.f;
+        Date end = bean.getEnd() == null ? bean.getStart() : bean.getEnd();
+
+        cost = getCost(userId, bean.getStart(), end, bean.getDeviceId());
+
+        DBManager.getDatabaseInstance().addPhysicalTimeBlock(bean.getDeviceId(),
+            devices.getValue().toString(), bean.getUserName(), bean.getUserFullName(),
+            calendar.getTime(), bean.getStart(), bean.getEnd(),
+            LiferayAndVaadinUtils.getUser().getScreenName(), cost);
+
+        // System.out.println("Cost: " + cost);
+
         occupationGrid.setContainerDataSource(container);
       }
       // addBeansToGrid(container);
@@ -200,6 +221,23 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   private void If(boolean b) {
     // TODO Auto-generated method stub
 
+  }
+
+
+
+  private float getCost(int userId, Date start, Date end, int resourceId) {
+    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
+    float cost = 0f;
+    float costPerHour =
+        DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+    // System.out.println("Cost per Hour: " + costPerHour);
+    if (costPerHour > 0) {
+      float hoursUsed = Formatter.toHours(start, end);
+      // System.out.println("Hours Used: " + hoursUsed);
+      cost = hoursUsed * costPerHour;
+      // System.out.println("Cost: " + cost);
+    }
+    return cost;
   }
 
 

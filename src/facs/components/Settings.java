@@ -72,14 +72,16 @@ public class Settings extends CustomComponent {
     TabSheet settings = new TabSheet();
     settings.addStyleName(ValoTheme.TABSHEET_FRAMED);
 
-    settings.addTab(newDeviceGrid());
+    // TODO: a new device functionality is temporarily removed from the user interface
+    // settings.addTab(newDeviceGrid());
+
     // upload csv files of devices
     settings.addTab(new UploadBox());
 
     setCompositionRoot(settings);
   }
 
-
+  // temporarily unavailable: see above
   private Component newDeviceGrid() {
 
     VerticalLayout devicesLayout = new VerticalLayout();
