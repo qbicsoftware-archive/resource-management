@@ -68,12 +68,11 @@ public class MachineOccupationBean implements Serializable {
     cytometer = info[11];
     serialno = info[12];
     custom = info[13];
+    cost = (float) -1;
     corrupted = false;
   }
 
-  public float getCost() {
-    return cost;
-  }
+
 
   public void setCost(float cost) {
     this.cost = cost;

@@ -667,6 +667,7 @@ public class Statistics extends CustomComponent {
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+      float cost = -1;
       String kostenStelle = "unknown";
       String institute = "unknown";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
@@ -676,9 +677,9 @@ public class Statistics extends CustomComponent {
         // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
-        getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, mobean.getCost(),
+      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, cost,
           mobean.getUserFullName(), institute);
     }
 
