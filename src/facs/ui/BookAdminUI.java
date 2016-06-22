@@ -72,6 +72,4 @@ public class BookAdminUI extends UI {
     return label;
   }
 
-
-
 }

@@ -314,6 +314,35 @@ public enum Database {
     return userrole;
   }
 
+  /**
+   * Returns the user name by querying the user ID
+   * 
+   * @param uuid
+   * @return
+   */
+  public String getEmailbyUserName(String username) {
+
+    String sql = "SELECT email FROM user WHERE user_name = ?";
+
+    String email = "info@qbic.uni-tuebingen.de";
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, username);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        email = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return email;
+  }
+
 
   /**
    * Returns the user ID from the user table by using users LDAP ID
@@ -851,7 +880,7 @@ public enum Database {
       statement.setString(1, uuid);
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
-        bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("user_name"), rs
+        bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("kostenstelle"), rs
             .getString("phone"), rs.getString("device_name"), rs.getTimestamp("start"), rs
             .getTimestamp("end"), rs.getString("service"), rs.getDouble("price"), rs
             .getBoolean("confirmation")));
@@ -1265,6 +1294,23 @@ public enum Database {
     java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
 
     String sql = "UPDATE booking SET deleted = 1 WHERE start = ? AND device_name = ?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setTimestamp(1, sqlStart);
+      statement.setString(2, device_name);
+      int result = statement.executeUpdate();
+      success = (result > 0);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return success;
+  }
+
+  public boolean markAsFaulty(Date start, String device_name) {
+    boolean success = false;
+
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+
+    String sql = "UPDATE booking SET service = 'Faulty' WHERE start = ? AND device_name = ?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setTimestamp(1, sqlStart);
       statement.setString(2, device_name);

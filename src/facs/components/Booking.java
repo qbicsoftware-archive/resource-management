@@ -29,13 +29,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.Action;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -68,6 +73,9 @@ import com.vaadin.ui.components.calendar.event.CalendarEvent;
 import com.vaadin.ui.components.calendar.event.EditableCalendarEvent;
 import com.vaadin.ui.components.calendar.handler.BasicEventMoveHandler;
 import com.vaadin.ui.components.calendar.handler.BasicEventResizeHandler;
+import com.vaadin.ui.renderers.ButtonRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer;
+import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
@@ -117,10 +125,10 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160419");
+    versionLabel.setValue("Version 0.1.160622");
 
-    showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
-        + bookingModel.userName() + "!", "");
+    // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
+    // + bookingModel.userName() + "!", "");
 
     Date dNow = new Date();
     SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
@@ -231,6 +239,7 @@ public class Booking extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         submit(bookingModel.getLDAP(), getCurrentDevice());
         newEvents.clear();
+        refreshDataSources();
       }
     });
 
@@ -312,15 +321,80 @@ public class Booking extends CustomComponent {
     // System.out.println(bookingModel.getLDAP());
 
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
+    gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1263377339178640406L;
+
+      @Override
+      public String getValue(Item item, Object itemId, Object propertyId) {
+        // return FontAwesome.TRASH_O.getHtml(); // The caption
+        return "Trash"; // The caption
+
+      }
+
+      @Override
+      public Class<String> getType() {
+        return String.class;
+      }
+    });
+
+    /*
+     * 
+     * try {
+     * 
+     * FreeformQuery query = new FreeformQuery(
+     * "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE deleted IS NULL AND booking.user_ldap ='"
+     * + bookingModel.getLDAP() + "';", DBManager.getDatabaseInstanceAlternative(), "booking_id");
+     * SQLContainer container = new SQLContainer(query);
+     * 
+     * // System.out.println("Print Container: " + container.size());
+     * container.setAutoCommit(isEnabled());
+     * 
+     * myBookings = new Grid(container);
+     * 
+     * } catch (Exception e) { e.printStackTrace(); }
+     * 
+     * myBookings.setColumnOrder("booking_id", "confirmation", "device_name", "service", "start",
+     * "end", "kostenstelle", "price", "project");
+     * 
+     * myBookings.removeColumn("user_ldap"); myBookings.removeColumn("timestamp");
+     * myBookings.removeColumn("deleted"); myBookings.removeColumn("user_name");
+     * myBookings.removeColumn("group_id"); myBookings.removeColumn("workgroup_id");
+     * myBookings.removeColumn("email"); myBookings.removeColumn("phone");
+     * myBookings.removeColumn("admin_panel"); myBookings.removeColumn("user_id");
+     * 
+     * myBookings.getColumn("booking_id").setHeaderCaption("Booking ID");
+     */
 
     myBookings = new Grid(gpc);
     // Create a grid
     myBookings.setStyleName("my-style");
     myBookings.setWidth("100%");
     myBookings.setSelectionMode(SelectionMode.SINGLE);
-    myBookings.setEditorEnabled(true);
+    myBookings.setEditorEnabled(false);
+
+    myBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
+        "username", "phone", "price");
+    // System.out.println(myBookings.getColumns());
     setRenderers(myBookings);
     devicesLayout.addComponent(myBookings);
+
+    myBookings.getColumn("delete").setRenderer(
+        new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = 302628105070456680L;
+
+          @Override
+          public void click(RendererClickEvent event) {
+            purgeBooking((BookingBean) event.getItemId());
+
+          }
+        }));
+
 
     // TODO filtering
     // HeaderRow filterRow = devicesGrid.prependHeaderRow();
@@ -381,6 +455,18 @@ public class Booking extends CustomComponent {
     notify.setIcon(FontAwesome.SMILE_O);
     notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     notify.show(Page.getCurrent());
+  }
+
+  protected void purgeBooking(BookingBean db) {
+    boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);
+    if (purged) {
+      myBookings.getContainerDataSource().removeItem(db);
+    } else {
+      // TODO log failed operation
+      showErrorNotification(
+          "Jeez! It's not fair!",
+          "For some reason we couldn't PURGE this booking. Maybe it's already restored or already purged from the database.");
+    }
   }
 
 
@@ -709,6 +795,9 @@ public class Booking extends CustomComponent {
 
   class MyEventHandler {
 
+    final String MESSAGE_24_HOURS_LIMIT = "o_O 24 Hours Limit Counts!";
+    final String MESSAGE_24_HOURS_LIMIT_DESCRIPTION =
+        "It's not possible to delete this booking since it's already in the last 24 hours limit, please try to contact your facility operator!";
     final String MESSAGE_IN_THE_PAST_TITLE = "o_O we can't turn back the time!";
     final String MESSAGE_IN_THE_PAST_DESCRIPTION =
         "Booking failed because you selected a time frame in the past. Please select current or future dates for booking and try again!";
@@ -717,7 +806,7 @@ public class Booking extends CustomComponent {
         "Booking failed because you selected an occupied time frame. Please select a new but 'free' time frame and try again!";
     final String MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE = "Hands off, not yours.";
     final String MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION =
-        "Action cancelled because you tried to change someone else's booking. You can only rebook/delete your own bookings.";
+        "Action cancelled because you tried to change someone else's booking. You can only mark/rebook/delete your own bookings.";
     final String MESSAGE_NOTHING_TO_DELETE_TITLE = "There is no spoon.";
     final String MESSAGE_NOTHING_TO_DELETE_DESCRIPTION =
         "Action cancelled because you tried to delete a nonexisting booking. Do not try and bend the spoon. That's impossible.";
@@ -783,7 +872,9 @@ public class Booking extends CustomComponent {
     }
 
     Action addEventAction = new Action("Create Booking");
-    Action deleteEventAction = new Action("Delete Booking");
+    Action deleteEventAction = new Action("Delete this booking");
+    Action sendEventAction = new Action("Send an e-mail");
+    Action faultyEventAction = new Action("Mark booking as 'faulty'");
 
     // Action editEventAction = new Action("Edit Booking");
 
@@ -809,7 +900,7 @@ public class Booking extends CustomComponent {
       if (events.size() == 0)
         return new Action[] {addEventAction};
       else
-        return new Action[] {deleteEventAction};
+        return new Action[] {deleteEventAction, sendEventAction, faultyEventAction};
       // return new Action[] {addEventAction, deleteEventAction, editEventAction};
     }
 
@@ -834,11 +925,20 @@ public class Booking extends CustomComponent {
 
       } else if (action == deleteEventAction) {
         // Check if the action was clicked on top of an event
+
+        Date serverTime = new WebBrowser().getCurrentDate();
+        long localTime = System.currentTimeMillis();
+        long eventTime = ((CalendarEvent) target).getStart().getTime();
+        long twentyFourHoursLimit = 86400000;
+
         if (target instanceof CalendarEvent) {
           if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
-            removeEvent((CalendarEvent) target);
-            db.removeBooking(((CalendarEvent) target).getStart(),
-                (String) selectedDevice.getValue());
+            if (eventTime - localTime > twentyFourHoursLimit) {
+              removeEvent((CalendarEvent) target);
+              db.removeBooking(((CalendarEvent) target).getStart(),
+                  (String) selectedDevice.getValue());
+            } else
+              showErrorNotification(MESSAGE_24_HOURS_LIMIT, MESSAGE_24_HOURS_LIMIT_DESCRIPTION);
             // TODO: ask for confirmation
           } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
             removeEvent((CalendarEvent) target);
@@ -852,6 +952,28 @@ public class Booking extends CustomComponent {
         } else
           showErrorNotification(MESSAGE_NOTHING_TO_DELETE_TITLE,
               MESSAGE_NOTHING_TO_DELETE_DESCRIPTION);
+      } else if (action == sendEventAction) {
+
+        Resource res =
+            new ExternalResource("mailto:"
+                + db.getEmailbyUserName(((CalendarEvent) target).getCaption()));
+
+        // if subject line is necessary replace the lines above with this
+        // new ExternalResource("mailto:"
+        // + db.getEmailbyUserName(((CalendarEvent)
+        // target).getCaption())+"?subject=your Flow Cytometry booking");
+
+        Page.getCurrent().open(((ExternalResource) res).getURL(), null);
+
+      } else if (action == faultyEventAction) {
+        if (target instanceof CalendarEvent) {
+          if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
+            db.markAsFaulty(((CalendarEvent) target).getStart(), (String) selectedDevice.getValue());
+          } else {
+            showErrorNotification(MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE,
+                MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION);
+          }
+        }
       }
     }
   }

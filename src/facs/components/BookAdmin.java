@@ -29,6 +29,7 @@ import java.util.Map;
 
 import com.liferay.portal.model.User;
 import com.vaadin.data.Item;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.MethodProperty;
@@ -218,6 +219,11 @@ public class BookAdmin extends CustomComponent {
 
     bookAdmin.addSelectedTabChangeListener(new SelectedTabChangeListener() {
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 8987818794404251063L;
+
       @Override
       public void selectedTabChange(SelectedTabChangeEvent event) {
         userDevice.select(bookAdmin.getSelectedTab().getCaption());
@@ -278,6 +284,11 @@ public class BookAdmin extends CustomComponent {
 
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(booking);
     gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1263377339178640406L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -306,6 +317,11 @@ public class BookAdmin extends CustomComponent {
     // Render a button that deletes the data row (item)
     gridMap.get(deviceName).getColumn("delete")
         .setRenderer(new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = 3544662150370497152L;
+
           @Override
           public void click(RendererClickEvent event) {
             removeBooking(gridMap.get(deviceName), (BookingBean) event.getItemId());
@@ -344,6 +360,11 @@ public class BookAdmin extends CustomComponent {
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(booking);
 
     gpc.addGeneratedProperty("restore", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 4082425701384202280L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -359,6 +380,11 @@ public class BookAdmin extends CustomComponent {
 
 
     gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1307493624895857513L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -396,14 +422,58 @@ public class BookAdmin extends CustomComponent {
 
     devicesGridTrash.getColumn("delete").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = 302628105070456680L;
+
           @Override
           public void click(RendererClickEvent event) {
             purgeBooking((BookingBean) event.getItemId());
+
+            FieldGroup fieldGroup = devicesGridTrash.getEditorFieldGroup();
+            fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
+              /**
+               * 
+               */
+              private static final long serialVersionUID = 3799806709907688919L;
+
+
+
+              @Override
+              public void preCommit(FieldGroup.CommitEvent commitEvent)
+                  throws FieldGroup.CommitException {
+
+              }
+
+              @Override
+              public void postCommit(FieldGroup.CommitEvent commitEvent)
+                  throws FieldGroup.CommitException {
+
+                Notification(
+                    "Successfully Updated",
+                    "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
+                    "success");
+
+                refreshGrid();
+              }
+
+              private void refreshGrid() {
+                getDeletedBookings();
+              }
+
+            });
+
           }
         }));
 
     devicesGridTrash.getColumn("restore").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = -9104571186503913834L;
+
           @Override
           public void click(RendererClickEvent event) {
             restoreBooking((BookingBean) event.getItemId());
@@ -442,6 +512,11 @@ public class BookAdmin extends CustomComponent {
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(booking);
 
     gpc.addGeneratedProperty("confirm", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -18835252803342382L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -456,6 +531,11 @@ public class BookAdmin extends CustomComponent {
     });
 
     gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 3815956364697828683L;
+
       @Override
       public String getValue(Item item, Object itemId, Object propertyId) {
         // return FontAwesome.TRASH_O.getHtml(); // The caption
@@ -484,6 +564,11 @@ public class BookAdmin extends CustomComponent {
     // Render a button that deletes the data row (item)
     devicesGridConfirm.getColumn("delete").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = -5479714386381863679L;
+
           @Override
           public void click(RendererClickEvent event) {
             denyBooking((BookingBean) event.getItemId());
@@ -492,6 +577,11 @@ public class BookAdmin extends CustomComponent {
 
     devicesGridConfirm.getColumn("confirm").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
+          /**
+           * 
+           */
+          private static final long serialVersionUID = 7944939118917004114L;
+
           @Override
           public void click(RendererClickEvent event) {
             confirmBooking((BookingBean) event.getItemId());
@@ -648,7 +738,31 @@ public class BookAdmin extends CustomComponent {
     notify.show(Page.getCurrent());
   }
 
+  private void Notification(String title, String description, String type) {
+    Notification notify = new Notification(title, description);
+    notify.setPosition(Position.TOP_CENTER);
+    if (type.equals("error")) {
+      notify.setDelayMsec(16000);
+      notify.setIcon(FontAwesome.FROWN_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else if (type.equals("success")) {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.SMILE_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.MEH_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    }
+    notify.show(Page.getCurrent());
+  }
+
   public class EuroConverter extends StringToBigDecimalConverter {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2330030712464256062L;
+
     @Override
     public BigDecimal convertToModel(String value, Class<? extends BigDecimal> targetType,
         Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {

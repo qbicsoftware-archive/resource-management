@@ -16,6 +16,12 @@
  *******************************************************************************/
 package facs.db;
 
+import java.sql.SQLException;
+
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
+import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
+
+
 public class DBManager {
 
   // local testing
@@ -47,6 +53,15 @@ public class DBManager {
     // System.out.println("DBManager: ON");
     Database.Instance.init(username, password, jdbcUrl);
     return Database.Instance;
+  }
+
+  public static JDBCConnectionPool getDatabaseInstanceAlternative() throws SQLException {
+
+    JDBCConnectionPool connectionPool =
+        new SimpleJDBCConnectionPool("com.mysql.jdbc.Driver", "jdbc:mysql://" + hostname + ":"
+            + port + "/" + sql_database, username, password, 2, 5);
+    return connectionPool;
+
   }
 
 }
