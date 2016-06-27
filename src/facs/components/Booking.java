@@ -102,7 +102,9 @@ public class Booking extends CustomComponent {
   private Date referenceDate;
   // private NativeSelect selectedProject;
   private NativeSelect selectedService;
-  private Grid myBookings;
+  private Grid upcomingBookings;
+  private Grid next24HoursBookings;
+  private Grid pastBookings;
 
 
   private static Database db;
@@ -125,7 +127,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160622");
+    versionLabel.setValue("Version 0.1.160627");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -287,7 +289,9 @@ public class Booking extends CustomComponent {
 
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
     booking.addTab(book).setCaption("Calendar");
-    booking.addTab(myBookings()).setCaption("My Bookings");;
+    booking.addTab(myNext24HoursBookings()).setCaption("Next 24 Hours");
+    booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
+    booking.addTab(myPastBookings()).setCaption("Past Bookings");
     setCompositionRoot(booking);
 
   }
@@ -308,7 +312,7 @@ public class Booking extends CustomComponent {
     cal.addComponent(bookMap.get(getCurrentDevice()));
   }
 
-  private Component myBookings() {
+  private Component myNext24HoursBookings() {
     VerticalLayout devicesLayout = new VerticalLayout();
     // devicesLayout.setCaption("My Bookings");
     // there will now be space around the test component
@@ -317,7 +321,75 @@ public class Booking extends CustomComponent {
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
 
-    BeanItemContainer<BookingBean> users = getBookings(bookingModel.getLDAP());
+    Date serverTime = new WebBrowser().getCurrentDate();
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+
+    BeanItemContainer<BookingBean> users =
+        getMyNext24HoursBookings(bookingModel.getLDAP(), serverTime, nextDayTime);
+    // System.out.println(bookingModel.getLDAP());
+
+    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
+
+    next24HoursBookings = new Grid(gpc);
+    // Create a grid
+    next24HoursBookings.setStyleName("my-style");
+    next24HoursBookings.setWidth("100%");
+    next24HoursBookings.setSelectionMode(SelectionMode.SINGLE);
+    next24HoursBookings.setEditorEnabled(false);
+
+    next24HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
+        "end", "username", "phone", "price");
+    setRenderers(next24HoursBookings);
+    devicesLayout.addComponent(next24HoursBookings);
+
+    return devicesLayout;
+  }
+
+  private Component myPastBookings() {
+    VerticalLayout devicesLayout = new VerticalLayout();
+    // devicesLayout.setCaption("My Bookings");
+    // there will now be space around the test component
+    // components added to the test component will now not stick together but have space between
+    // them
+    devicesLayout.setMargin(true);
+    devicesLayout.setSpacing(true);
+
+    Date serverTime = new WebBrowser().getCurrentDate();
+
+    BeanItemContainer<BookingBean> users = getMyPastBookings(bookingModel.getLDAP(), serverTime);
+    // System.out.println(bookingModel.getLDAP());
+
+    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
+
+    pastBookings = new Grid(gpc);
+    // Create a grid
+    pastBookings.setStyleName("my-style");
+    pastBookings.setWidth("100%");
+    pastBookings.setSelectionMode(SelectionMode.SINGLE);
+    pastBookings.setEditorEnabled(false);
+
+    pastBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
+        "username", "phone", "price");
+    setRenderers(pastBookings);
+    devicesLayout.addComponent(pastBookings);
+
+    return devicesLayout;
+  }
+
+  private Component myUpcomingBookings() {
+    VerticalLayout devicesLayout = new VerticalLayout();
+    // devicesLayout.setCaption("My Bookings");
+    // there will now be space around the test component
+    // components added to the test component will now not stick together but have space between
+    // them
+    devicesLayout.setMargin(true);
+    devicesLayout.setSpacing(true);
+
+    Date serverTime = new WebBrowser().getCurrentDate();
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+
+    BeanItemContainer<BookingBean> users =
+        getMyUpcomingBookings(bookingModel.getLDAP(), nextDayTime);
     // System.out.println(bookingModel.getLDAP());
 
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
@@ -368,25 +440,26 @@ public class Booking extends CustomComponent {
      * myBookings.getColumn("booking_id").setHeaderCaption("Booking ID");
      */
 
-    myBookings = new Grid(gpc);
+    upcomingBookings = new Grid(gpc);
     // Create a grid
-    myBookings.setStyleName("my-style");
-    myBookings.setWidth("100%");
-    myBookings.setSelectionMode(SelectionMode.SINGLE);
-    myBookings.setEditorEnabled(false);
+    upcomingBookings.setStyleName("my-style");
+    upcomingBookings.setWidth("100%");
+    upcomingBookings.setSelectionMode(SelectionMode.SINGLE);
+    upcomingBookings.setEditorEnabled(false);
 
-    myBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
+    upcomingBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
         "username", "phone", "price");
     // System.out.println(myBookings.getColumns());
-    setRenderers(myBookings);
-    devicesLayout.addComponent(myBookings);
+    setRenderers(upcomingBookings);
+    devicesLayout.addComponent(upcomingBookings);
 
-    myBookings.getColumn("delete").setRenderer(
+    upcomingBookings.getColumn("delete").setRenderer(
         new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
           /**
            * 
            */
           private static final long serialVersionUID = 302628105070456680L;
+
 
           @Override
           public void click(RendererClickEvent event) {
@@ -406,6 +479,34 @@ public class Booking extends CustomComponent {
     BeanItemContainer<BookingBean> bookingList =
         new BeanItemContainer<BookingBean>(BookingBean.class);
     List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyBookingsGrid(LDAP);
+    assert bookings != null;
+    bookingList.addAll(bookings);
+    return bookingList;
+  }
+
+  private BeanItemContainer<BookingBean> getMyNext24HoursBookings(String LDAP, Date start, Date end) {
+    BeanItemContainer<BookingBean> bookingList =
+        new BeanItemContainer<BookingBean>(BookingBean.class);
+    List<BookingBean> bookings =
+        DBManager.getDatabaseInstance().getMyNext24HoursBookings(LDAP, start, end);
+    assert bookings != null;
+    bookingList.addAll(bookings);
+    return bookingList;
+  }
+
+  private BeanItemContainer<BookingBean> getMyUpcomingBookings(String LDAP, Date start) {
+    BeanItemContainer<BookingBean> bookingList =
+        new BeanItemContainer<BookingBean>(BookingBean.class);
+    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyUpcomingBookings(LDAP, start);
+    assert bookings != null;
+    bookingList.addAll(bookings);
+    return bookingList;
+  }
+
+  private BeanItemContainer<BookingBean> getMyPastBookings(String LDAP, Date start) {
+    BeanItemContainer<BookingBean> bookingList =
+        new BeanItemContainer<BookingBean>(BookingBean.class);
+    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyPastBookings(LDAP, start);
     assert bookings != null;
     bookingList.addAll(bookings);
     return bookingList;
@@ -460,7 +561,7 @@ public class Booking extends CustomComponent {
   protected void purgeBooking(BookingBean db) {
     boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);
     if (purged) {
-      myBookings.getContainerDataSource().removeItem(db);
+      upcomingBookings.getContainerDataSource().removeItem(db);
     } else {
       // TODO log failed operation
       showErrorNotification(
@@ -926,7 +1027,6 @@ public class Booking extends CustomComponent {
       } else if (action == deleteEventAction) {
         // Check if the action was clicked on top of an event
 
-        Date serverTime = new WebBrowser().getCurrentDate();
         long localTime = System.currentTimeMillis();
         long eventTime = ((CalendarEvent) target).getStart().getTime();
         long twentyFourHoursLimit = 86400000;
@@ -937,6 +1037,11 @@ public class Booking extends CustomComponent {
               removeEvent((CalendarEvent) target);
               db.removeBooking(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
+            } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
+              removeEvent((CalendarEvent) target);
+              db.removeBooking(((CalendarEvent) target).getStart(),
+                  (String) selectedDevice.getValue());
+              // TODO: ask for confirmation
             } else
               showErrorNotification(MESSAGE_24_HOURS_LIMIT, MESSAGE_24_HOURS_LIMIT_DESCRIPTION);
             // TODO: ask for confirmation

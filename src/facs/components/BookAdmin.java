@@ -429,6 +429,7 @@ public class BookAdmin extends CustomComponent {
 
           @Override
           public void click(RendererClickEvent event) {
+
             purgeBooking((BookingBean) event.getItemId());
 
             FieldGroup fieldGroup = devicesGridTrash.getEditorFieldGroup();
@@ -670,7 +671,6 @@ public class BookAdmin extends CustomComponent {
     MethodProperty<String> p = (MethodProperty<String>) ((Item) item).getItemProperty("stock");
     p.fireValueChange();
   }
-
 
   protected void purgeBooking(BookingBean db) {
     boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);

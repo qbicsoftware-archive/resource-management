@@ -91,6 +91,7 @@ public class Statistics extends CustomComponent {
   Button downloadInvoice = new Button("Download Invoice");
 
   private GeneratedPropertyContainer gpcontainer;
+  private GeneratedPropertyContainer mpc;
 
   // private GridLayout gridLayout = new GridLayout(6, 6);
 
@@ -426,6 +427,7 @@ public class Statistics extends CustomComponent {
 
 
     IndexedContainer mcontainer = getEmptyContainer();
+
     GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
 
     VerticalLayout matchedLayout = new VerticalLayout();
@@ -433,20 +435,22 @@ public class Statistics extends CustomComponent {
     matchedGrid = new Grid(mpc);
 
     setRenderers(matchedGrid);
+    fillMatchedRows(matchedGrid);
 
     // compute total costs
     float totalCosts = 0.0f;
-    for (Object itemId : mcontainer.getItemIds())
+    for (Object itemId : mpc.getItemIds())
       totalCosts +=
-          ((Number) mcontainer.getContainerProperty(itemId, costCaption).getValue()).floatValue();
+          ((Number) mpc.getContainerProperty(itemId, costCaption).getValue()).floatValue();
 
     // compute total time in milliseconds
     long total = 0;
-    for (Object itemId : mcontainer.getItemIds()) {
-      long s = ((Date) mcontainer.getContainerProperty(itemId, startCaption).getValue()).getTime();
-      long e = ((Date) mcontainer.getContainerProperty(itemId, endCaption).getValue()).getTime();
+    for (Object itemId : mpc.getItemIds()) {
+      long s = ((Date) mpc.getContainerProperty(itemId, startCaption).getValue()).getTime();
+      long e = ((Date) mpc.getContainerProperty(itemId, endCaption).getValue()).getTime();
       total += e - s;
     }
+
 
     // set footer to contain total cost and time in hours:minutes
     FooterRow footer = matchedGrid.appendFooterRow();
@@ -463,8 +467,6 @@ public class Statistics extends CustomComponent {
 
     matchedLayout.setMargin(true);
     matchedLayout.setSpacing(true);
-
-    fillMatchedRows(matchedGrid);
 
     // devicesGrid.setWidth("100%");
     matchedGrid.setSizeFull();
@@ -487,8 +489,7 @@ public class Statistics extends CustomComponent {
         // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
         downloadInvoiceMatched.setEnabled(false);
         ReceiverPI =
-            (String) gpcontainer.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption)
-                .getValue();
+            (String) mpc.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption).getValue();
         createInvoiceMatched.setEnabled(true);
       }
     });
@@ -546,18 +547,17 @@ public class Statistics extends CustomComponent {
               billing.setProjectNumber("Keine project nummer verfügbar.");
 
             float cost =
-                ((Number) mcontainer
-                    .getContainerProperty(matchedGrid.getSelectedRow(), costCaption).getValue())
-                    .floatValue();
+                ((Number) mpc.getContainerProperty(matchedGrid.getSelectedRow(), costCaption)
+                    .getValue()).floatValue();
             long s =
-                ((Date) mcontainer.getContainerProperty(matchedGrid.getSelectedRow(), startCaption)
+                ((Date) mpc.getContainerProperty(matchedGrid.getSelectedRow(), startCaption)
                     .getValue()).getTime();
             long e =
-                ((Date) mcontainer.getContainerProperty(matchedGrid.getSelectedRow(), endCaption)
+                ((Date) mpc.getContainerProperty(matchedGrid.getSelectedRow(), endCaption)
                     .getValue()).getTime();
             long timeFrame = e - s;
             Date start =
-                ((Date) mcontainer.getContainerProperty(matchedGrid.getSelectedRow(), startCaption)
+                ((Date) mpc.getContainerProperty(matchedGrid.getSelectedRow(), startCaption)
                     .getValue());
             SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
             String date = ft.format(start);
@@ -567,12 +567,12 @@ public class Statistics extends CustomComponent {
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
             entries.add(billing.new CostEntry(date, time_frame, description, cost));
             billing.setCostEntries(entries);
+
             float totalCosts = 0.0f;
 
             totalCosts =
-                ((Number) mcontainer
-                    .getContainerProperty(matchedGrid.getSelectedRow(), costCaption).getValue())
-                    .floatValue();
+                ((Number) mpc.getContainerProperty(matchedGrid.getSelectedRow(), costCaption)
+                    .getValue()).floatValue();
 
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
 
@@ -679,7 +679,7 @@ public class Statistics extends CustomComponent {
         institute = user.getInstitute();
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, cost,
+      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, mobean.getCost(),
           mobean.getUserFullName(), institute);
     }
 

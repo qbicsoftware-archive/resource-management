@@ -42,7 +42,7 @@ public class MachineOccupationBean implements Serializable {
   private String serialno;
   private String custom;
   private String deviceName;
-  private Float cost;
+  private float cost;
   private boolean corrupted;
 
   public MachineOccupationBean() {
@@ -68,7 +68,7 @@ public class MachineOccupationBean implements Serializable {
     cytometer = info[11];
     serialno = info[12];
     custom = info[13];
-    cost = (float) -1;
+    cost = -1;
     corrupted = false;
   }
 
@@ -76,6 +76,10 @@ public class MachineOccupationBean implements Serializable {
 
   public void setCost(float cost) {
     this.cost = cost;
+  }
+
+  public float getCost() {
+    return cost;
   }
 
   public String getDeviceName() {

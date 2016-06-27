@@ -892,6 +892,86 @@ public enum Database {
     return bookings;
   }
 
+  public java.util.List<BookingBean> getMyNext24HoursBookings(String uuid, Date start, Date end) {
+    ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
+
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+    java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
+
+    String sql =
+        "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE deleted IS NULL AND booking.user_ldap = ? AND booking.start > ? AND booking.start <= ?";
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, uuid);
+      statement.setTimestamp(2, sqlStart);
+      statement.setTimestamp(3, sqlEnd);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("kostenstelle"), rs
+            .getString("phone"), rs.getString("device_name"), rs.getTimestamp("start"), rs
+            .getTimestamp("end"), rs.getString("service"), rs.getDouble("price"), rs
+            .getBoolean("confirmation")));
+      }
+      conn.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return bookings;
+  }
+
+  public java.util.List<BookingBean> getMyUpcomingBookings(String uuid, Date start) {
+    ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
+
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+
+    String sql =
+        "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE deleted IS NULL AND booking.user_ldap = ? AND booking.start > ?";
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, uuid);
+      statement.setTimestamp(2, sqlStart);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("kostenstelle"), rs
+            .getString("phone"), rs.getString("device_name"), rs.getTimestamp("start"), rs
+            .getTimestamp("end"), rs.getString("service"), rs.getDouble("price"), rs
+            .getBoolean("confirmation")));
+      }
+      conn.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return bookings;
+  }
+
+  public java.util.List<BookingBean> getMyPastBookings(String uuid, Date start) {
+    ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
+
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+
+    String sql =
+        "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE deleted IS NULL AND booking.user_ldap = ? AND booking.start <= ?";
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, uuid);
+      statement.setTimestamp(2, sqlStart);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("kostenstelle"), rs
+            .getString("phone"), rs.getString("device_name"), rs.getTimestamp("start"), rs
+            .getTimestamp("end"), rs.getString("service"), rs.getDouble("price"), rs
+            .getBoolean("confirmation")));
+      }
+      conn.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return bookings;
+  }
+
   public ArrayList<CalendarEvent> getAllMyBookings(String uuid, String device_name) {
     ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
     // System.out.println("Database.java 192 getAllBookings: ");
@@ -1966,7 +2046,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocks() {
 
     String sql =
-        "SELECT logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
+        "SELECT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -1974,6 +2054,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("logs.device_id"));
         m.setDeviceName(rs.getString("logs.device_name"));
         m.setUserFullName(rs.getString("user.user_name"));
         m.setStart(rs.getTimestamp("logs.start"));
