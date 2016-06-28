@@ -181,6 +181,29 @@ public enum Database {
     return userrole;
   }
 
+
+  public String getUserRoleByUserId(String uuid) {
+    String userrole = "";
+
+    String sql =
+        "SELECT group_name FROM groups INNER JOIN user ON user.group_id = groups.group_id WHERE user_id=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, uuid);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        userrole = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return userrole;
+  }
+
   public String getUserRoleByLDAPId(String uuid) {
     String userrole = "V";
 
@@ -285,6 +308,34 @@ public enum Database {
     }
 
     return userrole;
+  }
+
+
+  /**
+   * Returns the user name by querying the user ID
+   * 
+   * @param uuid
+   * @return
+   */
+  public boolean hasAdminPanelAccess(String user_id) {
+    boolean user_access = false;
+
+    String sql = "SELECT admin_panel FROM user WHERE user_id = ?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, user_id);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        user_access = rs.getBoolean(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return user_access;
   }
 
   /**
@@ -405,11 +456,70 @@ public enum Database {
    * @param device_id
    * @return
    */
+  public String getUserWorkgroupByUserId(String user_id) {
+    String workgroup_name = "";
+
+    String sql =
+        "SELECT workgroup_name FROM workgroups INNER JOIN user ON workgroups.workgroup_id = user.workgroup_id WHERE user_id=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, user_id);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        workgroup_name = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return workgroup_name;
+  }
+
+  /**
+   * Returns the specified user's Group Description by using user's LDAP ID
+   * 
+   * @param uuid
+   * @param device_id
+   * @return
+   */
   public String getUserGroupDescriptionByLDAPId(String uuid, String device_id) {
     String userrole = "V";
 
     String sql =
         "SELECT role_description FROM roles INNER JOIN user_roles ON roles.role_id = user_roles.role_id INNER JOIN user ON user_roles.user_id = user.user_id WHERE user_ldap=? AND device_id=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, uuid);
+      statement.setString(2, device_id);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        userrole = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return userrole;
+  }
+
+  /**
+   * Returns the specified user's Group Description by using user's LDAP ID
+   * 
+   * @param uuid
+   * @param device_id
+   * @return
+   */
+  public String getUserGroupDescriptionByUserID(String uuid, String device_id) {
+    String userrole = "N/A";
+
+    String sql =
+        "SELECT role_description FROM roles INNER JOIN user_roles ON roles.role_id = user_roles.role_id INNER JOIN user ON user_roles.user_id = user.user_id INNER JOIN devices ON user_roles.device_id = devices.device_id WHERE user.user_id=? AND device_name=?";
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -1686,6 +1796,22 @@ public enum Database {
       ResultSet rs = statement.executeQuery(sql);
       while (rs.next()) {
         list.add(rs.getString("role_description"));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return list;
+  }
+
+  public ArrayList<String> getUserWorkgroups() {
+    ArrayList<String> list = new ArrayList<String>();
+    String sql = "SELECT workgroup_name FROM workgroups";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); Statement statement = conn.createStatement()) {
+      ResultSet rs = statement.executeQuery(sql);
+      while (rs.next()) {
+        list.add(rs.getString("workgroup_name"));
       }
     } catch (SQLException e) {
       e.printStackTrace();

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.liferay.portal.model.User;
 import com.vaadin.data.Item;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.MethodProperty;
@@ -34,12 +35,15 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Grid.SingleSelectionModel;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
@@ -53,13 +57,18 @@ public class UserAdmin extends CustomComponent {
   private static final long serialVersionUID = 2183973381935176872L;
   private static final Object propertyId = null;
   // private Grid devicesGrid;
-  private Grid devicesGridConfirm;
-  private Grid devicesGridTrash;
+  // private Grid devicesGridConfirm;
+  // private Grid devicesGridTrash;
   private Grid usersGrid;
-  private Grid newContainerGrid;
+  // private Grid newContainerGrid;
 
   private Map<String, Grid> gridMap = new HashMap<String, Grid>();
   private GridLayout gridLayout = new GridLayout(6, 6);
+
+  private ListSelect userDevice;
+  private ListSelect userGroup;
+  private ListSelect userRole;
+  private ListSelect userWorkgroup;
 
   public UserAdmin(User user) {
 
@@ -74,6 +83,9 @@ public class UserAdmin extends CustomComponent {
             + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
     infoLabel.addStyleName("h4");
 
+    CheckBox isAdmin = new CheckBox("user has admin panel access");
+    isAdmin.setEnabled(false);
+
     String buttonTitle = "Refresh";
     Button refresh = new Button(buttonTitle);
     refresh.setIcon(FontAwesome.REFRESH);
@@ -87,6 +99,49 @@ public class UserAdmin extends CustomComponent {
     // save.setSizeFull();
     // save.setDescription("Click here to save all changes!");
     // save.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+
+
+    userDevice = new ListSelect("Devices");
+    userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
+    userDevice.setRows(6);
+    userDevice.setNullSelectionAllowed(false);
+    userDevice.setSizeFull();
+    userDevice.setImmediate(true);
+    /*
+     * userDevice.addValueChangeListener(e -> Notification.show("Device:",
+     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
+     */
+    userGroup = new ListSelect("User Groups");
+    userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
+    userGroup.setRows(6);
+    userGroup.setNullSelectionAllowed(false);
+    userGroup.setSizeFull();
+    userGroup.setImmediate(true);
+    /*
+     * userGroup.addValueChangeListener(e -> Notification.show("User Group:",
+     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
+     */
+    userRole = new ListSelect("User Roles");
+    userRole.addItems(DBManager.getDatabaseInstance().getUserRoles());
+    userRole.addItem("N/A");
+    userRole.setRows(6);
+    userRole.setNullSelectionAllowed(false);
+    userRole.setSizeFull();
+    userRole.setImmediate(true);
+    /*
+     * userRole.addValueChangeListener(e -> Notification.show("User Role:",
+     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
+     */
+    userWorkgroup = new ListSelect("Workgroups");
+    userWorkgroup.addItems(DBManager.getDatabaseInstance().getUserWorkgroups());
+    userWorkgroup.setRows(6);
+    userWorkgroup.setNullSelectionAllowed(false);
+    userWorkgroup.setSizeFull();
+    userWorkgroup.setImmediate(true);
+    /*
+     * userRole.addValueChangeListener(e -> Notification.show("User Role:",
+     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
+     */
 
     Button updateUser = new Button(buttonTitle);
     updateUser.setIcon(FontAwesome.WRENCH);
@@ -152,6 +207,52 @@ public class UserAdmin extends CustomComponent {
 
       });
 
+      usersGrid.addSelectionListener(selectionEvent -> { // Java 8
+            // Get selection from the selection model
+            Object selected =
+                ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+
+            if (selected != null) {
+
+
+              // userDevice.select(bookAdmin.getSelectedTab().getCaption());
+              userWorkgroup.select(DBManager.getDatabaseInstance().getUserWorkgroupByUserId(
+                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                      .toString()));
+              userGroup.select(DBManager.getDatabaseInstance().getUserRoleByUserId(
+                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                      .toString()));
+
+              userDevice.addValueChangeListener(new ValueChangeListener() {
+
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = -8696555155016720475L;
+
+                @Override
+                public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
+                  userRole
+                      .select(DBManager.getDatabaseInstance().getUserGroupDescriptionByUserID(
+                          usersGrid.getContainerDataSource().getItem(selected)
+                              .getItemProperty("user_id").toString(),
+                          userDevice.getValue().toString()));
+
+                }
+              });
+
+              isAdmin.setValue(DBManager.getDatabaseInstance().hasAdminPanelAccess(
+                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                      .toString()));
+
+
+              Notification
+                  .show("Selected "
+                      + usersGrid.getContainerDataSource().getItem(selected)
+                          .getItemProperty("user_id"));
+            } else
+              Notification.show("Nothing selected");
+          });
 
     } catch (Exception e) {
       // TODO Auto-generated catch block
@@ -161,8 +262,6 @@ public class UserAdmin extends CustomComponent {
           "error");
       e.printStackTrace();
     }
-
-
 
     /*
      * // only admins are allowed to see the admin panel ;) if (!DBManager.getDatabaseInstance()
@@ -193,9 +292,17 @@ public class UserAdmin extends CustomComponent {
     // gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
     gridLayout.addComponent(userAdmin, 0, 1, 5, 1);
     gridLayout.addComponent(refresh, 0, 2);
+    gridLayout.addComponent(isAdmin, 5, 2);
     // gridLayout.addComponent(save);
 
+    gridLayout.addComponent(userWorkgroup, 0, 4);
+    gridLayout.addComponent(userDevice, 1, 4);
+    gridLayout.addComponent(userRole, 2, 4, 4, 4);
+    gridLayout.addComponent(userGroup, 5, 4);
+
     // gridLayout.addComponent(newContainerGrid, 1, 4);
+
+
 
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
@@ -214,6 +321,8 @@ public class UserAdmin extends CustomComponent {
     // them
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
+
+
 
     // BeanItemContainer<UserBean> users = getUsers();
 
@@ -237,11 +346,11 @@ public class UserAdmin extends CustomComponent {
 
     usersGrid.removeColumn("workgroup_id");
     usersGrid.removeColumn("group_id");
+    usersGrid.removeColumn("admin_panel");
 
     usersGrid.getColumn("user_id").setHeaderCaption("ID");
     usersGrid.getColumn("user_ldap").setHeaderCaption("Username");
     usersGrid.getColumn("user_name").setHeaderCaption("Name");
-    usersGrid.getColumn("admin_panel").setHeaderCaption("Admin Access");
 
     usersGrid.getColumn("user_ldap").setEditable(false);
 
