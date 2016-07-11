@@ -183,7 +183,7 @@ public enum Database {
 
 
   public String getUserRoleByUserId(String uuid) {
-    String userrole = "";
+    String userrole = "N/A";
 
     String sql =
         "SELECT group_name FROM groups INNER JOIN user ON user.group_id = groups.group_id WHERE user_id=?";

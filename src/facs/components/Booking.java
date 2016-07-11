@@ -98,13 +98,15 @@ public class Booking extends CustomComponent {
   private Map<String, Calendar> bookMap = new HashMap<String, Calendar>();
   private Map<String, Set<CalendarEvent>> newEvents = new HashMap<String, Set<CalendarEvent>>();
   private int eventCounter = 0;
-  // private NativeSelect selectedKostenStelle;
+  private NativeSelect selectedKostenstelle;
   private Date referenceDate;
   // private NativeSelect selectedProject;
   private NativeSelect selectedService;
   private Grid upcomingBookings;
   private Grid next24HoursBookings;
   private Grid pastBookings;
+
+  private TabSheet booking;
 
 
   private static Database db;
@@ -127,7 +129,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160628");
+    versionLabel.setValue("Version 0.1.160711");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -160,12 +162,17 @@ public class Booking extends CustomComponent {
     selectedService = new NativeSelect("Please select a service:");
     selectedService.setDescription("Please select the service you would like to receive!");
 
+    selectedKostenstelle = new NativeSelect("Please select konstenstelle:");
+    selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
+
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
       private static final long serialVersionUID = 8153818693511960689L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
         versionLabel.setValue(db.getUserRoleDescByLDAPId(bookingModel.getLDAP(), getCurrentDevice()));
+
+        selectedKostenstelle.setVisible(true);
 
         if (bookMap.containsKey(getCurrentDevice())) {
           cal.removeAllComponents();
@@ -269,7 +276,8 @@ public class Booking extends CustomComponent {
 
     // gridLayout.addComponent(selectDeviceLabel,0,1);
     gridLayout.addComponent(selectedDevice, 0, 0);
-    gridLayout.addComponent(selectedService, 0, 1);
+    gridLayout.addComponent(selectedService, 1, 0);
+    // gridLayout.addComponent(selectedKostenstelle, 2, 0);
     selectedService.setVisible(false);
 
     gridLayout.addComponent(cal, 0, 2, 5, 2);
@@ -285,7 +293,7 @@ public class Booking extends CustomComponent {
 
     book.setContent(gridLayout);
 
-    TabSheet booking = new TabSheet();
+    booking = new TabSheet();
 
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
     booking.addTab(book).setCaption("Calendar");
@@ -339,6 +347,7 @@ public class Booking extends CustomComponent {
 
     next24HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
         "end", "username", "phone", "price");
+    next24HoursBookings.getColumn("price").setHeaderCaption("Approx. Price");
     setRenderers(next24HoursBookings);
     devicesLayout.addComponent(next24HoursBookings);
 
@@ -370,6 +379,9 @@ public class Booking extends CustomComponent {
 
     pastBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
         "username", "phone", "price");
+
+    pastBookings.getColumn("price").setHeaderCaption("Approx. Price");
+
     setRenderers(pastBookings);
     devicesLayout.addComponent(pastBookings);
 
@@ -449,6 +461,8 @@ public class Booking extends CustomComponent {
 
     upcomingBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
         "username", "phone", "price");
+    upcomingBookings.getColumn("price").setHeaderCaption("Approx. Price");
+
     // System.out.println(myBookings.getColumns());
     setRenderers(upcomingBookings);
     devicesLayout.addComponent(upcomingBookings);
@@ -464,8 +478,9 @@ public class Booking extends CustomComponent {
           @Override
           public void click(RendererClickEvent event) {
             purgeBooking((BookingBean) event.getItemId());
-
+            refreshDataSources();
           }
+
         }));
 
 
@@ -562,6 +577,9 @@ public class Booking extends CustomComponent {
     boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);
     if (purged) {
       upcomingBookings.getContainerDataSource().removeItem(db);
+      showNotification(
+          "The booking was deleted!",
+          "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.");
     } else {
       // TODO log failed operation
       showErrorNotification(
@@ -572,6 +590,11 @@ public class Booking extends CustomComponent {
 
 
   public void refreshDataSources() {
+    BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
+    setCompositionRoot(new Booking(bookingModel, referenceDate));
+  }
+
+  public void refreshDataSourcesGrid() {
     BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
     setCompositionRoot(new Booking(bookingModel, referenceDate));
   }
@@ -721,14 +744,17 @@ public class Booking extends CustomComponent {
   }
 
   // BASIC users are allowed to see from MON-FRI from 09:00 until 16:59
+
   private Calendar basicCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // 11.07.2016 updated: BASIC users are allowed to see from MON-SUN from 00:00 until 23:59
 
-    cal.setFirstVisibleHourOfDay(9);
-    cal.setLastVisibleHourOfDay(17);
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+
+    // cal.setFirstVisibleHourOfDay(9);
+    // cal.setLastVisibleHourOfDay(17);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -742,7 +768,8 @@ public class Booking extends CustomComponent {
     cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
     cal.setLocale(Locale.GERMANY);
     cal.setWidth("100%");
-    cal.setHeight("100%");
+    // cal.setHeight("100%");
+    cal.setHeight("1000px");
 
     return cal;
   }
@@ -751,11 +778,13 @@ public class Booking extends CustomComponent {
   private Calendar noviceCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // 11.07.2016 updated: NOVICE users are allowed to see from MON-SUN from 00:00 until 23:59
 
-    cal.setFirstVisibleHourOfDay(9);
-    cal.setLastVisibleHourOfDay(17);
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+
+    // cal.setFirstVisibleHourOfDay(9);
+    // cal.setLastVisibleHourOfDay(17);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -769,7 +798,8 @@ public class Booking extends CustomComponent {
     cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
     cal.setLocale(Locale.GERMANY);
     cal.setWidth("100%");
-    cal.setHeight("100%");
+    // cal.setHeight("100%");
+    cal.setHeight("1000px");
 
 
 
@@ -780,8 +810,10 @@ public class Booking extends CustomComponent {
   private Calendar advancedCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // 11.07.2016 updated: ADVANCED users are allowed to see from MON-SUN from 00:00 until 23:59
+
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -917,6 +949,11 @@ public class Booking extends CustomComponent {
     final String MESSAGE_OVERLAP_TITLE = "Pfoom! It's the sound of an overlap!";
     final String MESSAGE_OVERLAP_DESCRIPTION =
         "Unless we have a bug in the system, there is no way to overlap two bookings in the same timeframe. How did this happen now?";
+    final String MESSAGE_ITEM_PURGED = "The booking was deleted!";
+    final String MESSAGE_ITEM_PURGED_DESCRIPTION =
+        "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.";
+    final String MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN =
+        "You have the Admin Power, please use it wisely! - All good, item purged.";
 
     Calendar cal;
     BookingModel bookingModel;
@@ -927,12 +964,26 @@ public class Booking extends CustomComponent {
     }
 
     boolean add(Date start, Date end) {
+
+      Date startX = new Date();
+      startX.setTime(start.getTime() + 1);
+
+      Date endX = new Date();
+      endX.setTime(end.getTime() - 1);
+
       if (start.before(referenceDate)) {
         showErrorNotification(MESSAGE_IN_THE_PAST_TITLE, MESSAGE_IN_THE_PAST_DESCRIPTION);
-      } else if (cal.getEvents(start, end).size() > 0) {
+        // System.out.println("Test: " + start + " End: " + end + " Size: "
+        // + cal.getEvents(start, end).size());
+      } else if (cal.getEvents(startX, endX).size() > 0) {
+        // System.out.println("Test: " + start + " End: " + end + " Size: "
+        // + cal.getEvents(startX, endX).size());
+        // System.out.println("StartX: " + startX + " End: " + endX);
         showErrorNotification(MESSAGE_ALREADY_TAKEN_TITLE, MESSAGE_ALREADY_TAKEN_DESCRIPTION);
       } else {
         addEvent(start, end);
+        // System.out.println("Test: " + start + " End: " + end + " Size: "
+        // + cal.getEvents(start, end).size());
         return true;
       }
       return false;
@@ -1037,10 +1088,12 @@ public class Booking extends CustomComponent {
               removeEvent((CalendarEvent) target);
               db.removeBooking(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
+              showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION);
             } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
               removeEvent((CalendarEvent) target);
               db.removeBooking(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
+              showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
               // TODO: ask for confirmation
             } else
               showErrorNotification(MESSAGE_24_HOURS_LIMIT, MESSAGE_24_HOURS_LIMIT_DESCRIPTION);
@@ -1049,6 +1102,7 @@ public class Booking extends CustomComponent {
             removeEvent((CalendarEvent) target);
             db.removeBooking(((CalendarEvent) target).getStart(),
                 (String) selectedDevice.getValue());
+            showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
             // TODO: ask for confirmation
           } else {
             showErrorNotification(MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE,

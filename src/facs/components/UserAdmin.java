@@ -113,6 +113,7 @@ public class UserAdmin extends CustomComponent {
      */
     userGroup = new ListSelect("User Groups");
     userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
+    userGroup.addItem("N/A");
     userGroup.setRows(6);
     userGroup.setNullSelectionAllowed(false);
     userGroup.setSizeFull();
@@ -352,7 +353,7 @@ public class UserAdmin extends CustomComponent {
     usersGrid.getColumn("user_ldap").setHeaderCaption("Username");
     usersGrid.getColumn("user_name").setHeaderCaption("Name");
 
-    usersGrid.getColumn("user_ldap").setEditable(false);
+    // usersGrid.getColumn("user_ldap").setEditable(false);
 
     usersGrid.setEditorEnabled(true);
 
