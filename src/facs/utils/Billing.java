@@ -59,10 +59,10 @@ public class Billing {
   String templateFileName;
 
   // pdflatex path for local development
-  // String pdflatexPath = "/Library/TeX/texbin/pdflatex";
+  String pdflatexPath = "/Library/TeX/texbin/pdflatex";
 
   // pdflatex path for testing and production
-  String pdflatexPath = "pdflatex";
+  // String pdflatexPath = "pdflatex";
 
   Template template;
 

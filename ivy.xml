@@ -47,6 +47,5 @@
 		
 	<!--	<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="1.2.0"/> -->
 		
-		
 	</dependencies>
 </ivy-module>

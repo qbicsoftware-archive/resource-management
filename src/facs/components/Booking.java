@@ -264,6 +264,7 @@ public class Booking extends CustomComponent {
 
       @Override
       public void buttonClick(ClickEvent event) {
+
         refreshDataSources();
 
       }
@@ -277,7 +278,7 @@ public class Booking extends CustomComponent {
     // gridLayout.addComponent(selectDeviceLabel,0,1);
     gridLayout.addComponent(selectedDevice, 0, 0);
     gridLayout.addComponent(selectedService, 1, 0);
-    // gridLayout.addComponent(selectedKostenstelle, 2, 0);
+    gridLayout.addComponent(selectedKostenstelle, 2, 0);
     selectedService.setVisible(false);
 
     gridLayout.addComponent(cal, 0, 2, 5, 2);
@@ -477,8 +478,66 @@ public class Booking extends CustomComponent {
 
           @Override
           public void click(RendererClickEvent event) {
-            purgeBooking((BookingBean) event.getItemId());
-            refreshDataSources();
+
+            try {
+
+              Window cd = new Window("Delete Booking");
+
+              cd.setHeight("200px");
+              cd.setWidth("400px");
+              cd.setResizable(false);
+
+              GridLayout dialogLayout = new GridLayout(3, 3);
+
+              Button okButton = new Button("Yes");
+              okButton.addStyleName(ValoTheme.BUTTON_DANGER);
+              Button cancelButton = new Button("No, I'm actually not sure!");
+              cancelButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+              Label information = new Label("Are you sure you want to trash this item?");
+              information.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+
+              okButton.addClickListener(new Button.ClickListener() {
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = 1778157399909757369L;
+
+                @Override
+                public void buttonClick(ClickEvent okEvent) {
+                  purgeBooking((BookingBean) event.getItemId());
+                  cd.close();
+                  refreshDataSources();
+                  showNotification(
+                      "The booking was deleted!",
+                      "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.");
+                }
+              });
+
+              cancelButton.addClickListener(new Button.ClickListener() {
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = -8957620319158438769L;
+
+                @Override
+                public void buttonClick(ClickEvent okEvent) {
+                  cd.close();
+                }
+              });
+
+              dialogLayout.addComponent(information, 0, 0, 2, 0);
+              dialogLayout.addComponent(okButton, 0, 1);
+              dialogLayout.addComponent(cancelButton, 1, 1);
+              dialogLayout.setMargin(true);
+              dialogLayout.setSpacing(true);
+              cd.setContent(dialogLayout);
+              cd.center();
+              UI.getCurrent().addWindow(cd);
+
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+
           }
 
         }));
@@ -545,6 +604,33 @@ public class Booking extends CustomComponent {
     }
     notify.show(Page.getCurrent());
   }
+
+  /*
+   * public boolean showConfirmDialog(String title, String description) {
+   * 
+   * Boolean confirmed = false;
+   * 
+   * Label Description = new Label(description); Button confirm = new Button("Yes"); Button cancel =
+   * new Button("No");
+   * 
+   * ConfirmDialog x = new ConfirmDialog();
+   * 
+   * ConfirmDialog d = getFactory().create(windowCaption, message, okCaption, cancelCaption);
+   * 
+   * GridLayout dialogLayout = new GridLayout(3, 3);
+   * 
+   * x.setCaption(" " + title);
+   * 
+   * dialogLayout.addComponent(Description, 0, 0); dialogLayout.addComponent(cancel, 1, 1);
+   * dialogLayout.addComponent(confirm, 2, 1);
+   * 
+   * dialogLayout.setSpacing(true); dialogLayout.setMargin(true);
+   * 
+   * x.setIcon(FontAwesome.WARNING); x.setHeight("200px"); x.setWidth("450px");
+   * x.setResizable(false); x.setContent(dialogLayout);
+   * 
+   * }
+   */
 
   private void showErrorNotification(String title, String description) {
     Notification notify = new Notification(title, description);

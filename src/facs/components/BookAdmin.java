@@ -52,7 +52,9 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.SelectedTabChangeEvent;
 import com.vaadin.ui.TabSheet.SelectedTabChangeListener;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
@@ -430,7 +432,70 @@ public class BookAdmin extends CustomComponent {
           @Override
           public void click(RendererClickEvent event) {
 
-            purgeBooking((BookingBean) event.getItemId());
+            try {
+
+              Window cd = new Window("Purge Booking");
+
+              cd.setHeight("200px");
+              cd.setWidth("400px");
+              cd.setResizable(false);
+
+              GridLayout dialogLayout = new GridLayout(3, 3);
+
+              Button okButton = new Button("Yes");
+              okButton.addStyleName(ValoTheme.BUTTON_DANGER);
+              Button cancelButton = new Button("No, I'm actually not sure!");
+              cancelButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+              Label information = new Label("Are you sure you want to purge this item?");
+              information.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+
+              okButton.addClickListener(new Button.ClickListener() {
+
+
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = 3739260172118651857L;
+
+                @Override
+                public void buttonClick(ClickEvent okEvent) {
+                  purgeBooking((BookingBean) event.getItemId());
+                  cd.close();
+                  Notification(
+                      "The booking was deleted!",
+                      "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.",
+                      "");
+                }
+              });
+
+              cancelButton.addClickListener(new Button.ClickListener() {
+
+
+                /**
+                 * 
+                 */
+                private static final long serialVersionUID = -3931200823633220160L;
+
+                @Override
+                public void buttonClick(ClickEvent okEvent) {
+                  cd.close();
+                }
+              });
+
+              dialogLayout.addComponent(information, 0, 0, 2, 0);
+              dialogLayout.addComponent(okButton, 0, 1);
+              dialogLayout.addComponent(cancelButton, 1, 1);
+              dialogLayout.setMargin(true);
+              dialogLayout.setSpacing(true);
+              cd.setContent(dialogLayout);
+              cd.center();
+              UI.getCurrent().addWindow(cd);
+
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+
+
 
             FieldGroup fieldGroup = devicesGridTrash.getEditorFieldGroup();
             fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
