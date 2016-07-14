@@ -461,10 +461,8 @@ public class BookAdmin extends CustomComponent {
                 public void buttonClick(ClickEvent okEvent) {
                   purgeBooking((BookingBean) event.getItemId());
                   cd.close();
-                  Notification(
-                      "The booking was deleted!",
-                      "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.",
-                      "");
+                  Notification("The booking was purged!",
+                      "At the end, you are the admin, you have the power.", "");
                 }
               });
 
