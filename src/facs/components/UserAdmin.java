@@ -86,6 +86,25 @@ public class UserAdmin extends CustomComponent {
     CheckBox isAdmin = new CheckBox("user has admin panel access");
     isAdmin.setEnabled(false);
 
+    String buttonGroupUpdateTitle = "Edit Group";
+    Button updateUserGroup = new Button(buttonGroupUpdateTitle);
+    updateUserGroup.setIcon(FontAwesome.EDIT);
+    updateUserGroup.setSizeFull();
+    updateUserGroup.setDescription("Click here to update the group of the user!");
+
+    String buttonWorkgroupUpdateTitle = "Edit Workgroup";
+    Button updateUserWorkgroup = new Button(buttonWorkgroupUpdateTitle);
+    updateUserWorkgroup.setIcon(FontAwesome.EDIT);
+    updateUserWorkgroup.setSizeFull();
+    updateUserWorkgroup.setDescription("Click here to update the workgroup of the user!");
+
+    String buttonUpdateTitle = "Update (user role & group for device)";
+    Button updateUserRightsAndRoles = new Button(buttonUpdateTitle);
+    updateUserRightsAndRoles.setIcon(FontAwesome.WRENCH);
+    updateUserRightsAndRoles.setSizeFull();
+    updateUserRightsAndRoles
+        .setDescription("Click here to update the user's role and group for a device!");
+
     String buttonTitle = "Refresh";
     Button refresh = new Button(buttonTitle);
     refresh.setIcon(FontAwesome.REFRESH);
@@ -162,6 +181,142 @@ public class UserAdmin extends CustomComponent {
 
       @Override
       public void buttonClick(ClickEvent event) {
+        refreshDataSources();
+      }
+    });
+
+
+    updateUserWorkgroup.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -295434651623561492L;
+
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        try {
+          Object selectedRow =
+              ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+
+          if (selectedRow == null || userWorkgroup.getValue().equals(null)) {
+            Notification(
+                "Something's missing!",
+                "Please make sure that you selected the user and workgroup! Make sure they are highligthed.",
+                "error");
+          } else {
+            DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
+                DBManager.getDatabaseInstance().getUserGroupIDByName(
+                    userWorkgroup.getValue().toString()),
+                DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
+
+            // log changes in 'user_log' table
+            DBManager.getDatabaseInstance().logEverything(
+                LiferayAndVaadinUtils.getUser().getScreenName(), "Admin edited Workgroup");
+
+            Notification(
+                "Successfully Updated",
+                "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
+                "success");
+
+          }
+        } catch (Exception e) {
+          Notification(
+              "Something's missing!",
+              "Please make sure that you selected the user and workgroup! Make sure they are highligthed.",
+              "error");
+        }
+        refreshDataSources();
+      }
+    });
+
+    updateUserGroup.addClickListener(new ClickListener() {
+
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        try {
+          Object selectedRow =
+              ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+
+          if (selectedRow == null || userWorkgroup.getValue().equals(null)) {
+            Notification(
+                "Something's missing!",
+                "Please make sure that you selected the user and group! Make sure they are highligthed.",
+                "error");
+          } else {
+            DBManager.getDatabaseInstance().adminUpdatesUserGroup(
+                DBManager.getDatabaseInstance().getUserGroupIDByName(
+                    userGroup.getValue().toString()),
+                DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
+
+            // log changes in 'user_log' table
+            DBManager.getDatabaseInstance().logEverything(
+                LiferayAndVaadinUtils.getUser().getScreenName(), "Admin edited User Group");
+
+            Notification(
+                "Successfully Updated",
+                "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
+                "success");
+
+          }
+        } catch (Exception e) {
+          Notification(
+              "Something's missing!",
+              "Please make sure that you selected the user and group! Make sure they are highligthed.",
+              "error");
+        }
+        refreshDataSources();
+      }
+    });
+
+    updateUserRightsAndRoles.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -295434651623561492L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        try {
+          Object selectedRow =
+              ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+
+          if (selectedRow == null || userDevice.getValue().equals(null)
+              || userRole.getValue().equals(null)) {
+            Notification(
+                "Something's missing!",
+                "Please make sure that you selected the user, device and role! Each list has to have one highligthed option.",
+                "error");
+          } else {
+            DBManager.getDatabaseInstance()
+                .adminUpdatesUserRoleForDevice(
+                    DBManager.getDatabaseInstance().getUserRoleIDbyDesc(
+                        userRole.getValue().toString()),
+                    DBManager.getDatabaseInstance().getUserIDbyLDAPID(
+                        DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())),
+                    DBManager.getDatabaseInstance().getDeviceIDByName(
+                        userDevice.getValue().toString()));
+
+            // log changes in 'user_log' table
+            DBManager.getDatabaseInstance()
+                .logEverything(LiferayAndVaadinUtils.getUser().getScreenName(),
+                    "Admin edited Device, Role, Group");
+
+            Notification(
+                "Successfully Updated",
+                "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
+                "success");
+
+          }
+        } catch (Exception e) {
+          Notification(
+              "Something's missing!",
+              "Please make sure that you selected the user, device and role! Each list has to have one highligthed option.",
+              "error");
+        }
         refreshDataSources();
       }
     });
@@ -300,15 +455,14 @@ public class UserAdmin extends CustomComponent {
     gridLayout.addComponent(userDevice, 1, 4);
     gridLayout.addComponent(userRole, 2, 4, 4, 4);
     gridLayout.addComponent(userGroup, 5, 4);
-
+    gridLayout.addComponent(updateUserWorkgroup, 0, 5);
+    gridLayout.addComponent(updateUserRightsAndRoles, 1, 5, 4, 5);
+    gridLayout.addComponent(updateUserGroup, 5, 5);
     // gridLayout.addComponent(newContainerGrid, 1, 4);
-
-
 
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
     setCompositionRoot(gridLayout);
-
 
   }
 
@@ -377,9 +531,6 @@ public class UserAdmin extends CustomComponent {
     UserAdmin bookAdmin = new UserAdmin(null);
     setCompositionRoot(bookAdmin);
   }
-
-  // protected void save() {
-  // }
 
 
   private void refresh(BeanItemContainer<BookingBean> item) {

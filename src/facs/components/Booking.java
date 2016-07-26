@@ -32,9 +32,12 @@ import java.util.TimeZone;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.data.util.sqlcontainer.SQLContainer;
+import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.event.Action;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
@@ -129,7 +132,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160714");
+    versionLabel.setValue("Version 0.1.160726");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -301,6 +304,7 @@ public class Booking extends CustomComponent {
     booking.addTab(myNext24HoursBookings()).setCaption("Next 24 Hours");
     booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
     booking.addTab(myPastBookings()).setCaption("Past Bookings");
+    booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
     setCompositionRoot(booking);
 
   }
@@ -385,6 +389,86 @@ public class Booking extends CustomComponent {
 
     setRenderers(pastBookings);
     devicesLayout.addComponent(pastBookings);
+
+    return devicesLayout;
+  }
+
+  private Component myUpcomingBookingsSQLContainer() {
+
+
+    VerticalLayout devicesLayout = new VerticalLayout();
+    // devicesLayout.setCaption("My Bookings");
+    // there will now be space around the test component
+    // components added to the test component will now not stick together but have space between
+    // them
+    devicesLayout.setMargin(true);
+    devicesLayout.setSpacing(true);
+
+    Date serverTime = new WebBrowser().getCurrentDate();
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+
+    try {
+      TableQuery tq = new TableQuery("booking", DBManager.getDatabaseInstanceAlternative());
+      tq.setVersionColumn("OPTLOCK");
+      SQLContainer container = new SQLContainer(tq);
+
+      // System.out.println("Print Container: " + container.size());
+      container.setAutoCommit(isEnabled());
+
+      upcomingBookings = new Grid(container);
+
+      FieldGroup fieldGroup = upcomingBookings.getEditorFieldGroup();
+      fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3799806709907688919L;
+
+
+
+        @Override
+        public void preCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
+
+        }
+
+        @Override
+        public void postCommit(FieldGroup.CommitEvent commitEvent)
+            throws FieldGroup.CommitException {
+
+          Notification(
+              "Successfully Updated",
+              "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
+              "success");
+
+          refreshGrid();
+        }
+
+        private void refreshGrid() {
+          container.refresh();
+        }
+
+      });
+
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      Notification(
+          "Something went wrong!",
+          "Unable to update/connect the database. There may be a connection problem, please check your internet connection settings then try it again.",
+          "error");
+      e.printStackTrace();
+    }
+
+    upcomingBookings.clearSortOrder();
+
+    upcomingBookings.setStyleName("my-style");
+    upcomingBookings.setWidth("100%");
+    upcomingBookings.setSelectionMode(SelectionMode.SINGLE);
+    upcomingBookings.setEditorEnabled(false);
+
+    devicesLayout.addComponent(upcomingBookings);
+
+    // TODO filtering
+    // HeaderRow filterRow = devicesGrid.prependHeaderRow();
 
     return devicesLayout;
   }
@@ -504,9 +588,13 @@ public class Booking extends CustomComponent {
 
                 @Override
                 public void buttonClick(ClickEvent okEvent) {
+
                   purgeBooking((BookingBean) event.getItemId());
+
+                  booking.setSelectedTab(myUpcomingBookings());
+
                   cd.close();
-                  refreshDataSources();
+
                   showNotification(
                       "The booking was deleted!",
                       "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.");
@@ -678,6 +766,7 @@ public class Booking extends CustomComponent {
   public void refreshDataSources() {
     BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
     setCompositionRoot(new Booking(bookingModel, referenceDate));
+
   }
 
   public void refreshDataSourcesGrid() {
@@ -1040,6 +1129,9 @@ public class Booking extends CustomComponent {
         "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.";
     final String MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN =
         "You have the Admin Power, please use it wisely! - All good, item purged.";
+    final String MESSAGE_FAULTY_TITLE = "aye aye! Booking is marked as 'Faulty'!";
+    final String MESSAGE_FAULTY_DESCRIPTION =
+        "Something went wrong? As you requested, we marked this booking item as 'Faulty'. Thank you for your feedback, we will take the necessary steps to clear the problem.";
 
     Calendar cal;
     BookingModel bookingModel;
@@ -1174,11 +1266,13 @@ public class Booking extends CustomComponent {
               removeEvent((CalendarEvent) target);
               db.removeBooking(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
+              refreshDataSources();
               showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION);
             } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
               removeEvent((CalendarEvent) target);
               db.removeBooking(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
+              refreshDataSources();
               showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
               // TODO: ask for confirmation
             } else
@@ -1188,6 +1282,7 @@ public class Booking extends CustomComponent {
             removeEvent((CalendarEvent) target);
             db.removeBooking(((CalendarEvent) target).getStart(),
                 (String) selectedDevice.getValue());
+            refreshDataSources();
             showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
             // TODO: ask for confirmation
           } else {
@@ -1214,6 +1309,8 @@ public class Booking extends CustomComponent {
         if (target instanceof CalendarEvent) {
           if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
             db.markAsFaulty(((CalendarEvent) target).getStart(), (String) selectedDevice.getValue());
+            showNotification(MESSAGE_FAULTY_TITLE, MESSAGE_FAULTY_DESCRIPTION);
+            refreshDataSources();
           } else {
             showErrorNotification(MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE,
                 MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION);

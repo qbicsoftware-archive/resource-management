@@ -160,6 +160,25 @@ public enum Database {
 
   }
 
+
+  public void logEverything(String user_ldap, String comment) {
+    String sql = "INSERT INTO user_log (user_ldap, comment) VALUES(?,?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, user_ldap);
+      statement.setString(2, comment);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+  }
+
   public String getUserAdminPanelAccessByLDAPId(String uuid) {
     String userrole = "V";
 
@@ -394,6 +413,32 @@ public enum Database {
     return email;
   }
 
+  /**
+   * Returns the user ID from the user table by using users LDAP ID
+   * 
+   * @param uuid
+   * @return
+   */
+  public String getUserLDAPIDbyID(String ID) {
+    String userLDAP = "";
+
+    String sql = "SELECT user_ldap FROM user WHERE user_id=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, ID);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        userLDAP = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return userLDAP;
+  }
 
   /**
    * Returns the user ID from the user table by using users LDAP ID
@@ -630,6 +675,152 @@ public enum Database {
     }
 
     return userrole;
+  }
+
+  /**
+   * Sets the user role for the selected device for the specified user. Returns a boolean value in
+   * case of success or fail.
+   * 
+   * @param user_role
+   * @param uuid
+   * @param device_name
+   * @return
+   */
+  public boolean adminUpdatesUserRoleForDevice(String user_role, String uuid, String device_name) {
+    boolean exists = false;
+    boolean success = false;
+
+    String sqlCheck = "SELECT role_id FROM user_roles WHERE user_id=? AND device_id=?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlCheck)) {
+      statement.setString(1, user_role);
+      statement.setString(2, uuid);
+      statement.setString(3, device_name);
+      int result = statement.executeUpdate();
+      System.out.println("getShitDone: " + statement);
+      exists = (result > 0);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    if (exists) {
+      String sqlUpdate = "UPDATE user_roles SET role_id=?  WHERE user_id=? AND device_id=?";
+      try (Connection conn = login();
+          PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
+        statement.setString(1, user_role);
+        statement.setString(2, uuid);
+        statement.setString(3, device_name);
+        int result = statement.executeUpdate();
+        System.out.println("getShitDone: " + statement);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    } else {
+      String sqlInsert = "INSERT INTO user_roles (user_id, role_id, device_id) VALUES (?,?,?)";
+      try (Connection conn = login();
+          PreparedStatement statement = conn.prepareStatement(sqlInsert)) {
+        statement.setString(1, uuid);
+        statement.setString(2, user_role);
+        statement.setString(3, device_name);
+        int result = statement.executeUpdate();
+        System.out.println("getShitDone: " + statement);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return success;
+  }
+
+  /**
+   * Sets the user role for the selected device for the specified user. Returns a boolean value in
+   * case of success or fail.
+   * 
+   * @param workgroup_id
+   * @param uuid
+   * @return
+   */
+
+  public boolean adminUpdatesUserWorkgroup(String workgroup_id, String uuid) {
+    boolean success = false;
+
+    String sqlUpdate = "UPDATE user SET workgroup_id=?  WHERE user_id=?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
+      statement.setString(1, workgroup_id);
+      statement.setString(2, uuid);
+      int result = statement.executeUpdate();
+      System.out.println("getShitDone: " + statement);
+      success = (result > 0);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return success;
+  }
+
+
+  /**
+   * Sets the user's group for the specified user. Returns a boolean value in case of success or
+   * fail.
+   * 
+   * @param user_group
+   * @param uuid
+   * @return
+   */
+  public boolean adminUpdatesUserGroup(String user_group, String uuid) {
+    boolean exists = false;
+    boolean success = false;
+
+    String sqlCheck = "SELECT * FROM user_groups WHERE group_id = ? AND user_id = ?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlCheck)) {
+      statement.setString(1, user_group);
+      statement.setString(2, uuid);
+      int result = statement.executeUpdate();
+      System.out.println("getShitDone: " + statement);
+      exists = (result > 0);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    if (exists) {
+      String sqlUpdate = "UPDATE user_groups SET group_id=? WHERE user_id=?";
+      try (Connection conn = login();
+          PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
+        statement.setString(1, user_group);
+        statement.setString(2, uuid);
+        int result = statement.executeUpdate();
+        System.out.println("getShitDone: " + statement);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    } else {
+      String sqlInsert = "INSERT INTO user_groups (uuid, user_group) VALUES (?,?)";
+      try (Connection conn = login();
+          PreparedStatement statement = conn.prepareStatement(sqlInsert)) {
+        statement.setString(1, uuid);
+        statement.setString(2, user_group);
+        int result = statement.executeUpdate();
+        System.out.println("getShitDone: " + statement);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+
+    String sql = "UPDATE user SET group_id=?  WHERE user_ldap=?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, user_group);
+      statement.setString(2, uuid);
+      int result = statement.executeUpdate();
+      System.out.println("getShitDone: " + statement);
+      success = (result > 0);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return success;
   }
 
   /**
