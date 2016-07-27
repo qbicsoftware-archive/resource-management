@@ -234,6 +234,11 @@ public class UserAdmin extends CustomComponent {
     updateUserGroup.addClickListener(new ClickListener() {
 
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -5539382755814626288L;
+
       @Override
       public void buttonClick(ClickEvent event) {
         try {
@@ -249,7 +254,7 @@ public class UserAdmin extends CustomComponent {
             DBManager.getDatabaseInstance().adminUpdatesUserGroup(
                 DBManager.getDatabaseInstance().getUserGroupIDByName(
                     userGroup.getValue().toString()),
-                DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
+                DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
 
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(

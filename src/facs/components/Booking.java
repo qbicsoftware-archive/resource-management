@@ -132,7 +132,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160726");
+    versionLabel.setValue("Version 0.1.160727");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -304,7 +304,7 @@ public class Booking extends CustomComponent {
     booking.addTab(myNext24HoursBookings()).setCaption("Next 24 Hours");
     booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
     booking.addTab(myPastBookings()).setCaption("Past Bookings");
-    booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
+    // booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
     setCompositionRoot(booking);
 
   }

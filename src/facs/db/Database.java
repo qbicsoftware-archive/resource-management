@@ -687,43 +687,51 @@ public enum Database {
    * @return
    */
   public boolean adminUpdatesUserRoleForDevice(String user_role, String uuid, String device_name) {
-    boolean exists = false;
+    int count = 0;
     boolean success = false;
 
-    String sqlCheck = "SELECT role_id FROM user_roles WHERE user_id=? AND device_id=?";
-    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlCheck)) {
-      statement.setString(1, user_role);
-      statement.setString(2, uuid);
-      statement.setString(3, device_name);
-      int result = statement.executeUpdate();
-      System.out.println("getShitDone: " + statement);
-      exists = (result > 0);
+    String sqlCheck =
+        "SELECT COUNT(*) FROM user_roles WHERE role_id=? AND user_id=? AND device_id=?";
+
+    try (Connection connCheck = login();
+        PreparedStatement statementCheck =
+            connCheck.prepareStatement(sqlCheck, Statement.RETURN_GENERATED_KEYS)) {
+      statementCheck.setString(1, user_role);
+      statementCheck.setString(2, uuid);
+      statementCheck.setString(3, device_name);
+      ResultSet resultCheck = statementCheck.executeQuery();
+      System.out.println("Exists: " + statementCheck);
+      while (resultCheck.next()) {
+        count = resultCheck.getInt(1);
+      }
+      System.out.println("resultCheck: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
     }
 
-    if (exists) {
+
+    if (count > 0) {
       String sqlUpdate = "UPDATE user_roles SET role_id=?  WHERE user_id=? AND device_id=?";
-      try (Connection conn = login();
-          PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
-        statement.setString(1, user_role);
-        statement.setString(2, uuid);
-        statement.setString(3, device_name);
-        int result = statement.executeUpdate();
-        System.out.println("getShitDone: " + statement);
+      try (Connection connUpdate = login();
+          PreparedStatement statementUpdate = connUpdate.prepareStatement(sqlUpdate)) {
+        statementUpdate.setString(1, user_role);
+        statementUpdate.setString(2, uuid);
+        statementUpdate.setString(3, device_name);
+        int result = statementUpdate.executeUpdate();
+        System.out.println("Update: " + statementUpdate);
         success = (result > 0);
       } catch (SQLException e) {
         e.printStackTrace();
       }
     } else {
       String sqlInsert = "INSERT INTO user_roles (user_id, role_id, device_id) VALUES (?,?,?)";
-      try (Connection conn = login();
-          PreparedStatement statement = conn.prepareStatement(sqlInsert)) {
-        statement.setString(1, uuid);
-        statement.setString(2, user_role);
-        statement.setString(3, device_name);
-        int result = statement.executeUpdate();
-        System.out.println("getShitDone: " + statement);
+      try (Connection connInsert = login();
+          PreparedStatement statementInsert = connInsert.prepareStatement(sqlInsert)) {
+        statementInsert.setString(1, uuid);
+        statementInsert.setString(2, user_role);
+        statementInsert.setString(3, device_name);
+        int result = statementInsert.executeUpdate();
+        System.out.println("Insert: " + statementInsert);
         success = (result > 0);
       } catch (SQLException e) {
         e.printStackTrace();
@@ -750,7 +758,7 @@ public enum Database {
       statement.setString(1, workgroup_id);
       statement.setString(2, uuid);
       int result = statement.executeUpdate();
-      System.out.println("getShitDone: " + statement);
+      // System.out.println("getShitDone: " + statement);
       success = (result > 0);
     } catch (SQLException e) {
       e.printStackTrace();
@@ -769,52 +777,32 @@ public enum Database {
    * @return
    */
   public boolean adminUpdatesUserGroup(String user_group, String uuid) {
-    boolean exists = false;
+    // boolean exists = false;
     boolean success = false;
-
-    String sqlCheck = "SELECT * FROM user_groups WHERE group_id = ? AND user_id = ?";
-    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlCheck)) {
-      statement.setString(1, user_group);
-      statement.setString(2, uuid);
-      int result = statement.executeUpdate();
-      System.out.println("getShitDone: " + statement);
-      exists = (result > 0);
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-
-    if (exists) {
-      String sqlUpdate = "UPDATE user_groups SET group_id=? WHERE user_id=?";
-      try (Connection conn = login();
-          PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
-        statement.setString(1, user_group);
-        statement.setString(2, uuid);
-        int result = statement.executeUpdate();
-        System.out.println("getShitDone: " + statement);
-        success = (result > 0);
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    } else {
-      String sqlInsert = "INSERT INTO user_groups (uuid, user_group) VALUES (?,?)";
-      try (Connection conn = login();
-          PreparedStatement statement = conn.prepareStatement(sqlInsert)) {
-        statement.setString(1, uuid);
-        statement.setString(2, user_group);
-        int result = statement.executeUpdate();
-        System.out.println("getShitDone: " + statement);
-        success = (result > 0);
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    }
-
-    String sql = "UPDATE user SET group_id=?  WHERE user_ldap=?";
+    /*
+     * String sqlCheck = "SELECT user_id FROM user_groups WHERE group_id = ? AND user_id = ?"; try
+     * (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlCheck)) {
+     * statement.setString(1, user_group); statement.setString(2, uuid); int result =
+     * statement.executeUpdate(); // System.out.println("getShitDone: " + statement); exists =
+     * (result > 0); } catch (SQLException e) { e.printStackTrace(); }
+     * 
+     * if (exists) { String sqlUpdate = "UPDATE user_groups SET group_id=? WHERE user_id=?"; try
+     * (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
+     * statement.setString(1, user_group); statement.setString(2, uuid); int result =
+     * statement.executeUpdate(); System.out.println("getShitDone: " + statement); success = (result
+     * > 0); } catch (SQLException e) { e.printStackTrace(); } } else { String sqlInsert =
+     * "INSERT INTO user_groups (user_id, group_id) VALUES (?,?)"; try (Connection conn = login();
+     * PreparedStatement statement = conn.prepareStatement(sqlInsert)) { statement.setString(1,
+     * uuid); statement.setString(2, user_group); int result = statement.executeUpdate(); //
+     * System.out.println("getShitDone: " + statement); success = (result > 0); } catch
+     * (SQLException e) { e.printStackTrace(); } }
+     */
+    String sql = "UPDATE user SET group_id=?  WHERE user_id=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, user_group);
       statement.setString(2, uuid);
       int result = statement.executeUpdate();
-      System.out.println("getShitDone: " + statement);
+      // System.out.println("getShitDone: " + statement);
       success = (result > 0);
     } catch (SQLException e) {
       e.printStackTrace();
