@@ -700,11 +700,11 @@ public enum Database {
       statementCheck.setString(2, uuid);
       statementCheck.setString(3, device_name);
       ResultSet resultCheck = statementCheck.executeQuery();
-      System.out.println("Exists: " + statementCheck);
+      // System.out.println("Exists: " + statementCheck);
       while (resultCheck.next()) {
         count = resultCheck.getInt(1);
       }
-      System.out.println("resultCheck: " + count);
+      // System.out.println("resultCheck: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -718,7 +718,7 @@ public enum Database {
         statementUpdate.setString(2, uuid);
         statementUpdate.setString(3, device_name);
         int result = statementUpdate.executeUpdate();
-        System.out.println("Update: " + statementUpdate);
+        // System.out.println("Update: " + statementUpdate);
         success = (result > 0);
       } catch (SQLException e) {
         e.printStackTrace();
@@ -731,7 +731,7 @@ public enum Database {
         statementInsert.setString(2, user_role);
         statementInsert.setString(3, device_name);
         int result = statementInsert.executeUpdate();
-        System.out.println("Insert: " + statementInsert);
+        // System.out.println("Insert: " + statementInsert);
         success = (result > 0);
       } catch (SQLException e) {
         e.printStackTrace();
@@ -862,18 +862,19 @@ public enum Database {
   }
 
   public int addBooking(String uuid, String device_name, Date start, Date end, String service,
-      double cost) {
+      String kostenstelle, double cost) {
     int booking_id = -1;
     if (uuid == null || uuid.isEmpty() || start == null || end == null) {
       return booking_id;
     }
+
     // System.out.println("Database.java 131 util start: " + start);
     java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
     java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
     // System.out.println("Database.java 131 sql start: " + sqlStart);
     // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
     String sql =
-        "INSERT INTO booking (user_ldap, device_name, start, end, service, price) VALUES(?, ?, ?, ?, ?, ?)";
+        "INSERT INTO booking (user_ldap, device_name, start, end, service, kostenstelle, price) VALUES(?, ?, ?, ?, ?, ?, ?)";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -883,7 +884,8 @@ public enum Database {
       statement.setTimestamp(3, sqlStart);
       statement.setTimestamp(4, sqlEnd);
       statement.setString(5, service);
-      statement.setDouble(6, cost);
+      statement.setString(6, kostenstelle);
+      statement.setDouble(7, cost);
       // execute the statement, data IS NOT commit yet
       statement.execute();
       ResultSet rs = statement.getGeneratedKeys();
@@ -900,18 +902,19 @@ public enum Database {
   }
 
   public int addBooking(String uuid, String device_name, Date start, Date end, String service,
-      double cost, boolean confirmation) {
+      String kostenstelle, double cost, boolean confirmation) {
     int booking_id = -1;
     if (uuid == null || uuid.isEmpty() || start == null || end == null) {
       return booking_id;
     }
+
     // System.out.println("Database.java 131 util start: " + start);
     java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
     java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
     // System.out.println("Database.java 131 sql start: " + sqlStart);
     // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
     String sql =
-        "INSERT INTO booking (user_ldap, device_name, start, end, service, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO booking (user_ldap, device_name, start, end, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -921,8 +924,9 @@ public enum Database {
       statement.setTimestamp(3, sqlStart);
       statement.setTimestamp(4, sqlEnd);
       statement.setString(5, service);
-      statement.setDouble(6, cost);
-      statement.setBoolean(7, confirmation);
+      statement.setString(6, kostenstelle);
+      statement.setDouble(7, cost);
+      statement.setBoolean(8, confirmation);
       // execute the statement, data IS NOT commit yet
       statement.execute();
       ResultSet rs = statement.getGeneratedKeys();
@@ -1397,6 +1401,22 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         kostenstelle = rs.getString("kostenstelle_code");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return kostenstelle;
+  }
+
+  public String getKostenstelleByLDAPId(String userLDAP) {
+    String sql = "SELECT kostenstelle FROM user WHERE user_ldap = ?";
+    String kostenstelle = "";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, userLDAP);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        kostenstelle = rs.getString("kostenstelle");
       }
     } catch (SQLException e) {
       e.printStackTrace();

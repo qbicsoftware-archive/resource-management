@@ -220,6 +220,8 @@ public class UserAdmin extends CustomComponent {
                 "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
                 "success");
 
+            refreshDataSources();
+
           }
         } catch (Exception e) {
           Notification(
@@ -227,7 +229,7 @@ public class UserAdmin extends CustomComponent {
               "Please make sure that you selected the user and workgroup! Make sure they are highligthed.",
               "error");
         }
-        refreshDataSources();
+
       }
     });
 
@@ -265,6 +267,8 @@ public class UserAdmin extends CustomComponent {
                 "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
                 "success");
 
+            refreshDataSources();
+
           }
         } catch (Exception e) {
           Notification(
@@ -272,7 +276,7 @@ public class UserAdmin extends CustomComponent {
               "Please make sure that you selected the user and group! Make sure they are highligthed.",
               "error");
         }
-        refreshDataSources();
+
       }
     });
 
@@ -315,6 +319,8 @@ public class UserAdmin extends CustomComponent {
                 "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
                 "success");
 
+            refreshDataSources();
+
           }
         } catch (Exception e) {
           Notification(
@@ -322,7 +328,7 @@ public class UserAdmin extends CustomComponent {
               "Please make sure that you selected the user, device and role! Each list has to have one highligthed option.",
               "error");
         }
-        refreshDataSources();
+
       }
     });
 

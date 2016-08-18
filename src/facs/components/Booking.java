@@ -109,6 +109,8 @@ public class Booking extends CustomComponent {
   private Grid next24HoursBookings;
   private Grid pastBookings;
 
+  private String defaultKostenstelle;
+
   private TabSheet booking;
 
 
@@ -132,7 +134,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160727");
+    versionLabel.setValue("Version 0.1.160818");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -167,6 +169,8 @@ public class Booking extends CustomComponent {
 
     selectedKostenstelle = new NativeSelect("Please select konstenstelle:");
     selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
+
+    selectedKostenstelle.addItems(db.getKostenstelleCodes());
 
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
       private static final long serialVersionUID = 8153818693511960689L;
@@ -229,6 +233,9 @@ public class Booking extends CustomComponent {
           + bookingModel.getKostenstelle() + " · Project: " + bookingModel.getProject()
           + " · Institute: " + bookingModel.getInstitute());
     }
+
+    selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
+    System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
 
     // bookDeviceLayout.addComponent(infoLabel);
     cal.setLocale(Locale.getDefault());
@@ -782,7 +789,6 @@ public class Booking extends CustomComponent {
       return;
     }
 
-
     if (db.getDeviceRestriction(currentDevice) == true) {
 
       // System.out.println("I am here: True - "+db.getDeviceRestriction(currentDevice));
@@ -819,6 +825,7 @@ public class Booking extends CustomComponent {
                   event.getStart(),
                   event.getEnd(),
                   (String) selectedService.getValue(),
+                  (String) selectedKostenstelle.getValue(),
                   bookingModel.cost(
                       event.getStart(),
                       event.getEnd(),
@@ -862,6 +869,7 @@ public class Booking extends CustomComponent {
                     event.getStart(),
                     event.getEnd(),
                     (String) selectedService.getValue(),
+                    (String) selectedKostenstelle.getValue(),
                     bookingModel.cost(
                         event.getStart(),
                         event.getEnd(),
@@ -874,6 +882,7 @@ public class Booking extends CustomComponent {
                     event.getStart(),
                     event.getEnd(),
                     (String) selectedService.getValue(),
+                    (String) selectedKostenstelle.getValue(),
                     bookingModel.cost(
                         event.getStart(),
                         event.getEnd(),
