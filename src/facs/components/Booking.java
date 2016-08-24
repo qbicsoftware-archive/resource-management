@@ -49,6 +49,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Calendar;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
@@ -134,7 +135,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160818");
+    versionLabel.setValue("Version 0.1.160824");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -171,6 +172,9 @@ public class Booking extends CustomComponent {
     selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
 
     selectedKostenstelle.addItems(db.getKostenstelleCodes());
+
+    CheckBox bookAsAdmin = new CheckBox("Book as an Admin");
+    bookAsAdmin.setEnabled(true);
 
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
       private static final long serialVersionUID = 8153818693511960689L;
@@ -235,7 +239,7 @@ public class Booking extends CustomComponent {
     }
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
-    System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
+    // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
 
     // bookDeviceLayout.addComponent(infoLabel);
     cal.setLocale(Locale.getDefault());
@@ -289,6 +293,7 @@ public class Booking extends CustomComponent {
     gridLayout.addComponent(selectedDevice, 0, 0);
     gridLayout.addComponent(selectedService, 1, 0);
     gridLayout.addComponent(selectedKostenstelle, 2, 0);
+    // gridLayout.addComponent(bookAsAdmin, 3, 0);
     selectedService.setVisible(false);
 
     gridLayout.addComponent(cal, 0, 2, 5, 2);

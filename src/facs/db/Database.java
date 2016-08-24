@@ -455,6 +455,7 @@ public enum Database {
 
       statement.setString(1, uuid);
       ResultSet rs = statement.executeQuery();
+      System.out.println("getUserIDbyLDAPID: " + statement);
       while (rs.next()) {
         userrole = rs.getString(1);
       }
@@ -466,6 +467,34 @@ public enum Database {
 
     return userrole;
   }
+
+  /**
+   * Returns the user group ID
+   * 
+   * @param userWorkgroupName
+   * @return
+   */
+  public String getUserWorkgroupIDByName(String userWorkgroupName) {
+    String userrole = "Basic · only view the calendar and/or request.";
+
+    String sql = "SELECT workgroup_id FROM workgroups WHERE workgroup_name=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, userWorkgroupName);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        userrole = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return userrole;
+  }
+
 
   /**
    * Returns the user group ID
@@ -677,6 +706,57 @@ public enum Database {
     return userrole;
   }
 
+
+  public boolean adminUpdatesUserGroups(String uuid, String group_id) {
+    int count = 0;
+    boolean success = false;
+
+    String sqlCheck = "SELECT COUNT(*) FROM user_groups WHERE user_id=?";
+
+    try (Connection connCheck = login();
+        PreparedStatement statementCheck =
+            connCheck.prepareStatement(sqlCheck, Statement.RETURN_GENERATED_KEYS)) {
+      statementCheck.setString(1, uuid);
+      ResultSet resultCheck = statementCheck.executeQuery();
+      // System.out.println("Exists: " + statementCheck);
+      while (resultCheck.next()) {
+        count = resultCheck.getInt(1);
+      }
+      // System.out.println("resultCheck: " + count);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+
+    if (count > 0) {
+      String sqlUpdate = "UPDATE user_groups SET group_id=? WHERE user_id=?";
+      try (Connection connUpdate = login();
+          PreparedStatement statementUpdate = connUpdate.prepareStatement(sqlUpdate)) {
+        statementUpdate.setString(1, group_id);
+        statementUpdate.setString(2, uuid);
+        int result = statementUpdate.executeUpdate();
+        // System.out.println("Update: " + statementUpdate);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    } else {
+      String sqlInsert = "INSERT INTO user_groups (user_id, group_id) VALUES (?,?)";
+      try (Connection connInsert = login();
+          PreparedStatement statementInsert = connInsert.prepareStatement(sqlInsert)) {
+        statementInsert.setString(1, uuid);
+        statementInsert.setString(2, group_id);
+        int result = statementInsert.executeUpdate();
+        // System.out.println("Insert: " + statementInsert);
+        success = (result > 0);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return success;
+  }
+
   /**
    * Sets the user role for the selected device for the specified user. Returns a boolean value in
    * case of success or fail.
@@ -753,10 +833,11 @@ public enum Database {
   public boolean adminUpdatesUserWorkgroup(String workgroup_id, String uuid) {
     boolean success = false;
 
-    String sqlUpdate = "UPDATE user SET workgroup_id=?  WHERE user_id=?";
+    String sqlUpdate = "UPDATE user SET workgroup_id=? WHERE user_ldap=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
       statement.setString(1, workgroup_id);
       statement.setString(2, uuid);
+      System.out.println("adminUpdatesUserWorkgroup: " + statement);
       int result = statement.executeUpdate();
       // System.out.println("getShitDone: " + statement);
       success = (result > 0);
@@ -797,10 +878,11 @@ public enum Database {
      * System.out.println("getShitDone: " + statement); success = (result > 0); } catch
      * (SQLException e) { e.printStackTrace(); } }
      */
-    String sql = "UPDATE user SET group_id=?  WHERE user_id=?";
+    String sql = "UPDATE user SET group_id=? WHERE user_id=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, user_group);
       statement.setString(2, uuid);
+      System.out.println("adminUpdatesUserGroup: " + statement);
       int result = statement.executeUpdate();
       // System.out.println("getShitDone: " + statement);
       success = (result > 0);
@@ -823,7 +905,7 @@ public enum Database {
   public boolean getShitDone(String user_role, String uuid, String device_name) {
     boolean success = false;
 
-    String sql = "UPDATE user_roles SET role_id=?  WHERE user_id=? AND device_id=?";
+    String sql = "UPDATE user_roles SET role_id=? WHERE user_id=? AND device_id=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, user_role);
       statement.setString(2, uuid);
@@ -848,7 +930,7 @@ public enum Database {
   public boolean getShitDoneAgain(String user_group, String uuid) {
     boolean success = false;
 
-    String sql = "UPDATE user SET group_id=?  WHERE user_ldap=?";
+    String sql = "UPDATE user SET group_id=? WHERE user_ldap=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, user_group);
       statement.setString(2, uuid);

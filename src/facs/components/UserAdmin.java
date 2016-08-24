@@ -203,17 +203,21 @@ public class UserAdmin extends CustomComponent {
           if (selectedRow == null || userWorkgroup.getValue().equals(null)) {
             Notification(
                 "Something's missing!",
-                "Please make sure that you selected the user and workgroup! Make sure they are highligthed.",
+                "Please make sure that you selected the user and workgroup! Make sure they are highlighted.",
                 "error");
           } else {
             DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
-                DBManager.getDatabaseInstance().getUserGroupIDByName(
+                DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
                     userWorkgroup.getValue().toString()),
                 DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
 
+            System.out.println("Edit Workgroup: " + userWorkgroup.getValue().toString());
+
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
-                LiferayAndVaadinUtils.getUser().getScreenName(), "Admin edited Workgroup");
+                LiferayAndVaadinUtils.getUser().getScreenName(),
+                "Admin edited Workgroup: "
+                    + DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
 
             Notification(
                 "Successfully Updated",
@@ -226,7 +230,7 @@ public class UserAdmin extends CustomComponent {
         } catch (Exception e) {
           Notification(
               "Something's missing!",
-              "Please make sure that you selected the user and workgroup! Make sure they are highligthed.",
+              "Please make sure that you selected the user and workgroup! Make sure they are highlighted.",
               "error");
         }
 
@@ -250,13 +254,21 @@ public class UserAdmin extends CustomComponent {
           if (selectedRow == null || userWorkgroup.getValue().equals(null)) {
             Notification(
                 "Something's missing!",
-                "Please make sure that you selected the user and group! Make sure they are highligthed.",
+                "Please make sure that you selected the user and group! Make sure they are highlighted.",
                 "error");
           } else {
             DBManager.getDatabaseInstance().adminUpdatesUserGroup(
                 DBManager.getDatabaseInstance().getUserGroupIDByName(
-                    userGroup.getValue().toString()),
-                DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
+                    userGroup.getValue().toString()), selectedRow.toString());
+
+            System.out.println("Edit Workgroup: " + userGroup.getValue().toString() + " UserId: "
+                + DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
+
+            /*
+             * DBManager.getDatabaseInstance().adminUpdatesUserGroups( selectedRow.toString(),
+             * DBManager.getDatabaseInstance().getUserGroupIDByName(
+             * userGroup.getValue().toString()));
+             */
 
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
@@ -273,7 +285,7 @@ public class UserAdmin extends CustomComponent {
         } catch (Exception e) {
           Notification(
               "Something's missing!",
-              "Please make sure that you selected the user and group! Make sure they are highligthed.",
+              "Please make sure that you selected the user and group! Make sure they are highlighted.",
               "error");
         }
 
@@ -297,7 +309,7 @@ public class UserAdmin extends CustomComponent {
               || userRole.getValue().equals(null)) {
             Notification(
                 "Something's missing!",
-                "Please make sure that you selected the user, device and role! Each list has to have one highligthed option.",
+                "Please make sure that you selected the user, device and role! Each list has to have one highlighted option.",
                 "error");
           } else {
             DBManager.getDatabaseInstance()
@@ -325,7 +337,7 @@ public class UserAdmin extends CustomComponent {
         } catch (Exception e) {
           Notification(
               "Something's missing!",
-              "Please make sure that you selected the user, device and role! Each list has to have one highligthed option.",
+              "Please make sure that you selected the user, device and role! Each list has to have one highlighted option.",
               "error");
         }
 
