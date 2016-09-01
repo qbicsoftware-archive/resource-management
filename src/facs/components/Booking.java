@@ -16,6 +16,7 @@
  *******************************************************************************/
 package facs.components;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -40,9 +41,11 @@ import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.event.Action;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
@@ -56,6 +59,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
@@ -135,7 +139,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160824");
+    versionLabel.setValue("Version 0.1.160901");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -284,6 +288,18 @@ public class Booking extends CustomComponent {
       }
     });
 
+    String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+
+    // Image as a file resource
+    FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/legend.png"));
+
+    // Show the image in the application
+    Image image = new Image("Color Legend:", resource);
+    // image.setWidth("100%");
+
+    // Let the user view the file in browser or download it
+    // Link link = new Link("Link to the image file", resource);
+
     gridLayout.setWidth("100%");
     // add components to the grid layout
     gridLayout.addComponent(infoLabel, 0, 4, 3, 4);
@@ -300,6 +316,7 @@ public class Booking extends CustomComponent {
 
     gridLayout.addComponent(refresh, 0, 3);
     gridLayout.addComponent(submit, 1, 3, 5, 3);
+    gridLayout.addComponent(image, 0, 5, 2, 5);
 
     // gridLayout.addComponent(myBookings(), 0, 5, 5, 5);
 
