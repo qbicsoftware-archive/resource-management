@@ -1,12 +1,10 @@
-NOT ready for production.
-
-facs (developement name)
+Flowcytometry Booking Portlets (FACS)
 ======
 *Many work groups have different measurement instruments. And different
-operators/users with a different level of expertiece for different instruments.*
+operators/users with a different level of expertise for different instruments.*
 
 The idea of this tool is to enable workgroup leaders to manage the
-accesibility of resources as well as the users which want to use those
+accessibility of resources as well as the users which want to use those
 resources.
 
 The project consists of several Servlets/Portlets which should help to mangage or schedule users and scientific resources.
@@ -30,8 +28,7 @@ Everything was written in Java 1.7 openjdk, [vaadin](https://vaadin.com/hom://va
 10.0.20-MariaDB
 
 There are several Servlets/Portlets for achieving this goal:
-(resource, instrument, device are used interchangebly. Call it whatever you
-like).
+(resource, instrument, device are used).
 
 Calendar
 -----
@@ -45,8 +42,8 @@ interaction by administrators.
 Additionally, Administrators set time blocks in which a group of users, e.g. beginners can use a resource.
 For example, a group leader wants to ensure that a device is only used by the
 group beginners if an advanced users is around. That could mean that beginners
-are only allowed to reserve time slots from monday to
-friday, 8 am to 4 pm.
+are only allowed to reserve time slots from Monday to
+Friday, 8 am to 4 pm.
 
 Note: It should synchronise with the database so that changes will be displayed
 immediately.
@@ -54,7 +51,7 @@ immediately.
 
 Statistics
 -----
-Show user and usage statistics. Might get fancy, but for now it is a filterable
+Show user and usage statistics. Might get fancy, but for now it is a filtered
 table or vaadin grid.
 
 
@@ -86,7 +83,7 @@ Add, modify, delete, lock resources, users, costs etc.
 Database
 -----
 This one is not a portlet.
-The database could now be a Mysql or Mariadb. Other sql-like databases should work
+The database could now be a Mysql or Mariadb. Other SQL-like databases should work
 as well, but have not been tested.
 
 The database class is now implemented as a ?static singelton?.
@@ -94,7 +91,7 @@ The reason is that the whole thing runs as a bunch of liferay portlets.
 If one user logs in and tries to reserve an instrument through the calendar,
 all other users should be immediately notified. If the database class is a static
 singelton, all users use the same instance, because it exists only once for the
-jvm.
+JVM.
 The database class is supposed to send 'calendar changed' events (and others) to listeners. The calendar portlet should listen to that and update itself
 immediately.
 
