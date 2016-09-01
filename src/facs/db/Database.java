@@ -1093,6 +1093,25 @@ public enum Database {
     return events;
   }
 
+  public int getBookingTotalCount() {
+    int count = 0;
+    String sql = "SELECT COUNT(*) FROM booking WHERE deleted IS NULL";
+
+    try (Connection connCheck = login();
+        PreparedStatement statementCheck =
+            connCheck.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      ResultSet resultCheck = statementCheck.executeQuery();
+      // System.out.println("Exists: " + statementCheck);
+      while (resultCheck.next()) {
+        count = resultCheck.getInt(1);
+      }
+      // System.out.println("resultCheck: " + count);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return count;
+  }
+
   public java.util.List<BookingBean> getAllBookings() {
     ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
     String sql = "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap";

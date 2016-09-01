@@ -141,6 +141,11 @@ public class Booking extends CustomComponent {
     versionLabel.addStyleName("h4");
     versionLabel.setValue("Version 0.1.160901");
 
+    Label countLabel = new Label();
+    countLabel.addStyleName("h5");
+
+
+
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
 
@@ -241,6 +246,8 @@ public class Booking extends CustomComponent {
           + bookingModel.getKostenstelle() + " · Project: " + bookingModel.getProject()
           + " · Institute: " + bookingModel.getInstitute());
     }
+
+    countLabel.setValue("Total Bookings: " + db.getBookingTotalCount());
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
     // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
