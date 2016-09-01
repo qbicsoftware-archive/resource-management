@@ -65,9 +65,7 @@ public class Billing {
   String pdflatexPath = "pdflatex";
 
   Template template;
-
   File tempTexFile;
-
   MyVelocityLogChute log;
 
   private final String RESOURCE_LOADER = "file";
