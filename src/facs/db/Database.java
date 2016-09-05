@@ -1093,7 +1093,7 @@ public enum Database {
     return events;
   }
 
-  public int getBookingTotalCount() {
+  public int getAllBookingTotalCount() {
     int count = 0;
     String sql = "SELECT COUNT(*) FROM booking WHERE deleted IS NULL";
 

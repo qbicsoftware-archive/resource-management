@@ -144,8 +144,6 @@ public class Booking extends CustomComponent {
     Label countLabel = new Label();
     countLabel.addStyleName("h5");
 
-
-
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
 
@@ -247,7 +245,7 @@ public class Booking extends CustomComponent {
           + " · Institute: " + bookingModel.getInstitute());
     }
 
-    countLabel.setValue("Total Bookings: " + db.getBookingTotalCount());
+    countLabel.setValue("Total Bookings: " + db.getAllBookingTotalCount());
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
     // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
@@ -324,6 +322,7 @@ public class Booking extends CustomComponent {
     gridLayout.addComponent(refresh, 0, 3);
     gridLayout.addComponent(submit, 1, 3, 5, 3);
     gridLayout.addComponent(image, 0, 5, 2, 5);
+    gridLayout.addComponent(countLabel, 3, 0);
 
     // gridLayout.addComponent(myBookings(), 0, 5, 5, 5);
 
