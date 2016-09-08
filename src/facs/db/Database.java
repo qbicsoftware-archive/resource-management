@@ -2105,7 +2105,7 @@ public enum Database {
 
   public ArrayList<String> getUserWorkgroups() {
     ArrayList<String> list = new ArrayList<String>();
-    String sql = "SELECT workgroup_name FROM workgroups";
+    String sql = "SELECT workgroup_name FROM workgroups ORDER BY workgroup_name";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login(); Statement statement = conn.createStatement()) {

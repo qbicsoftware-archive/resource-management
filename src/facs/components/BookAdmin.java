@@ -107,7 +107,7 @@ public class BookAdmin extends CustomComponent {
     updateUser.setSizeFull();
     updateUser.setDescription("Click here to update your user role and group!");
 
-    userDevice = new ListSelect("Select a device");
+    userDevice = new ListSelect("Select an Instrument or a Service");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
     userDevice.setRows(6);
     userDevice.setNullSelectionAllowed(false);
@@ -117,7 +117,7 @@ public class BookAdmin extends CustomComponent {
      * userDevice.addValueChangeListener(e -> Notification.show("Device:",
      * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
      */
-    userGroup = new ListSelect("Select a user group");
+    userGroup = new ListSelect("Select a User Group");
     userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
     userGroup.setRows(6);
     userGroup.setNullSelectionAllowed(false);
@@ -127,7 +127,7 @@ public class BookAdmin extends CustomComponent {
      * userGroup.addValueChangeListener(e -> Notification.show("User Group:",
      * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
      */
-    userRole = new ListSelect("Select a user role");
+    userRole = new ListSelect("Select a User Role");
     userRole.addItems(DBManager.getDatabaseInstance().getUserRoles());
     userRole.setRows(6);
     userRole.setNullSelectionAllowed(false);

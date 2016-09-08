@@ -32,6 +32,7 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -120,7 +121,7 @@ public class UserAdmin extends CustomComponent {
     // save.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
 
-    userDevice = new ListSelect("Devices");
+    userDevice = new ListSelect("Instrument or Service");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
     userDevice.setRows(6);
     userDevice.setNullSelectionAllowed(false);
@@ -521,6 +522,7 @@ public class UserAdmin extends CustomComponent {
 
     usersGrid.setColumnOrder("user_id", "user_ldap", "user_name", "email", "phone", "workgroup_id",
         "group_id", "kostenstelle", "project", "admin_panel");
+    usersGrid.sort("user_name", SortDirection.ASCENDING);
 
     usersGrid.removeColumn("workgroup_id");
     usersGrid.removeColumn("group_id");

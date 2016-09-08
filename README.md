@@ -12,19 +12,19 @@ The project consists of several Servlets/Portlets which should help to mangage o
 Quick Setup
 =====
 1. <code>git clone https://github.com/qbicsoftware/resource-management.git</code>
-1. Install IvyDE, including Ant Tasks, if needed
+2. Install IvyDE, including Ant Tasks, if needed
    (http://www.apache.org/dist/ant/ivyde/updatesite)
-1. Insall vaadin see here:
+3. Install vaadin see here:
    https://vaadin.com/book/-/page/getting-started.environment.html#getting-started.environment.eclipse
-1. Install Liferay 6.2+
-1. Import the project into Eclipse
-1. create war
-1. deploy war file in Liferay
-1. create database with [link
-   here](https://github.com/qbicsoftware/resource-management-data)
+4. Install Liferay 6.2+
+5. Import the project into Eclipse
+6. create war
+7. deploy war file in Liferay
+8. create database with [link here]
+   (https://github.com/qbicsoftware/resource-management-data)
 
 
-Everything was written in Java 1.7 openjdk, [vaadin](https://vaadin.com/hom://vaadin.com/home) 7.5, [Liferay 6.2](https://www.liferay.com/),
+Everything was written in Java 1.7 openjdk, [vaadin] (https://vaadin.com/hom://vaadin.com/home) 7.5, [Liferay 6.2] (https://www.liferay.com/),
 10.0.20-MariaDB
 
 There are several Servlets/Portlets for achieving this goal:
@@ -92,6 +92,7 @@ If one user logs in and tries to reserve an instrument through the calendar,
 all other users should be immediately notified. If the database class is a static
 singelton, all users use the same instance, because it exists only once for the
 JVM.
+
 The database class is supposed to send 'calendar changed' events (and others) to listeners. The calendar portlet should listen to that and update itself
 immediately.
 

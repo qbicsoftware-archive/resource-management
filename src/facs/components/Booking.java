@@ -139,7 +139,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160901");
+    versionLabel.setValue("Version 0.1.160908");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h5");
@@ -172,10 +172,10 @@ public class Booking extends CustomComponent {
     db.userLogin(bookingModel.getLDAP());
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
-    selectedService = new NativeSelect("Please select a service:");
+    selectedService = new NativeSelect("Please select a Service:");
     selectedService.setDescription("Please select the service you would like to receive!");
 
-    selectedKostenstelle = new NativeSelect("Please select konstenstelle:");
+    selectedKostenstelle = new NativeSelect("Please select Kostenstelle:");
     selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
 
     selectedKostenstelle.addItems(db.getKostenstelleCodes());
@@ -955,18 +955,16 @@ public class Booking extends CustomComponent {
 
   }
 
-  // BASIC users are allowed to see from MON-FRI from 09:00 until 16:59
+  // BASIC users are allowed to see from MON-FRI from 08:00 until 17:59
 
   private Calendar basicCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    // 11.07.2016 updated: BASIC users are allowed to see from MON-SUN from 00:00 until 23:59
+    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
-    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
-
-    // cal.setFirstVisibleHourOfDay(9);
-    // cal.setLastVisibleHourOfDay(17);
+    cal.setFirstVisibleHourOfDay(8);
+    cal.setLastVisibleHourOfDay(18);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -990,13 +988,11 @@ public class Booking extends CustomComponent {
   private Calendar noviceCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    // 11.07.2016 updated: NOVICE users are allowed to see from MON-SUN from 00:00 until 23:59
+    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
-    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
-
-    // cal.setFirstVisibleHourOfDay(9);
-    // cal.setLastVisibleHourOfDay(17);
+    cal.setFirstVisibleHourOfDay(9);
+    cal.setLastVisibleHourOfDay(17);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -1022,10 +1018,8 @@ public class Booking extends CustomComponent {
   private Calendar advancedCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    // 11.07.2016 updated: ADVANCED users are allowed to see from MON-SUN from 00:00 until 23:59
-
-    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
@@ -1127,7 +1121,7 @@ public class Booking extends CustomComponent {
   }
 
   NativeSelect initCalendars(List<String> devices) {
-    String selectDeviceCaption = "Please select a device:";
+    String selectDeviceCaption = "Please select an Instrument or a Service:";
     String selectDeviceDescription =
         "Please select a device to ask for a booking request or to book!";
     NativeSelect selectDevice = new NativeSelect();
