@@ -1286,7 +1286,7 @@ public enum Database {
     return bookings;
   }
 
-  public java.util.List<BookingBean> getMyNext24HoursBookings(String uuid, Date start, Date end) {
+  public java.util.List<BookingBean> getMyNext3HoursBookings(String uuid, Date start, Date end) {
     ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
 
     java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());

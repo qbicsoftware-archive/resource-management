@@ -86,7 +86,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     for (DeviceBean bean : DBManager.getDatabaseInstance().getDevices()) {
       deviceNameToId.put(bean.getName(), bean.getId());
       devices.addItem(bean.getName());
-      // System.out.println("Bean.getName: " + bean.getName() + " Bean.getId: " + bean.getId());
+      System.out.println("Bean.getName: " + bean.getName() + " Bean.getId: " + bean.getId());
     }
     occupationGrid = new Grid();
     occupationGrid.setSizeFull();

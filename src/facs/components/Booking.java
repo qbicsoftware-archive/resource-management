@@ -99,7 +99,7 @@ public class Booking extends CustomComponent {
   private static final long serialVersionUID = -4396068933947619408L;
 
   private HorizontalLayout cal = new HorizontalLayout();
-  private GridLayout gridLayout = new GridLayout(6, 6);
+  private GridLayout gridLayout = new GridLayout(6, 7);
 
   private BookingModel bookingModel;
   private NativeSelect selectedDevice;
@@ -117,6 +117,8 @@ public class Booking extends CustomComponent {
   private String defaultKostenstelle;
 
   private TabSheet booking;
+
+  private Grid next3HoursBookings;
 
 
   private static Database db;
@@ -139,7 +141,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.160908");
+    versionLabel.setValue("Version 0.1.161021");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h5");
@@ -301,14 +303,12 @@ public class Booking extends CustomComponent {
     // Show the image in the application
     Image image = new Image("Color Legend:", resource);
     // image.setWidth("100%");
-
     // Let the user view the file in browser or download it
     // Link link = new Link("Link to the image file", resource);
-
     gridLayout.setWidth("100%");
     // add components to the grid layout
     gridLayout.addComponent(infoLabel, 0, 4, 3, 4);
-    gridLayout.addComponent(versionLabel, 4, 4, 5, 4);
+    gridLayout.addComponent(versionLabel, 0, 5);
 
     // gridLayout.addComponent(selectDeviceLabel,0,1);
     gridLayout.addComponent(selectedDevice, 0, 0);
@@ -318,25 +318,20 @@ public class Booking extends CustomComponent {
     selectedService.setVisible(false);
 
     gridLayout.addComponent(cal, 0, 2, 5, 2);
-
     gridLayout.addComponent(refresh, 0, 3);
     gridLayout.addComponent(submit, 1, 3, 5, 3);
-    gridLayout.addComponent(image, 0, 5, 2, 5);
     gridLayout.addComponent(countLabel, 3, 0);
-
-    // gridLayout.addComponent(myBookings(), 0, 5, 5, 5);
+    gridLayout.addComponent(image, 0, 6, 2, 6);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
 
     book.setContent(gridLayout);
-
     booking = new TabSheet();
-
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
     booking.addTab(book).setCaption("Calendar");
-    booking.addTab(myNext24HoursBookings()).setCaption("Next 24 Hours");
+    booking.addTab(myNext3HoursBookings()).setCaption("Next 3 Hours");
     booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
     booking.addTab(myPastBookings()).setCaption("Past Bookings");
     // booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
@@ -360,7 +355,7 @@ public class Booking extends CustomComponent {
     cal.addComponent(bookMap.get(getCurrentDevice()));
   }
 
-  private Component myNext24HoursBookings() {
+  private Component myNext3HoursBookings() {
     VerticalLayout devicesLayout = new VerticalLayout();
     // devicesLayout.setCaption("My Bookings");
     // there will now be space around the test component
@@ -370,26 +365,26 @@ public class Booking extends CustomComponent {
     devicesLayout.setSpacing(true);
 
     Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
 
     BeanItemContainer<BookingBean> users =
-        getMyNext24HoursBookings(bookingModel.getLDAP(), serverTime, nextDayTime);
+        getMyNext3HoursBookings(bookingModel.getLDAP(), serverTime, nextDayTime);
     // System.out.println(bookingModel.getLDAP());
 
     GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
 
-    next24HoursBookings = new Grid(gpc);
+    next3HoursBookings = new Grid(gpc);
     // Create a grid
-    next24HoursBookings.setStyleName("my-style");
-    next24HoursBookings.setWidth("100%");
-    next24HoursBookings.setSelectionMode(SelectionMode.SINGLE);
-    next24HoursBookings.setEditorEnabled(false);
+    next3HoursBookings.setStyleName("my-style");
+    next3HoursBookings.setWidth("100%");
+    next3HoursBookings.setSelectionMode(SelectionMode.SINGLE);
+    next3HoursBookings.setEditorEnabled(false);
 
-    next24HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
+    next3HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
         "end", "username", "phone", "price");
-    next24HoursBookings.getColumn("price").setHeaderCaption("Approx. Price");
-    setRenderers(next24HoursBookings);
-    devicesLayout.addComponent(next24HoursBookings);
+    next3HoursBookings.getColumn("price").setHeaderCaption("Approx. Price");
+    setRenderers(next3HoursBookings);
+    devicesLayout.addComponent(next3HoursBookings);
 
     return devicesLayout;
   }
@@ -440,7 +435,7 @@ public class Booking extends CustomComponent {
     devicesLayout.setSpacing(true);
 
     Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
 
     try {
       TableQuery tq = new TableQuery("booking", DBManager.getDatabaseInstanceAlternative());
@@ -518,7 +513,7 @@ public class Booking extends CustomComponent {
     devicesLayout.setSpacing(true);
 
     Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 24));
+    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
 
     BeanItemContainer<BookingBean> users =
         getMyUpcomingBookings(bookingModel.getLDAP(), nextDayTime);
@@ -632,7 +627,7 @@ public class Booking extends CustomComponent {
 
                   showNotification(
                       "The booking was deleted!",
-                      "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.");
+                      "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.");
                 }
               });
 
@@ -681,11 +676,11 @@ public class Booking extends CustomComponent {
     return bookingList;
   }
 
-  private BeanItemContainer<BookingBean> getMyNext24HoursBookings(String LDAP, Date start, Date end) {
+  private BeanItemContainer<BookingBean> getMyNext3HoursBookings(String LDAP, Date start, Date end) {
     BeanItemContainer<BookingBean> bookingList =
         new BeanItemContainer<BookingBean>(BookingBean.class);
     List<BookingBean> bookings =
-        DBManager.getDatabaseInstance().getMyNext24HoursBookings(LDAP, start, end);
+        DBManager.getDatabaseInstance().getMyNext3HoursBookings(LDAP, start, end);
     assert bookings != null;
     bookingList.addAll(bookings);
     return bookingList;
@@ -788,7 +783,7 @@ public class Booking extends CustomComponent {
       upcomingBookings.getContainerDataSource().removeItem(db);
       showNotification(
           "The booking was deleted!",
-          "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.");
+          "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.");
     } else {
       // TODO log failed operation
       showErrorNotification(
@@ -1134,9 +1129,9 @@ public class Booking extends CustomComponent {
 
   class MyEventHandler {
 
-    final String MESSAGE_24_HOURS_LIMIT = "o_O 24 Hours Limit Counts!";
+    final String MESSAGE_24_HOURS_LIMIT = "o_O 3 Hours Limit Counts!";
     final String MESSAGE_24_HOURS_LIMIT_DESCRIPTION =
-        "It's not possible to delete this booking since it's already in the last 24 hours limit, please try to contact your facility operator!";
+        "It's not possible to delete this booking since it's already in the last 3 hours limit, please try to contact your facility operator!";
     final String MESSAGE_IN_THE_PAST_TITLE = "o_O we can't turn back the time!";
     final String MESSAGE_IN_THE_PAST_DESCRIPTION =
         "Booking failed because you selected a time frame in the past. Please select current or future dates for booking and try again!";
@@ -1157,7 +1152,7 @@ public class Booking extends CustomComponent {
         "Unless we have a bug in the system, there is no way to overlap two bookings in the same timeframe. How did this happen now?";
     final String MESSAGE_ITEM_PURGED = "The booking was deleted!";
     final String MESSAGE_ITEM_PURGED_DESCRIPTION =
-        "You wanted to delete an upcoming booking and it wasn't within the next 24 hours. All good, item purged.";
+        "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.";
     final String MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN =
         "You have the Admin Power, please use it wisely! - All good, item purged.";
     final String MESSAGE_FAULTY_TITLE = "aye aye! Booking is marked as 'Faulty'!";
@@ -1289,7 +1284,7 @@ public class Booking extends CustomComponent {
 
         long localTime = System.currentTimeMillis();
         long eventTime = ((CalendarEvent) target).getStart().getTime();
-        long twentyFourHoursLimit = 86400000;
+        long twentyFourHoursLimit = 10800000;
 
         if (target instanceof CalendarEvent) {
           if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
