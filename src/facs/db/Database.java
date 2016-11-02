@@ -1112,6 +1112,25 @@ public enum Database {
     return count;
   }
 
+  public int getAllUnconfirmedCount() {
+    int count = 0;
+    String sql =
+        "SELECT COUNT(*) FROM booking WHERE device_name = 'Aria' AND confirmation IS NOT NULL AND deleted IS NULL AND start > DATE(NOW())";
+    try (Connection connCheck = login();
+        PreparedStatement statementCheck =
+            connCheck.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      ResultSet resultCheck = statementCheck.executeQuery();
+      // System.out.println("Exists: " + statementCheck);
+      while (resultCheck.next()) {
+        count = resultCheck.getInt(1);
+      }
+      // System.out.println("resultCheck: " + count);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return count;
+  }
+
   public java.util.List<BookingBean> getAllBookings() {
     ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
     String sql = "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap";
@@ -1202,7 +1221,6 @@ public enum Database {
     ArrayList<BookingBean> bookings = new ArrayList<BookingBean>();
     String sql =
         "SELECT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE confirmation IS NOT NULL AND deleted IS NULL";
-
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 

@@ -453,6 +453,21 @@ public class UserAdmin extends CustomComponent {
      * ); setCompositionRoot(errorLayout); return; }
      */
 
+    // only admins are allowed to see the admin panel ;)
+    if (!DBManager.getDatabaseInstance()
+        .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
+        .equals("1")) {
+      VerticalLayout errorLayout = new VerticalLayout();
+      infoLabel.setValue("ACCESS DENIED");
+      errorLayout.addComponent(infoLabel);
+      Notification(
+          "Access Denied!",
+          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'.",
+          "error");
+      setCompositionRoot(errorLayout);
+      return;
+    }
+
     this.setCaption("User Manager");
 
     final TabSheet userAdmin = new TabSheet();

@@ -59,7 +59,7 @@ public class UserAdminUI extends UI {
       setContent(userAdmin);
     } catch (Exception e) {
       setContent(errorView());
-      e.printStackTrace();
+      // e.printStackTrace();
     }
   }
 

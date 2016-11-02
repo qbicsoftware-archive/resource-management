@@ -88,6 +88,7 @@ import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
+import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
 import facs.db.Database;
 import facs.model.BookingBean;
@@ -114,6 +115,8 @@ public class Booking extends CustomComponent {
   private Grid next24HoursBookings;
   private Grid pastBookings;
 
+  private CheckBox bookMaintenance;
+
   private String defaultKostenstelle;
 
   private TabSheet booking;
@@ -139,12 +142,15 @@ public class Booking extends CustomComponent {
     selectDeviceLabel.addStyleName("h4");
     selectDeviceLabel.setValue("Please Select a Device");
 
+    bookMaintenance = new CheckBox("maintenance");
+    bookMaintenance.setEnabled(true);
+
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.161021");
+    versionLabel.setValue("Version 0.1.161103");
 
     Label countLabel = new Label();
-    countLabel.addStyleName("h5");
+    countLabel.addStyleName("h6");
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -182,8 +188,8 @@ public class Booking extends CustomComponent {
 
     selectedKostenstelle.addItems(db.getKostenstelleCodes());
 
-    CheckBox bookAsAdmin = new CheckBox("Book as an Admin");
-    bookAsAdmin.setEnabled(true);
+    // CheckBox bookAsAdmin = new CheckBox("Book as an Admin");
+    // bookAsAdmin.setEnabled(true);
 
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
       private static final long serialVersionUID = 8153818693511960689L;
@@ -247,7 +253,9 @@ public class Booking extends CustomComponent {
           + " · Institute: " + bookingModel.getInstitute());
     }
 
-    countLabel.setValue("Total Bookings: " + db.getAllBookingTotalCount());
+    countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " Booking(s)");
+    // countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " - Total Bookings: " +
+    // db.getAllBookingTotalCount());
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
     // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
@@ -302,6 +310,7 @@ public class Booking extends CustomComponent {
 
     // Show the image in the application
     Image image = new Image("Color Legend:", resource);
+    image.setSizeUndefined();
     // image.setWidth("100%");
     // Let the user view the file in browser or download it
     // Link link = new Link("Link to the image file", resource);
@@ -320,8 +329,15 @@ public class Booking extends CustomComponent {
     gridLayout.addComponent(cal, 0, 2, 5, 2);
     gridLayout.addComponent(refresh, 0, 3);
     gridLayout.addComponent(submit, 1, 3, 5, 3);
-    gridLayout.addComponent(countLabel, 3, 0);
     gridLayout.addComponent(image, 0, 6, 2, 6);
+
+    // only users who has admin panel access can see these UI elementss
+    if (DBManager.getDatabaseInstance()
+        .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
+        .equals("1")) {
+      gridLayout.addComponent(bookMaintenance, 4, 4);
+      gridLayout.addComponent(countLabel, 3, 0);
+    }
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
@@ -899,6 +915,22 @@ public class Booking extends CustomComponent {
                         getCost((String) selectedDevice.getValue(),
                             (String) selectedService.getValue(), getGroupID())), true);
               } else
+
+              // admins can book slots for maintenance/service
+              if (!bookMaintenance.isEmpty()) {
+                db.addBooking(
+                    "maintenance",
+                    (String) selectedDevice.getValue(),
+                    event.getStart(),
+                    event.getEnd(),
+                    (String) selectedService.getValue(),
+                    (String) selectedKostenstelle.getValue(),
+                    bookingModel.cost(
+                        event.getStart(),
+                        event.getEnd(),
+                        getCost((String) selectedDevice.getValue(),
+                            (String) selectedService.getValue(), getGroupID())));
+              } else {
                 db.addBooking(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
@@ -911,6 +943,7 @@ public class Booking extends CustomComponent {
                         event.getEnd(),
                         getCost((String) selectedDevice.getValue(),
                             (String) selectedService.getValue(), getGroupID())));
+              }
             } catch (NumberFormatException e) {
               e.printStackTrace();
             }
