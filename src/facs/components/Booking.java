@@ -88,7 +88,6 @@ import com.vaadin.ui.renderers.DateRenderer;
 import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
-import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
 import facs.db.Database;
 import facs.model.BookingBean;
@@ -147,7 +146,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.161103");
+    versionLabel.setValue("Version 0.1.161107");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -253,9 +252,9 @@ public class Booking extends CustomComponent {
           + " · Institute: " + bookingModel.getInstitute());
     }
 
-    countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " Booking(s)");
-    // countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " - Total Bookings: " +
-    // db.getAllBookingTotalCount());
+    // countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " Booking(s)");
+    countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " - Total Bookings: "
+        + db.getAllBookingTotalCount());
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
     // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
@@ -331,13 +330,8 @@ public class Booking extends CustomComponent {
     gridLayout.addComponent(submit, 1, 3, 5, 3);
     gridLayout.addComponent(image, 0, 6, 2, 6);
 
-    // only users who has admin panel access can see these UI elementss
-    if (DBManager.getDatabaseInstance()
-        .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
-        .equals("1")) {
-      gridLayout.addComponent(bookMaintenance, 4, 4);
-      gridLayout.addComponent(countLabel, 3, 0);
-    }
+    gridLayout.addComponent(bookMaintenance, 4, 4);
+    gridLayout.addComponent(countLabel, 3, 0);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
@@ -352,6 +346,10 @@ public class Booking extends CustomComponent {
     booking.addTab(myPastBookings()).setCaption("Past Bookings");
     // booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
     setCompositionRoot(booking);
+
+    if (bookingModel.getAdminAccess() != 1) {
+      bookMaintenance.setEnabled(false);
+    }
 
   }
 
@@ -807,7 +805,6 @@ public class Booking extends CustomComponent {
           "For some reason we couldn't PURGE this booking. Maybe it's already restored or already purged from the database.");
     }
   }
-
 
   public void refreshDataSources() {
     BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();

@@ -183,6 +183,7 @@ public enum Database {
     String userrole = "V";
 
     String sql = "SELECT admin_panel FROM user WHERE user_ldap=?";
+
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -1176,17 +1177,18 @@ public enum Database {
     ArrayList<UserBean> users = new ArrayList<UserBean>();
     String sql =
         "SELECT * FROM user INNER JOIN groups ON user.group_id=groups.group_id INNER JOIN workgroups ON user.workgroup_id=workgroups.workgroup_id;";
-
+    System.out.println("here");
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
       ResultSet rs = statement.executeQuery();
+
       while (rs.next()) {
         users.add(new UserBean(rs.getString("user_ldap"), rs.getInt("user_id"), rs
             .getString("user_name"), rs.getString("group_name"), rs.getString("workgroup_name"), rs
             .getString("street"), rs.getString("postcode"), rs.getString("city"), rs
             .getString("institute_name"), rs.getString("kostenstelle"), rs.getString("project"), rs
-            .getString("email"), rs.getString("phone")));
+            .getString("email"), rs.getString("phone"), rs.getInt("admin_panel")));
       }
       conn.close();
     } catch (SQLException e) {
@@ -2516,7 +2518,7 @@ public enum Database {
 
   public UserBean getUserByLDAPId(String userId) {
     String sql =
-        "SELECT user.user_id, user.user_ldap, user.user_name, user.group_id, workgroups.workgroup_name, workgroups.institute_name, user.kostenstelle, user.project FROM user INNER JOIN workgroups ON user.workgroup_id=workgroups.workgroup_id WHERE user.user_ldap = ?";
+        "SELECT user.user_id, user.user_ldap, user.user_name, user.group_id, workgroups.workgroup_name, workgroups.institute_name, user.kostenstelle, user.project, user.admin_panel FROM user INNER JOIN workgroups ON user.workgroup_id=workgroups.workgroup_id WHERE user.user_ldap = ?";
     // 1 2 3 4
     UserBean ret = new UserBean();
     try (Connection conn = login();
@@ -2533,6 +2535,7 @@ public enum Database {
         ret.setInstitute(rs.getString(6));
         ret.setKostenstelle(rs.getString(7));
         ret.setProject(rs.getString(8));
+        ret.setAdminPanel(rs.getInt(9));
         // TODO get the correct ones
         List<String> kostenStelle = new ArrayList<String>();
         String k = getKostenstelleByUserId(ret.getId());
@@ -2547,7 +2550,7 @@ public enum Database {
 
   public UserBean getUserById(int userId) {
     String sql =
-        "SELECT user.user_id, user.user_name, user.kostenstelle, workgroups.workgroup_name, workgroups.institute_name, workgroups.street, workgroups.postcode, workgroups.city, user.project FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
+        "SELECT user.user_id, user.user_name, user.kostenstelle, workgroups.workgroup_name, workgroups.institute_name, workgroups.street, workgroups.postcode, workgroups.city, user.project, user.admin_panel FROM user INNER JOIN workgroups on user.workgroup_id = workgroups.workgroup_id WHERE user.user_id = ?";
     // 1 2 3 4
     UserBean ret = new UserBean();
     try (Connection conn = login();
@@ -2565,6 +2568,7 @@ public enum Database {
         ret.setPostCode(rs.getString(7));
         ret.setCity(rs.getString(8));
         ret.setProject(rs.getString(9));
+        ret.setAdminPanel(rs.getInt(10));
         // TODO get the correct ones - when one user has more than one kostenstelle then reimplement
         // using the code below
         // List<String> kostenStelle = new ArrayList<String>();

@@ -36,12 +36,14 @@ public class UserBean implements Serializable {
   private String status = "";
   private String kostenstelle = "";
   private String project = "";
+  private int admin_panel;
 
   // private List<String> Kostenstelle = new ArrayList<String>();
   // private List<String> ProjectName = new ArrayList<String>();
 
   public UserBean(int id, String user_ldap, String name, String group, String street,
-      String postcode, String city, String role, String status, String kostenstelle, String project) {
+      String postcode, String city, String role, String status, String kostenstelle,
+      String project, int admin_panel) {
     super();
     this.id = id;
     this.user_ldap = user_ldap;
@@ -54,13 +56,14 @@ public class UserBean implements Serializable {
     this.city = city;
     this.postcode = postcode;
     this.street = street;
+    this.admin_panel = admin_panel;
     // Kostenstelle = kostenstelle;
     // ProjectName = projectName;
   }
 
   public UserBean(String user_ldap, int id, String name, String group, String workgroup,
       String street, String postcode, String city, String institute, String kostenstelle,
-      String project, String email, String phone) {
+      String project, String email, String phone, int admin_panel) {
     super();
     this.user_ldap = user_ldap;
     this.id = id;
@@ -76,6 +79,7 @@ public class UserBean implements Serializable {
     this.email = email;
     this.phone = phone;
     this.project = project;
+    this.admin_panel = admin_panel;
   }
 
   public UserBean() {}
@@ -98,6 +102,14 @@ public class UserBean implements Serializable {
 
   public String getLDAP() {
     return user_ldap;
+  }
+
+  public void setAdminPanel(int admin_panel) {
+    this.admin_panel = admin_panel;
+  }
+
+  public int getAdminPanel() {
+    return admin_panel;
   }
 
   public void setName(String name) {
@@ -225,6 +237,7 @@ public class UserBean implements Serializable {
     result = prime * result + ((phone == null) ? 0 : phone.hashCode());
     result = prime * result + ((group == null) ? 0 : group.hashCode());
     result = prime * result + ((workgroup == null) ? 0 : workgroup.hashCode());
+    result = prime * result + admin_panel;
     return result;
   }
 

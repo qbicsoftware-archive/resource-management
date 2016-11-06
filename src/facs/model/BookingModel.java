@@ -48,6 +48,10 @@ public class BookingModel implements Serializable {
     return user.getLDAP().isEmpty();
   }
 
+  public int hasAdminPanelAccess() {
+    return user.getAdminPanel();
+  }
+
   public List<DeviceBean> getDevices() {
     return devices;
   }
@@ -95,6 +99,10 @@ public class BookingModel implements Serializable {
     return user.getLDAP();
   }
 
+  public int getAdminAccess() {
+    return user.getAdminPanel();
+  }
+
   public String getKostenstelle() {
     return user.getKostenstelle();
   }
@@ -139,6 +147,10 @@ public class BookingModel implements Serializable {
 
   public String getInstitute() {
     return user.getInstitute();
+  }
+
+  public String getPhone() {
+    return user.getPhone();
   }
 
 

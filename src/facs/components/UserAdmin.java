@@ -346,9 +346,18 @@ public class UserAdmin extends CustomComponent {
     });
 
     try {
+
       TableQuery tq = new TableQuery("user", DBManager.getDatabaseInstanceAlternative());
       tq.setVersionColumn("OPTLOCK");
       SQLContainer container = new SQLContainer(tq);
+
+
+      /*
+       * FreeformQuery query = new FreeformQuery(
+       * "SELECT * FROM user INNER JOIN workgroups WHERE user.workgroup_id = workgroups.workgroup_id"
+       * , DBManager.getDatabaseInstanceAlternative(), "user_id"); SQLContainer container = new
+       * SQLContainer(query);
+       */
 
       // System.out.println("Print Container: " + container.size());
       container.setAutoCommit(isEnabled());
@@ -453,20 +462,15 @@ public class UserAdmin extends CustomComponent {
      * ); setCompositionRoot(errorLayout); return; }
      */
 
-    // only admins are allowed to see the admin panel ;)
-    if (!DBManager.getDatabaseInstance()
-        .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
-        .equals("1")) {
-      VerticalLayout errorLayout = new VerticalLayout();
-      infoLabel.setValue("ACCESS DENIED");
-      errorLayout.addComponent(infoLabel);
-      Notification(
-          "Access Denied!",
-          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'.",
-          "error");
-      setCompositionRoot(errorLayout);
-      return;
-    }
+    /*
+     * only admins are allowed to see the admin panel ;) if (!DBManager.getDatabaseInstance()
+     * .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
+     * .equals("1")) { VerticalLayout errorLayout = new VerticalLayout();
+     * infoLabel.setValue("ACCESS DENIED"); errorLayout.addComponent(infoLabel); Notification(
+     * "Access Denied!",
+     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'."
+     * , "error"); setCompositionRoot(errorLayout); return; }
+     */
 
     this.setCaption("User Manager");
 
@@ -539,7 +543,7 @@ public class UserAdmin extends CustomComponent {
         "group_id", "kostenstelle", "project", "admin_panel");
     usersGrid.sort("user_name", SortDirection.ASCENDING);
 
-    usersGrid.removeColumn("workgroup_id");
+    // usersGrid.removeColumn("workgroup_id");
     usersGrid.removeColumn("group_id");
     usersGrid.removeColumn("admin_panel");
 
