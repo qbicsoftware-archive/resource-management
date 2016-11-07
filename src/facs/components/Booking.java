@@ -33,12 +33,9 @@ import java.util.TimeZone;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
-import com.vaadin.data.util.sqlcontainer.SQLContainer;
-import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.event.Action;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FileResource;
@@ -111,15 +108,11 @@ public class Booking extends CustomComponent {
   // private NativeSelect selectedProject;
   private NativeSelect selectedService;
   private Grid upcomingBookings;
-  private Grid next24HoursBookings;
+  // private Grid next24HoursBookings;
   private Grid pastBookings;
-
   private CheckBox bookMaintenance;
-
-  private String defaultKostenstelle;
-
+  // private String defaultKostenstelle;
   private TabSheet booking;
-
   private Grid next3HoursBookings;
 
 
@@ -127,9 +120,10 @@ public class Booking extends CustomComponent {
 
   public Booking(final BookingModel bookingModel, Date referenceDate) {
 
-    String[] sayHello =
-        {"Kon'nichiwa", "Hello", "Halo", "Hiya", "Hej", "Hallo", "Hola", "Grüezi", "Servus",
-            "Merhaba", "Bonjour", "Ahoj", "Moi", "Ciao", "Buongiorno"};
+    /*
+     * String[] sayHello = {"Kon'nichiwa", "Hello", "Halo", "Hiya", "Hej", "Hallo", "Hola",
+     * "Grüezi", "Servus", "Merhaba", "Bonjour", "Ahoj", "Moi", "Ciao", "Buongiorno"};
+     */
 
     this.bookingModel = bookingModel;
     this.referenceDate = referenceDate;
@@ -437,85 +431,68 @@ public class Booking extends CustomComponent {
     return devicesLayout;
   }
 
-  private Component myUpcomingBookingsSQLContainer() {
-
-
-    VerticalLayout devicesLayout = new VerticalLayout();
-    // devicesLayout.setCaption("My Bookings");
-    // there will now be space around the test component
-    // components added to the test component will now not stick together but have space between
-    // them
-    devicesLayout.setMargin(true);
-    devicesLayout.setSpacing(true);
-
-    Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
-
-    try {
-      TableQuery tq = new TableQuery("booking", DBManager.getDatabaseInstanceAlternative());
-      tq.setVersionColumn("OPTLOCK");
-      SQLContainer container = new SQLContainer(tq);
-
-      // System.out.println("Print Container: " + container.size());
-      container.setAutoCommit(isEnabled());
-
-      upcomingBookings = new Grid(container);
-
-      FieldGroup fieldGroup = upcomingBookings.getEditorFieldGroup();
-      fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3799806709907688919L;
-
-
-
-        @Override
-        public void preCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
-
-        }
-
-        @Override
-        public void postCommit(FieldGroup.CommitEvent commitEvent)
-            throws FieldGroup.CommitException {
-
-          Notification(
-              "Successfully Updated",
-              "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet.",
-              "success");
-
-          refreshGrid();
-        }
-
-        private void refreshGrid() {
-          container.refresh();
-        }
-
-      });
-
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      Notification(
-          "Something went wrong!",
-          "Unable to update/connect the database. There may be a connection problem, please check your internet connection settings then try it again.",
-          "error");
-      e.printStackTrace();
-    }
-
-    upcomingBookings.clearSortOrder();
-
-    upcomingBookings.setStyleName("my-style");
-    upcomingBookings.setWidth("100%");
-    upcomingBookings.setSelectionMode(SelectionMode.SINGLE);
-    upcomingBookings.setEditorEnabled(false);
-
-    devicesLayout.addComponent(upcomingBookings);
-
-    // TODO filtering
-    // HeaderRow filterRow = devicesGrid.prependHeaderRow();
-
-    return devicesLayout;
-  }
+  /*
+   * private Component myUpcomingBookingsSQLContainer() {
+   * 
+   * 
+   * VerticalLayout devicesLayout = new VerticalLayout(); //
+   * devicesLayout.setCaption("My Bookings"); // there will now be space around the test component
+   * // components added to the test component will now not stick together but have space between //
+   * them devicesLayout.setMargin(true); devicesLayout.setSpacing(true);
+   * 
+   * Date serverTime = new WebBrowser().getCurrentDate(); Date nextDayTime = new
+   * Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
+   * 
+   * try { TableQuery tq = new TableQuery("booking", DBManager.getDatabaseInstanceAlternative());
+   * tq.setVersionColumn("OPTLOCK"); SQLContainer container = new SQLContainer(tq);
+   * 
+   * // System.out.println("Print Container: " + container.size());
+   * container.setAutoCommit(isEnabled());
+   * 
+   * upcomingBookings = new Grid(container);
+   * 
+   * FieldGroup fieldGroup = upcomingBookings.getEditorFieldGroup(); fieldGroup.addCommitHandler(new
+   * FieldGroup.CommitHandler() {
+   * 
+   * private static final long serialVersionUID = 3799806709907688919L;
+   * 
+   * 
+   * 
+   * @Override public void preCommit(FieldGroup.CommitEvent commitEvent) throws
+   * FieldGroup.CommitException {
+   * 
+   * }
+   * 
+   * @Override public void postCommit(FieldGroup.CommitEvent commitEvent) throws
+   * FieldGroup.CommitException {
+   * 
+   * Notification( "Successfully Updated",
+   * "Selected values are updated in the database. If it was a mistake, please remind that there is no 'undo' functionality yet."
+   * , "success");
+   * 
+   * refreshGrid(); }
+   * 
+   * private void refreshGrid() { container.refresh(); }
+   * 
+   * });
+   * 
+   * } catch (Exception e) { // TODO Auto-generated catch block Notification(
+   * "Something went wrong!",
+   * "Unable to update/connect the database. There may be a connection problem, please check your internet connection settings then try it again."
+   * , "error"); e.printStackTrace(); }
+   * 
+   * upcomingBookings.clearSortOrder();
+   * 
+   * upcomingBookings.setStyleName("my-style"); upcomingBookings.setWidth("100%");
+   * upcomingBookings.setSelectionMode(SelectionMode.SINGLE);
+   * upcomingBookings.setEditorEnabled(false);
+   * 
+   * devicesLayout.addComponent(upcomingBookings);
+   * 
+   * // TODO filtering // HeaderRow filterRow = devicesGrid.prependHeaderRow();
+   * 
+   * return devicesLayout; }
+   */
 
   private Component myUpcomingBookings() {
     VerticalLayout devicesLayout = new VerticalLayout();
@@ -553,8 +530,8 @@ public class Booking extends CustomComponent {
       }
     });
 
+
     /*
-     * 
      * try {
      * 
      * FreeformQuery query = new FreeformQuery(
@@ -681,14 +658,13 @@ public class Booking extends CustomComponent {
     return devicesLayout;
   }
 
-  private BeanItemContainer<BookingBean> getBookings(String LDAP) {
-    BeanItemContainer<BookingBean> bookingList =
-        new BeanItemContainer<BookingBean>(BookingBean.class);
-    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyBookingsGrid(LDAP);
-    assert bookings != null;
-    bookingList.addAll(bookings);
-    return bookingList;
-  }
+  /*
+   * private BeanItemContainer<BookingBean> getBookings(String LDAP) {
+   * BeanItemContainer<BookingBean> bookingList = new
+   * BeanItemContainer<BookingBean>(BookingBean.class); List<BookingBean> bookings =
+   * DBManager.getDatabaseInstance().getMyBookingsGrid(LDAP); assert bookings != null;
+   * bookingList.addAll(bookings); return bookingList; }
+   */
 
   private BeanItemContainer<BookingBean> getMyNext3HoursBookings(String LDAP, Date start, Date end) {
     BeanItemContainer<BookingBean> bookingList =
@@ -718,24 +694,17 @@ public class Booking extends CustomComponent {
     return bookingList;
   }
 
-  private void Notification(String title, String description, String type) {
-    Notification notify = new Notification(title, description);
-    notify.setPosition(Position.TOP_CENTER);
-    if (type.equals("error")) {
-      notify.setDelayMsec(16000);
-      notify.setIcon(FontAwesome.FROWN_O);
-      notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    } else if (type.equals("success")) {
-      notify.setDelayMsec(8000);
-      notify.setIcon(FontAwesome.SMILE_O);
-      notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    } else {
-      notify.setDelayMsec(8000);
-      notify.setIcon(FontAwesome.MEH_O);
-      notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    }
-    notify.show(Page.getCurrent());
-  }
+  /*
+   * private void Notification(String title, String description, String type) { Notification notify
+   * = new Notification(title, description); notify.setPosition(Position.TOP_CENTER); if
+   * (type.equals("error")) { notify.setDelayMsec(16000); notify.setIcon(FontAwesome.FROWN_O);
+   * notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE); }
+   * else if (type.equals("success")) { notify.setDelayMsec(8000);
+   * notify.setIcon(FontAwesome.SMILE_O); notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " +
+   * ValoTheme.NOTIFICATION_CLOSABLE); } else { notify.setDelayMsec(8000);
+   * notify.setIcon(FontAwesome.MEH_O); notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " +
+   * ValoTheme.NOTIFICATION_CLOSABLE); } notify.show(Page.getCurrent()); }
+   */
 
   /*
    * public boolean showConfirmDialog(String title, String description) {

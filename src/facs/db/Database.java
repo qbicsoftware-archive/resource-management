@@ -160,7 +160,6 @@ public enum Database {
 
   }
 
-
   public void logEverything(String user_ldap, String comment) {
     String sql = "INSERT INTO user_log (user_ldap, comment) VALUES(?,?)";
     // The following statement is an try-with-resources statement, which declares two resources,
@@ -200,7 +199,6 @@ public enum Database {
 
     return userrole;
   }
-
 
   public String getUserRoleByUserId(String uuid) {
     String userrole = "N/A";

@@ -32,7 +32,6 @@ import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.MethodProperty;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.StringToBigDecimalConverter;
 import com.vaadin.server.FontAwesome;
@@ -663,14 +662,12 @@ public class BookAdmin extends CustomComponent {
     return devicesLayout;
   }
 
-  private BeanItemContainer<BookingBean> getBookingList() {
-    BeanItemContainer<BookingBean> bookingList =
-        new BeanItemContainer<BookingBean>(BookingBean.class);
-    List<BookingBean> bookings = DBManager.getDatabaseInstance().getAllBookings();
-    assert bookings != null;
-    bookingList.addAll(bookings);
-    return bookingList;
-  }
+  /*
+   * private BeanItemContainer<BookingBean> getBookingList() { BeanItemContainer<BookingBean>
+   * bookingList = new BeanItemContainer<BookingBean>(BookingBean.class); List<BookingBean> bookings
+   * = DBManager.getDatabaseInstance().getAllBookings(); assert bookings != null;
+   * bookingList.addAll(bookings); return bookingList; }
+   */
 
   private BeanItemContainer<BookingBean> getBookingList(String deviceName) {
     BeanItemContainer<BookingBean> bookingList =
@@ -730,10 +727,11 @@ public class BookAdmin extends CustomComponent {
         new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));
   }
 
-  private void refresh(BeanItemContainer<BookingBean> item) {
-    MethodProperty<String> p = (MethodProperty<String>) ((Item) item).getItemProperty("stock");
-    p.fireValueChange();
-  }
+
+  /*
+   * private void refresh(BeanItemContainer<BookingBean> item) { MethodProperty<String> p =
+   * (MethodProperty<String>) ((Item) item).getItemProperty("stock"); p.fireValueChange(); }
+   */
 
   protected void purgeBooking(BookingBean db) {
     boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);

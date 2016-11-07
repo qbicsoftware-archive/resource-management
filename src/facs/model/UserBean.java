@@ -156,17 +156,6 @@ public class UserBean implements Serializable {
     this.project = project;
   }
 
-  /*
-   * public List<String> getKostenstelle() { return Kostenstelle; }
-   * 
-   * public void setKostenstelle(List<String> kostenstelle) { Kostenstelle = kostenstelle; }
-   * 
-   * 
-   * public List<String> getProject() { return ProjectName; }
-   * 
-   * public void setProject(List<String> projectName) { ProjectName = projectName; }
-   */
-
   public String getWorkgroup() {
     return workgroup;
   }
@@ -222,6 +211,17 @@ public class UserBean implements Serializable {
   public void setPhone(String phone) {
     this.phone = phone;
   }
+
+  /*
+   * public List<String> getKostenstelle() { return Kostenstelle; }
+   * 
+   * public void setKostenstelle(List<String> kostenstelle) { Kostenstelle = kostenstelle; }
+   * 
+   * 
+   * public List<String> getProject() { return ProjectName; }
+   * 
+   * public void setProject(List<String> projectName) { ProjectName = projectName; }
+   */
 
   @Override
   public int hashCode() {
