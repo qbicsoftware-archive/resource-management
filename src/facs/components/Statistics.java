@@ -49,6 +49,7 @@ import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
@@ -76,6 +77,9 @@ public class Statistics extends CustomComponent {
   private final String nameCaption = "Name";
   private final String instituteCaption = "Institute";
   private final String CAPTION = "Usage/Statistics";
+
+  private NativeSelect selectedYear;
+  private NativeSelect selectedQuarter;
 
   String ReceiverPI = null;
   String ReceiverInstitute = null;
@@ -105,9 +109,18 @@ public class Statistics extends CustomComponent {
 
     TabSheet statistics = new TabSheet();
 
+    selectedYear = new NativeSelect("Please select a year:");
+    selectedYear.setDescription("to be added!");
+    selectedYear.addItems("2016", "2017");
+
+    selectedQuarter = new NativeSelect("Please select quarter of the year:");
+    selectedQuarter.setDescription("to be added!");
+    selectedQuarter.addItems("Jan-Mar", "Apr-Jun", "Jul-Sep", "Oct-Dec");
+
     statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
     statistics.addTab(newMatchedGrid()).setCaption("Matched");
-    statistics.addTab(initialGrid()).setCaption("Not Matched");
+    statistics.addTab(noCostsGrid()).setCaption("No Costs");
+    statistics.addTab(initialGrid()).setCaption("All");
 
     setCompositionRoot(statistics);
 
@@ -199,6 +212,9 @@ public class Statistics extends CustomComponent {
     gridLayout.addComponent(refresh);
     gridLayout.addComponent(createInvoice);
     gridLayout.addComponent(downloadInvoice);
+
+    // gridLayout.addComponent(selectedYear);
+    // gridLayout.addComponent(selectedQuarter);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
@@ -495,6 +511,10 @@ public class Statistics extends CustomComponent {
     });
     createInvoiceMatched.addClickListener(new ClickListener() {
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -7548522758005539698L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -613,6 +633,81 @@ public class Statistics extends CustomComponent {
     return matchedLayout;
   }
 
+  private Component noCostsGrid() {
+
+    String buttonRefreshTitle = "Refresh";
+    Button refreshMatched = new Button(buttonRefreshTitle);
+    refreshMatched.setIcon(FontAwesome.REFRESH);
+    refreshMatched.setDescription("Click here to reload the data from the database!");
+    refreshMatched.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+    Grid noCostsGrid;
+
+    refreshMatched.addClickListener(new ClickListener() {
+
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        refreshDataSources();
+
+      }
+    });
+
+
+    IndexedContainer mcontainer = getEmptyContainer();
+
+    GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
+
+    VerticalLayout noCostLayout = new VerticalLayout();
+
+    noCostsGrid = new Grid(mpc);
+
+    setRenderers(noCostsGrid);
+    fillNoCostRows(noCostsGrid);
+
+    // compute total costs
+    float totalCosts = 0.0f;
+    for (Object itemId : mpc.getItemIds())
+      totalCosts +=
+          ((Number) mpc.getContainerProperty(itemId, costCaption).getValue()).floatValue();
+
+    // compute total time in milliseconds
+    long total = 0;
+    for (Object itemId : mpc.getItemIds()) {
+      long s = ((Date) mpc.getContainerProperty(itemId, startCaption).getValue()).getTime();
+      long e = ((Date) mpc.getContainerProperty(itemId, endCaption).getValue()).getTime();
+      total += e - s;
+    }
+
+    // set footer to contain total cost and time in hours:minutes
+    FooterRow footer = noCostsGrid.appendFooterRow();
+    FooterCell footerCellCost = footer.getCell(costCaption);
+    footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
+
+    FooterCell footerCellEnd = footer.getCell(endCaption);
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+
+    // Set up a filter for all columns
+    HeaderRow filterRow = noCostsGrid.appendHeaderRow();
+    addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
+
+    noCostLayout.setMargin(true);
+    noCostLayout.setSpacing(true);
+    // devicesGrid.setWidth("100%");
+    noCostsGrid.setSizeFull();
+
+    noCostLayout.addComponent(noCostsGrid);
+    noCostLayout.addComponent(refreshMatched);
+
+    return noCostLayout;
+  }
+
   private void setRenderers(Grid grid) {
     grid.getColumn(costCaption).setRenderer(new NumberRenderer("%1$.2f €"));
 
@@ -664,6 +759,29 @@ public class Statistics extends CustomComponent {
 
   private void fillMatchedRows(Grid grid) {
     List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getMatchedTimeBlocks();
+
+    for (MachineOccupationBean mobean : mobeans) {
+      int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+      float cost = -1;
+      String kostenStelle = "unknown";
+      String institute = "unknown";
+      UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
+      Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
+      if (user != null) {
+        // System.out.println("userId: " + userId);
+        // System.out.println("name: " + mobean.getUserFullName());
+        kostenStelle = user.getKostenstelle();
+        institute = user.getInstitute();
+        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+      }
+      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, mobean.getCost(),
+          mobean.getUserFullName(), institute);
+    }
+
+  }
+
+  private void fillNoCostRows(Grid grid) {
+    List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getNoCostTimeBlocks();
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());

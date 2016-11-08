@@ -2490,7 +2490,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocks() {
 
     String sql =
-        "SELECT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
+        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -2512,6 +2512,30 @@ public enum Database {
     }
     return obean;
   }
+
+  public List<MachineOccupationBean> getNoCostTimeBlocks() {
+    String sql = "SELECT * FROM logs WHERE cost=0";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("device_id"));
+        m.setDeviceName(rs.getString("logs.device_name"));
+        m.setUserFullName(rs.getString("user_full_name"));
+        m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+
 
 
   public UserBean getUserByLDAPId(String userId) {
