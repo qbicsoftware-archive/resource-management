@@ -59,10 +59,10 @@ public class Billing {
   String templateFileName;
 
   // pdflatex path for local development
-  // String pdflatexPath = "/Library/TeX/texbin/pdflatex";
+  String pdflatexPath = "/Library/TeX/texbin/pdflatex";
 
   // pdflatex path for testing and production
-  String pdflatexPath = "pdflatex";
+  // String pdflatexPath = "pdflatex";
 
   Template template;
   File tempTexFile;
@@ -131,6 +131,10 @@ public class Billing {
     context.put("sender_postalcode", postalcode);
   }
 
+  public void setSenderInstitute(String institute) {
+    context.put("sender_institute", institute);
+  }
+
   public void setSenderCity(String city) {
     context.put("sender_city", city);
   }
@@ -151,8 +155,16 @@ public class Billing {
     context.put("sender_url", url);
   }
 
+  public void setSenderTitle(String title) {
+    context.put("sender_title", title);
+  }
+
   public void setSenderFaculty(String fac) {
     context.put("sender_faculty", fac);
+  }
+
+  public void setInvoiceNumber(String invoiceNumber) {
+    context.put("invoice_number", invoiceNumber);
   }
 
   public void setProjectDescription(String desc) {

@@ -52,19 +52,19 @@
   \ifnum\farbe=1% farbiges Logo
   	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/ukt-neu-logo.jpg}}
   \else% nicht farbiges Logo
-  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/logo_sw.pdf}}
+  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/ukt-neu-logo.jpg}}
   \fi
 \else% nicht pdf
   \ifnum\farbe=1% farbiges Logo
-  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/UT_WBMW_Rot_RGB.eps}}
+  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/ukt-neu-logo.jpg}}
   \else% nicht farbiges Logo
-  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/logo_sw.eps}}
+  	\raisebox{-12mm}{\includegraphics[width=70mm, keepaspectratio=true]{logos/ukt-neu-logo.jpg}}
   \fi
 \fi
 \end{minipage}
 \hfill
 % rechter Header, Absenderinformationen. Höhe niedrig gewählt, dass das nachfolgende Adressfeld hochrutschen kann.
-\begin{minipage}[t][0.5cm]{0.23\textwidth}
+\begin{minipage}[t][2cm]{0.23\textwidth}
 \upshape\sffamily\flushleft
 {\fontsize{10pt}{12pt}\selectfont
 	\textbf{\ifnum\farbe=1\color{rot}\fi \fakult}\par\bigskip}
@@ -76,10 +76,9 @@
   	{\scriptsize \web}
 \end{minipage}
 \\[1cm]
-
 % Adressfeld - Höhe regelt den Abstand von Betreffzeile zu rechtem Header
 \begin{minipage}[t][3.25cm][t]{0.44\textwidth}
-        {\tiny \mbox{\textbf{Universität Tübingen} · \strasse ~· \plzort}\smallskip \\}
+        {\tiny \mbox{\textbf{Universität Tübingen} · Geissweg 5/1 ~· 72076 Tübingen}\smallskip \\}
 	{\footnotesize \empfaenger}
 \end{minipage}
 \end{flushleft}

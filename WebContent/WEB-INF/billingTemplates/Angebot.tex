@@ -8,21 +8,22 @@
 %\usepackage{colortbl} % benötigt, falls man farbigen Tabellenhintergrund möchte
 \usepackage{booktabs}% http://ctan.org/pkg/booktab
 
-
 \newcommand{\farbe}{1} %Farbiges Uni-Logo? ja=1, nein=0
 
-\newcommand{\fakult}{$sender_faculty}%Fakultät
-%\newcommand{\fbname}{Zentrum f\"{u}r Quantitative Biologie (QBiC)}	%wird aktuell nicht verwendet
-\newcommand{\profname}{$sender_name} %Name
-\newcommand{\funkt}{$sender_function} %Funktion
-\newcommand{\anschrift}{$sender_street \par $sender_postalcode $sender_city \par}
-\newcommand{\tel}{Telefon $sender_phone \par}
+\newcommand{\fakult}{$sender_title \par $sender_faculty \par}
+\newcommand{\profname}{$sender_function} %Name
+\newcommand{\funkt}{$sender_name} %Funktion
+\newcommand{\anschrift}{$sender_institute \par $sender_street \par $sender_postalcode $sender_city \par}
+\newcommand{\tel}{Ansprechpartner \par $sender_name \par Telefon $sender_phone}
 \newcommand{\web}{\mbox{$sender_email}\par $sender_url \par} % Beim Zeilenumbruch \par behalten.
-\newcommand{\ang}{Angebot Nr.: $project_number}
+
+\newcommand{\ang}{Rechnung}
+%\newcommand{\ang}{Rechnungs-Nr:}{$invoice_number}
+%\newcommand{\ang}{Anfordernde Kostenstelle:}{$project_number}
 \newcommand{\angbeschr}{$project_short_description} %Bezeichnung des Angebots
 \newcommand{\ort}{$sender_city} %T\"{u}bingen}%Ort
-\newcommand{\datum}{\today}	%aktuelles Datum 
-\newcommand{\empfaenger}{$institute \\ $PI \\ $street \\ $postalcode $city} % bis zu 5 Zeilen
+\newcommand{\datum}{\today}	%aktuelles Datum
+\newcommand{\empfaenger}{$PI \\ $institute \\ $street \\ $postalcode $city} % bis zu 5 Zeilen
 \newcommand{\strasse}{$sender_street} % für kleine Zeile über dem Adressfeld
 \newcommand{\plzort}{$sender_postalcode $sender_city} % für kleine Zeile über dem Adressfeld%------------------------------------------------------
 \begin{document}
@@ -37,21 +38,24 @@ $project_description
 \begin{tabular}{ccp{0.6\textwidth}c}
  %\rowcolor{gold} %farbiger Hintergrund
  \hline
- \textbf{Datum} & \textbf{Dauer} & \textbf{Beschreibung} & \textbf{Betrag (\euro)} \\
+ \textbf{Datum} & \textbf{Menge} & \textbf{Bezeichnung} & \textbf{Gesamt (\euro)} \\
  %\rowcolor{hellgold} %farbiger Hintergrund
  #foreach($row in $costs)
    \hline
    $row.date & $row.time_frame & $row.description & $row.cost \\
  #end
- \hline
- &\multicolumn{3}{r}{\textbf{Rechnungsbetrag}: \textbf{$total_cost \euro}}
+ \hline \hline
+ &\multicolumn{3}{r}{{Summe Netto}: {$total_cost \euro}}
+  & &\multicolumn{3}{r}{{MwSt. (0\%)}: {$total_cost \euro}}
+   & &\multicolumn{3}{r}{\textbf{Bruttosumme}: \textbf{$total_cost \euro}} \\ 
+   \hline
 
 \end{tabular}
 }
 \vspace{10 mm}
 
-\textbf{Bitte Rechnungsbetrag nicht anweisen, Betrag wird in den n\"{a}chsten
-Tagen der von ihnen angegebenen Kostenstelle belastet}
+\textbf{Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den n\"{a}chsten
+Tagen der von Ihnen angegebenen Kostenstelle abgebucht.}
 
 \vspace{10 mm}
 Mit freundlichen Gr\"{u}{\ss}en

@@ -223,7 +223,6 @@ public class Statistics extends CustomComponent {
     grid.setSelectionMode(SelectionMode.SINGLE);
     grid.addSelectionListener(new SelectionListener() {
 
-
       /**
        * 
        */
@@ -276,22 +275,30 @@ public class Statistics extends CustomComponent {
             billing.setReceiverPostalCode(user.getPostcode());
             billing.setReceiverCity(user.getCity());
 
-            billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
-            billing.setSenderFunction("Leiterin");
+            billing.setSenderTitle("Einrichtung");
+            billing.setSenderFaculty("Core Facility Durchflusszytometrie");
+
+            billing.setSenderFunction("Leitung:");
+            billing.setSenderName("Dr. Stella Autenrieth");
+
+            billing.setSenderInstitute("Medizinische Klinik Tübingen");
+            billing.setSenderStreet("Otfried-Müller-Straße 10");
             billing.setSenderPostalCode("72076");
             billing.setSenderCity("Tübingen");
-            billing.setSenderStreet("Otfried-Müller-Straße 10");
+
             billing.setSenderPhone("+49 (0) 7071 29-83156");
             billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
             billing.setSenderUrl("www.medizin.uni-tuebingen.de");
-            billing.setSenderFaculty("Medizinischen Fakultät");
 
             if (user.getKostenstelle() != null)
-              billing.setProjectDescription("Kostenstelle: " + user.getKostenstelle());
+              billing.setProjectDescription("Rechnungs-Nr: " + user.getKostenstelle() + "\n"
+                  + "Kostenstelle: " + user.getKostenstelle());
             else
               billing.setProjectDescription("Keine kostenstelle verfügbar.");
 
             billing.setProjectShortDescription("Dieses Angebot beinhaltet jede Menge Extras.");
+
+            // billing.setInvoiceNumber("FCF2015-001");
 
             if (user.getProject() != null)
               billing.setProjectNumber("Kostenstelle: " + user.getKostenstelle());
@@ -489,8 +496,6 @@ public class Statistics extends CustomComponent {
     matchedGrid.setSelectionMode(SelectionMode.SINGLE);
     matchedLayout.addComponent(matchedGrid);
 
-
-    matchedGrid.setSelectionMode(SelectionMode.SINGLE);
     matchedGrid.addSelectionListener(new SelectionListener() {
 
 
@@ -562,7 +567,7 @@ public class Statistics extends CustomComponent {
             billing.setProjectShortDescription("Dieses Angebot beinhaltet jede Menge Extras.");
 
             if (user.getProject() != null)
-              billing.setProjectNumber("Kostenstelle: " + user.getKostenstelle());
+              billing.setProjectNumber("Project Nr: " + user.getKostenstelle());
             else
               billing.setProjectNumber("Keine project nummer verfügbar.");
 
@@ -890,7 +895,7 @@ public class Statistics extends CustomComponent {
         FooterCell footerCellEnd = footer.getCell(endCaption);
         int hours = (int) (total * 0.000000277778f);
         float minutes = (total * 0.000000277778f - hours) * 60;
-        footerCellEnd.setText(String.format("%d:%02d hours", hours, (int) minutes)); // "%1$.0f hours"
+        footerCellEnd.setText(String.format("%d:%02d Std.", hours, (int) minutes)); // "%1$.0f hours"
 
       }
     });
