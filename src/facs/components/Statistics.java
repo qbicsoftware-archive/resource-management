@@ -40,6 +40,7 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
@@ -49,7 +50,6 @@ import com.vaadin.ui.Grid.HeaderCell;
 import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextField;
@@ -67,6 +67,7 @@ import facs.utils.Billing.CostEntry;
 import facs.utils.Formatter;
 
 public class Statistics extends CustomComponent {
+
   private static final long serialVersionUID = 4811041982287436302L;
 
   private final String deviceCaption = "Device";
@@ -78,8 +79,13 @@ public class Statistics extends CustomComponent {
   private final String instituteCaption = "Institute";
   private final String CAPTION = "Usage/Statistics";
 
-  private NativeSelect selectedYear;
-  private NativeSelect selectedQuarter;
+  // private NativeSelect selectedYear;
+  // private NativeSelect selectedQuarter;
+
+  private ComboBox selectedYear;
+  private ComboBox selectedQuarter;
+
+  private Button listBookings;
 
   String ReceiverPI = null;
   String ReceiverInstitute = null;
@@ -94,11 +100,13 @@ public class Statistics extends CustomComponent {
   Button createInvoice = new Button("Create Invoice");
   Button downloadInvoice = new Button("Download Invoice");
 
+  String dateStart = "";
+  String dateEnd = "";
+
   private GeneratedPropertyContainer gpcontainer;
   private GeneratedPropertyContainer mpc;
 
   // private GridLayout gridLayout = new GridLayout(6, 6);
-
 
   public Statistics() {
     this.setCaption(CAPTION);
@@ -107,26 +115,78 @@ public class Statistics extends CustomComponent {
 
   private void init() {
 
+    Date dNow = new Date();
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    System.out.println(ft.format(dNow) + "  INFO  Statistics accessed! - User: "
+        + LiferayAndVaadinUtils.getUser().getScreenName());
+
+    VerticalLayout vLayout = new VerticalLayout();
+
+    vLayout.setMargin(true);
+    vLayout.setSpacing(true);
+    vLayout.setSizeFull();
+
     TabSheet statistics = new TabSheet();
 
-    selectedYear = new NativeSelect("Please select a year:");
+    selectedYear = new ComboBox("Please select a year:");
     selectedYear.setDescription("to be added!");
-    selectedYear.addItems("2016", "2017");
+    selectedYear.addItems(DBManager.getDatabaseInstance().getLoggedYears());
 
-    selectedQuarter = new NativeSelect("Please select quarter of the year:");
+    selectedQuarter = new ComboBox("Please select quarter of the year:");
     selectedQuarter.setDescription("to be added!");
     selectedQuarter.addItems("Jan-Mar", "Apr-Jun", "Jul-Sep", "Oct-Dec");
 
-    statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
-    statistics.addTab(newMatchedGrid()).setCaption("Matched");
-    statistics.addTab(noCostsGrid()).setCaption("No Costs");
-    statistics.addTab(initialGrid()).setCaption("All");
+    listBookings = new Button("List Bookings");
 
-    setCompositionRoot(statistics);
+    listBookings.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 7673747658185105191L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+
+        if ((String) selectedQuarter.getValue() == "Jan-Mar") {
+          dateStart = (String) selectedYear.getValue() + "-01-01";
+          dateEnd = (String) selectedYear.getValue() + "-03-31";
+        } else if ((String) selectedQuarter.getValue() == "Apr-Jun") {
+          dateStart = (String) selectedYear.getValue() + "-04-01";
+          dateEnd = (String) selectedYear.getValue() + "-06-30";
+        } else if ((String) selectedQuarter.getValue() == "Jul-Sep") {
+          dateStart = (String) selectedYear.getValue() + "-07-01";
+          dateEnd = (String) selectedYear.getValue() + "-09-30";
+        } else if ((String) selectedQuarter.getValue() == "Oct-Dec") {
+          dateStart = (String) selectedYear.getValue() + "-10-01";
+          dateEnd = (String) selectedYear.getValue() + "-12-31";
+        }
+
+        statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
+        statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
+        statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
+        statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
+
+        selectedYear.setCaption("Selected Year:");
+        selectedQuarter.setCaption("Selected Quarter:");
+
+        selectedYear.setEnabled(false);
+        selectedQuarter.setEnabled(false);
+        listBookings.setVisible(false);
+
+      }
+    });
+
+    vLayout.addComponent(selectedYear);
+    vLayout.addComponent(selectedQuarter);
+    vLayout.addComponent(listBookings);
+    vLayout.addComponent(statistics);
+
+    setCompositionRoot(vLayout);
 
   }
 
-  private Component initialGrid() {
+  private Component initialGrid(String start, String end) {
 
     VerticalLayout gridLayout = new VerticalLayout();
 
@@ -149,11 +209,6 @@ public class Statistics extends CustomComponent {
       }
     });
 
-    Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-    System.out.println(ft.format(dNow) + "  INFO  Statistics accessed! - User: "
-        + LiferayAndVaadinUtils.getUser().getScreenName());
-
     // Add some generated properties
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
@@ -162,7 +217,7 @@ public class Statistics extends CustomComponent {
 
     grid.setWidth("100%");
     setRenderers(grid);
-    fillRows(grid);
+    fillRows(grid, start, end);
 
     // compute total costs
     float totalCosts = 0.0f;
@@ -230,8 +285,8 @@ public class Statistics extends CustomComponent {
 
       @Override
       public void select(SelectionEvent event) {
-        // Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
-        // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
+        Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
+            + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
         downloadInvoice.setEnabled(false);
         ReceiverPI =
             (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
@@ -255,7 +310,7 @@ public class Statistics extends CustomComponent {
 
         Paths.get(basepath, "WEB-INF/billingTemplates");
 
-        // System.out.println("Basepath: " + basepath);
+        System.out.println("Basepath: " + basepath);
 
         try {
 
@@ -422,7 +477,7 @@ public class Statistics extends CustomComponent {
 
   }
 
-  private Component newMatchedGrid() {
+  private Component newMatchedGrid(String dateStart, String dateEnd) {
 
     Button createInvoiceMatched = new Button("Create Invoice");
     Button downloadInvoiceMatched = new Button("Download Invoice");
@@ -448,17 +503,12 @@ public class Statistics extends CustomComponent {
       }
     });
 
-
     IndexedContainer mcontainer = getEmptyContainer();
-
     GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
-
     VerticalLayout matchedLayout = new VerticalLayout();
-
     matchedGrid = new Grid(mpc);
-
     setRenderers(matchedGrid);
-    fillMatchedRows(matchedGrid);
+    fillMatchedRows(matchedGrid, dateStart, dateEnd);
 
     // compute total costs
     float totalCosts = 0.0f;
@@ -506,8 +556,10 @@ public class Statistics extends CustomComponent {
 
       @Override
       public void select(SelectionEvent event) {
-        // Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
-        // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
+        /*
+         * Notification.show("Select row: " + matchedGrid.getSelectedRow() + " Name: " +
+         * gpcontainer.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption) .getValue());
+         */
         downloadInvoiceMatched.setEnabled(false);
         ReceiverPI =
             (String) mpc.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption).getValue();
@@ -638,7 +690,7 @@ public class Statistics extends CustomComponent {
     return matchedLayout;
   }
 
-  private Component noCostsGrid() {
+  private Component noCostsGrid(String dateStart, String dateEnd) {
 
     String buttonRefreshTitle = "Refresh";
     Button refreshMatched = new Button(buttonRefreshTitle);
@@ -649,7 +701,6 @@ public class Statistics extends CustomComponent {
     Grid noCostsGrid;
 
     refreshMatched.addClickListener(new ClickListener() {
-
 
       /**
        * 
@@ -663,7 +714,6 @@ public class Statistics extends CustomComponent {
       }
     });
 
-
     IndexedContainer mcontainer = getEmptyContainer();
 
     GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
@@ -673,7 +723,7 @@ public class Statistics extends CustomComponent {
     noCostsGrid = new Grid(mpc);
 
     setRenderers(noCostsGrid);
-    fillNoCostRows(noCostsGrid);
+    fillNoCostRows(noCostsGrid, dateStart, dateEnd);
 
     // compute total costs
     float totalCosts = 0.0f;
@@ -730,8 +780,15 @@ public class Statistics extends CustomComponent {
    * 
    * @param grid
    */
-  private void fillRows(Grid grid) {
-    List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getPhysicalTimeBlocks();
+  private void fillRows(Grid grid, String dateStart, String dateEnd) {
+    List<MachineOccupationBean> mobeans =
+        DBManager.getDatabaseInstance().getPhysicalTimeBlocksSetDates(dateStart, dateEnd);
+
+    if (mobeans.size() <= 0)
+      Notification(
+          "Oops! No Entries Found",
+          "Apparently there no entries for the selected time period, please 'Refresh' and select another time period!",
+          "error");
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
@@ -762,8 +819,17 @@ public class Statistics extends CustomComponent {
 
   }
 
-  private void fillMatchedRows(Grid grid) {
-    List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getMatchedTimeBlocks();
+  private void fillMatchedRows(Grid grid, String dateStart, String dateEnd) {
+    List<MachineOccupationBean> mobeans =
+        DBManager.getDatabaseInstance().getMatchedTimeBlocksSetDates(dateStart, dateEnd);
+
+    // System.out.println("Size: " + mobeans.size());
+
+    if (mobeans.size() <= 0)
+      Notification(
+          "Oops! No Matches Found",
+          "Apparently there no entries or no matches between the entries of the booking system and the machine output.",
+          "error");
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
@@ -785,8 +851,13 @@ public class Statistics extends CustomComponent {
 
   }
 
-  private void fillNoCostRows(Grid grid) {
-    List<MachineOccupationBean> mobeans = DBManager.getDatabaseInstance().getNoCostTimeBlocks();
+  private void fillNoCostRows(Grid grid, String dateStart, String dateEnd) {
+    List<MachineOccupationBean> mobeans =
+        DBManager.getDatabaseInstance().getNoCostTimeBlocksSetDates(dateStart, dateEnd);
+
+    if (mobeans.size() > 0)
+      Notification("Attention! Entries with No Costs!",
+          "Costs of some entries couldn't be calculated! Check the 'No Costs' tab!", "error");
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
@@ -932,6 +1003,25 @@ public class Statistics extends CustomComponent {
   public void refreshDataSources() {
     init();
 
+  }
+
+  private void Notification(String title, String description, String type) {
+    Notification notify = new Notification(title, description);
+    notify.setPosition(Position.TOP_CENTER);
+    if (type.equals("error")) {
+      notify.setDelayMsec(16000);
+      notify.setIcon(FontAwesome.FROWN_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else if (type.equals("success")) {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.SMILE_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    } else {
+      notify.setDelayMsec(8000);
+      notify.setIcon(FontAwesome.MEH_O);
+      notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    }
+    notify.show(Page.getCurrent());
   }
 
 }

@@ -2100,6 +2100,28 @@ public enum Database {
     return list;
   }
 
+
+  /**
+   * return the years which are in the logged years table
+   * 
+   * @return
+   */
+  public ArrayList<String> getLoggedYears() {
+    ArrayList<String> list = new ArrayList<String>();
+    String sql = "SELECT DISTINCT YEAR(start) FROM logs";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); Statement statement = conn.createStatement()) {
+      ResultSet rs = statement.executeQuery(sql);
+      while (rs.next()) {
+        list.add(rs.getString("YEAR(start)"));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return list;
+  }
+
   /**
    * return all role names to display inside the drop-down menu
    * 
@@ -2486,7 +2508,6 @@ public enum Database {
     return obean;
   }
 
-
   public List<MachineOccupationBean> getMatchedTimeBlocks() {
 
     String sql =
@@ -2513,8 +2534,87 @@ public enum Database {
     return obean;
   }
 
+  public List<MachineOccupationBean> getMatchedTimeBlocksSetDates(String dateStart, String dateEnd) {
+
+    String sql =
+        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
+            + dateStart + "' AND '" + dateEnd + "'";
+
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("logs.device_id"));
+        m.setDeviceName(rs.getString("logs.device_name"));
+        m.setUserFullName(rs.getString("user.user_name"));
+        m.setStart(rs.getTimestamp("logs.start"));
+        m.setEnd(rs.getTimestamp("logs.end"));
+        m.setCost(rs.getFloat("logs.cost"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+
+
+  public List<MachineOccupationBean> getPhysicalTimeBlocksSetDates(String dateStart, String dateEnd) {
+
+    String sql = "SELECT * FROM logs WHERE start BETWEEN '" + dateStart + "' AND '" + dateEnd + "'";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+
+    // System.out.println(sql);
+
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("device_id"));
+        m.setUserFullName(rs.getString("user_full_name"));
+        m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+
   public List<MachineOccupationBean> getNoCostTimeBlocks() {
     String sql = "SELECT * FROM logs WHERE cost=0";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("device_id"));
+        m.setDeviceName(rs.getString("logs.device_name"));
+        m.setUserFullName(rs.getString("user_full_name"));
+        m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+
+  public List<MachineOccupationBean> getNoCostTimeBlocksSetDates(String dateStart, String dateEnd) {
+    String sql =
+        "SELECT * FROM logs WHERE cost=0 AND start BETWEEN '" + dateStart + "' AND '" + dateEnd
+            + "'";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
 

@@ -171,6 +171,7 @@ public class Booking extends CustomComponent {
     DBManager.getDatabaseInstance();
     db = Database.Instance;
     db.userLogin(bookingModel.getLDAP());
+
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
     selectedService = new NativeSelect("Please select a Service:");
