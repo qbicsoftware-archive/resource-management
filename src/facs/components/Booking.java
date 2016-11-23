@@ -140,7 +140,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.161113");
+    versionLabel.setValue("Version 0.1.161123");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -170,7 +170,8 @@ public class Booking extends CustomComponent {
 
     DBManager.getDatabaseInstance();
     db = Database.Instance;
-    db.userLogin(bookingModel.getLDAP());
+    db.userLogin(bookingModel.getLDAP(), Page.getCurrent().getWebBrowser().getBrowserApplication(),
+        Page.getCurrent().getWebBrowser().getAddress());
 
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 

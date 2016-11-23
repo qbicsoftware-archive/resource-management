@@ -32,6 +32,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.StringToBigDecimalConverter;
 import com.vaadin.server.FontAwesome;
@@ -280,6 +281,8 @@ public class BookAdmin extends CustomComponent {
     // them
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
+
+
 
     BeanItemContainer<BookingBean> booking = getBookingList(deviceName);
 
@@ -788,6 +791,17 @@ public class BookAdmin extends CustomComponent {
           "Jeez! It's not fair!",
           "For some reason we couldn't CONFIRM this booking. Maybe it's already confirmed or already removed from the database.");
     }
+  }
+
+  private IndexedContainer getEmptyContainer() {
+    final IndexedContainer container = new IndexedContainer();
+    // some columns
+    container.addContainerProperty("service", String.class, null);
+    container.addContainerProperty("username", String.class, null);
+    container.addContainerProperty("institute", String.class, null);
+    container.addContainerProperty("start", Date.class, null);
+    container.addContainerProperty("end", Date.class, null);
+    return container;
   }
 
   private void showErrorNotification(String title, String description) {

@@ -134,6 +134,7 @@ public class Statistics extends CustomComponent {
 
     selectedQuarter = new ComboBox("Please select quarter of the year:");
     selectedQuarter.setDescription("to be added!");
+
     selectedQuarter.addItems("Jan-Mar", "Apr-Jun", "Jul-Sep", "Oct-Dec");
 
     listBookings = new Button("List Bookings");
@@ -221,6 +222,7 @@ public class Statistics extends CustomComponent {
 
     // compute total costs
     float totalCosts = 0.0f;
+
     for (Object itemId : gpcontainer.getItemIds())
       totalCosts +=
           ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue()).floatValue();
@@ -245,6 +247,8 @@ public class Statistics extends CustomComponent {
     HeaderRow filterRow = grid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
+    addRowFilter(filterRow, nameCaption, container, footer, gpcontainer);
+    addRowFilter(filterRow, instituteCaption, container, footer, gpcontainer);
 
     Label infoLabel =
         new Label(DBManager.getDatabaseInstance().getUserNameByUserID(
@@ -285,8 +289,8 @@ public class Statistics extends CustomComponent {
 
       @Override
       public void select(SelectionEvent event) {
-        Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
-            + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
+        // Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
+        // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
         downloadInvoice.setEnabled(false);
         ReceiverPI =
             (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
@@ -314,7 +318,11 @@ public class Statistics extends CustomComponent {
 
         try {
 
-          int setUserId = DBManager.getDatabaseInstance().findUserByFullName(ReceiverPI);
+          // int setUserId = DBManager.getDatabaseInstance().findUserByFullName(ReceiverPI);
+          int setUserId =
+              DBManager.getDatabaseInstance().findMainContactIDByGroupMembereFullName(ReceiverPI);
+
+          System.out.println("Main Contact ID: " + setUserId);
 
           if (setUserId > 0) {
 
@@ -324,13 +332,18 @@ public class Statistics extends CustomComponent {
             UserBean user =
                 setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
 
-            billing.setReceiverPI(ReceiverPI);
+            System.out.println("User: " + user);
+
+            System.out.println("User: " + user);
+
+            // billing.setReceiverPI(ReceiverPI);
+            billing.setReceiverPI(user.getName());
             billing.setReceiverInstitution(user.getInstitute());
             billing.setReceiverStreet(user.getStreet());
             billing.setReceiverPostalCode(user.getPostcode());
             billing.setReceiverCity(user.getCity());
 
-            billing.setSenderTitle("Einrichtung");
+            // billing.setSenderTitle("Einrichtung");
             billing.setSenderFaculty("Core Facility Durchflusszytometrie");
 
             billing.setSenderFunction("Leitung:");
@@ -360,39 +373,44 @@ public class Statistics extends CustomComponent {
             else
               billing.setProjectNumber("Keine project nummer verfügbar.");
 
-            float cost =
-                ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
-                    .getValue()).floatValue();
-            long s =
-                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
-                    .getValue()).getTime();
-            long e =
-                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), endCaption)
-                    .getValue()).getTime();
-            long timeFrame = e - s;
-            Date start =
-                ((Date) gpcontainer.getContainerProperty(grid.getSelectedRow(), startCaption)
-                    .getValue());
-            SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
-            String date = ft.format(start);
-            String description = "No Description is Available";
-            String time_frame = Formatter.toHoursAndMinutes(timeFrame);
-
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
-            entries.add(billing.new CostEntry(date, time_frame, description, cost));
+
+            for (Object itemId : gpcontainer.getItemIds()) {
+              float cost =
+              // grid.getSelectedRow() x4 is replaced by itemId below
+                  ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
+                      .floatValue();
+              long s =
+                  ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue())
+                      .getTime();
+              long e =
+                  ((Date) gpcontainer.getContainerProperty(itemId, endCaption).getValue())
+                      .getTime();
+              long timeFrame = e - s;
+              Date start =
+                  ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
+              SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
+              String date = ft.format(start);
+              String description = "No Description is Available";
+              String time_frame = Formatter.toHoursAndMinutes(timeFrame);
+
+              // ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
+              entries.add(billing.new CostEntry(date, time_frame, description, cost));
+            }
+
             billing.setCostEntries(entries);
             float totalCosts = 0.0f;
 
             // calculates the total cost of items
-            // for (Object itemId : gpcontainer.getItemIds()) {
-            // totalCosts +=
-            // ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
-            // .floatValue();
-            // }
+            for (Object itemId : gpcontainer.getItemIds()) {
+              totalCosts +=
+                  ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
+                      .floatValue();
+            }
 
-            totalCosts =
-                ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
-                    .getValue()).floatValue();
+            // totalCosts =
+            // ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
+            // .getValue()).floatValue();
 
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
 

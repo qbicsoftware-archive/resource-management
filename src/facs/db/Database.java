@@ -143,14 +143,16 @@ public enum Database {
     return str == null ? new String() : str;
   }
 
-  public void userLogin(String user_ldap) {
-    String sql = "INSERT INTO user_login (user_ldap) VALUES(?)";
+  public void userLogin(String user_ldap, String webbrowser, String ip) {
+    String sql = "INSERT INTO user_login (user_ldap, webbrowser, ip) VALUES(?,?,?)";
     // The following statement is an try-with-resources statement, which declares two resources,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
       statement.setString(1, user_ldap);
+      statement.setString(2, webbrowser);
+      statement.setString(3, ip);
       statement.execute();
       // nothing will be in the database, until you commit it!
       // conn.commit();
@@ -2100,6 +2102,26 @@ public enum Database {
     return list;
   }
 
+  /**
+   * return the years which are in the logged months table
+   * 
+   * @return
+   */
+  public ArrayList<String> getLoggedMonths() {
+    ArrayList<String> list = new ArrayList<String>();
+    String sql = "SELECT DISTINCT MONTH(start) FROM logs";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); Statement statement = conn.createStatement()) {
+      ResultSet rs = statement.executeQuery(sql);
+      while (rs.next()) {
+        list.add(rs.getString("MONTH(start)"));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return list;
+  }
 
   /**
    * return the years which are in the logged years table
@@ -2263,6 +2285,38 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         userId = rs.getInt("user_id");
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return userId;
+
+  }
+
+
+  /**
+   * retuns the user id of the main contact person for a given group member user or -1 if user can
+   * not be found.
+   * 
+   * @param fullName
+   * @return
+   */
+  public int findMainContactIDByGroupMembereFullName(String fullName) {
+    // select user_id from users where name = '?';
+    int userId = -1;
+    if (fullName == null)
+      return userId;
+
+    String sql =
+        "SELECT workgroups.`main_contact_id` FROM user INNER JOIN workgroups ON user.`workgroup_id`=workgroups.`workgroup_id` WHERE user.user_name=?";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, fullName);
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        userId = rs.getInt("main_contact_id");
       }
       statement.close();
     } catch (SQLException e) {

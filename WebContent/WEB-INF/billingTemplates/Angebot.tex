@@ -2,25 +2,23 @@
 % erstellt von Ekaterina Kohler (ekaterina.kohler@googlemail.com)
 % stark modifieziert und an die Bedürfnisse von QBiC angepasst von Nomi Meixner (nomi.meixner@student.uni-tuebingen.de)
 \documentclass[a4paper,oneside,11pt,DIV=14]{scrartcl}
-\usepackage{angebot-engl} %Uni-Design
+\usepackage{angebot-engl} 
 \usepackage{eurosym} %Eurosymbol
 
-%\usepackage{colortbl} % benötigt, falls man farbigen Tabellenhintergrund möchte
-\usepackage{booktabs}% http://ctan.org/pkg/booktab
+\usepackage{booktabs} % http://ctan.org/pkg/booktab
 
 \newcommand{\farbe}{1} %Farbiges Uni-Logo? ja=1, nein=0
-
-\newcommand{\fakult}{$sender_title \par $sender_faculty \par}
+\newcommand{\fakult}{$sender_faculty \par}
 \newcommand{\profname}{$sender_function} %Name
 \newcommand{\funkt}{$sender_name} %Funktion
 \newcommand{\anschrift}{$sender_institute \par $sender_street \par $sender_postalcode $sender_city \par}
 \newcommand{\tel}{Ansprechpartner \par $sender_name \par Telefon $sender_phone}
 \newcommand{\web}{\mbox{$sender_email}\par $sender_url \par} % Beim Zeilenumbruch \par behalten.
-
-\newcommand{\ang}{Rechnung}
+\newcommand{\vspace{20 mm}}
 %\newcommand{\ang}{Rechnungs-Nr:}{$invoice_number}
-%\newcommand{\ang}{Anfordernde Kostenstelle:}{$project_number}
-\newcommand{\angbeschr}{$project_short_description} %Bezeichnung des Angebots
+%\newcommand{\ang}{\normalsize Anfordernde Kostenstelle:}{$project_number}
+\newcommand{\angbeschr}{\Large Rechnung}
+\newcommand{\angbeschr}{\normalsize $project_short_description} %Bezeichnung des Angebots
 \newcommand{\ort}{$sender_city} %T\"{u}bingen}%Ort
 \newcommand{\datum}{\today}	%aktuelles Datum
 \newcommand{\empfaenger}{$PI \\ $institute \\ $street \\ $postalcode $city} % bis zu 5 Zeilen
