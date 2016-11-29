@@ -63,6 +63,8 @@ public class UserAdmin extends CustomComponent {
   private Grid usersGrid;
   // private Grid newContainerGrid;
 
+  private final String usernameCaption = "username";
+
   private Map<String, Grid> gridMap = new HashMap<String, Grid>();
   private GridLayout gridLayout = new GridLayout(6, 6);
 
@@ -351,7 +353,6 @@ public class UserAdmin extends CustomComponent {
       tq.setVersionColumn("OPTLOCK");
       SQLContainer container = new SQLContainer(tq);
 
-
       /*
        * FreeformQuery query = new FreeformQuery(
        * "SELECT * FROM user INNER JOIN workgroups WHERE user.workgroup_id = workgroups.workgroup_id"
@@ -363,6 +364,12 @@ public class UserAdmin extends CustomComponent {
       container.setAutoCommit(isEnabled());
 
       usersGrid = new Grid(container);
+
+      // Create a grid bound to it
+
+      usersGrid.setSelectionMode(SelectionMode.NONE);
+      usersGrid.setWidth("500px");
+      usersGrid.setHeight("300px");
 
       FieldGroup fieldGroup = usersGrid.getEditorFieldGroup();
       fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
@@ -505,6 +512,7 @@ public class UserAdmin extends CustomComponent {
 
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
+
     setCompositionRoot(gridLayout);
 
   }
@@ -520,12 +528,8 @@ public class UserAdmin extends CustomComponent {
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
 
-
-
     // BeanItemContainer<UserBean> users = getUsers();
-
     // GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
-
     // usersGrid = new Grid(gpc);
     // Create a grid
 

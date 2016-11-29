@@ -73,7 +73,6 @@ public class MachineOccupationBean implements Serializable {
   }
 
 
-
   public void setCost(float cost) {
     this.cost = cost;
   }
@@ -263,6 +262,7 @@ public class MachineOccupationBean implements Serializable {
     cytometer = setParameter(row, headerNumbers, "Cytometer");
     serialno = setParameter(row, headerNumbers, "Serial No");
     custom = setParameter(row, headerNumbers, "Custom");
+
   }
 
   // DateFormat

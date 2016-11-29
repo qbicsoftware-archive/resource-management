@@ -78,7 +78,6 @@ public class UserBean implements Serializable {
     this.project = project;
     this.email = email;
     this.phone = phone;
-    this.project = project;
     this.admin_panel = admin_panel;
   }
 
@@ -298,7 +297,7 @@ public class UserBean implements Serializable {
   @Override
   public String toString() {
     return "UserBean [id=" + id + ", name=" + name + ", workgroup=" + workgroup + ", institute="
-        + institute + ", role=" + role + ", email=" + email + ", telephon=" + phone + ", status="
-        + status + ", kostenstelle=" + kostenstelle + "]";
+        + institute + "project=" + project + ", role=" + role + ", email=" + email + ", telephon="
+        + phone + ", status=" + status + ", kostenstelle=" + kostenstelle + "]";
   }
 }

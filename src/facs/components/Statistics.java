@@ -77,6 +77,7 @@ public class Statistics extends CustomComponent {
   private final String costCaption = "Cost";
   private final String nameCaption = "Name";
   private final String instituteCaption = "Institute";
+  private final String projectCaption = "Project";
   private final String CAPTION = "Usage/Statistics";
 
   // private NativeSelect selectedYear;
@@ -249,6 +250,7 @@ public class Statistics extends CustomComponent {
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, nameCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, instituteCaption, container, footer, gpcontainer);
+    addRowFilter(filterRow, projectCaption, container, footer, gpcontainer);
 
     Label infoLabel =
         new Label(DBManager.getDatabaseInstance().getUserNameByUserID(
@@ -271,6 +273,8 @@ public class Statistics extends CustomComponent {
     gridLayout.addComponent(refresh);
     gridLayout.addComponent(createInvoice);
     gridLayout.addComponent(downloadInvoice);
+
+    // gridLayout.setExpandRatio(grid, 3);
 
     // gridLayout.addComponent(selectedYear);
     // gridLayout.addComponent(selectedQuarter);
@@ -314,7 +318,7 @@ public class Statistics extends CustomComponent {
 
         Paths.get(basepath, "WEB-INF/billingTemplates");
 
-        System.out.println("Basepath: " + basepath);
+        // System.out.println("Basepath: " + basepath);
 
         try {
 
@@ -322,7 +326,7 @@ public class Statistics extends CustomComponent {
           int setUserId =
               DBManager.getDatabaseInstance().findMainContactIDByGroupMembereFullName(ReceiverPI);
 
-          System.out.println("Main Contact ID: " + setUserId);
+          // System.out.println("Main Contact ID: " + setUserId);
 
           if (setUserId > 0) {
 
@@ -332,9 +336,7 @@ public class Statistics extends CustomComponent {
             UserBean user =
                 setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
 
-            System.out.println("User: " + user);
-
-            System.out.println("User: " + user);
+            // System.out.println("User: " + user);
 
             // billing.setReceiverPI(ReceiverPI);
             billing.setReceiverPI(user.getName());
@@ -555,6 +557,9 @@ public class Statistics extends CustomComponent {
     HeaderRow filterRow = matchedGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
     addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, nameCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, projectCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, instituteCaption, mcontainer, footer, mpc);
 
     matchedLayout.setMargin(true);
     matchedLayout.setSpacing(true);
@@ -769,6 +774,9 @@ public class Statistics extends CustomComponent {
     HeaderRow filterRow = noCostsGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
     addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, nameCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, projectCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, instituteCaption, mcontainer, footer, mpc);
 
     noCostLayout.setMargin(true);
     noCostLayout.setSpacing(true);
@@ -809,7 +817,9 @@ public class Statistics extends CustomComponent {
           "error");
 
     for (MachineOccupationBean mobean : mobeans) {
+
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+      // System.out.println("userId: " + userId);
 
       // List<String> kostenStelle = new ArrayList<String>();
       // String kostenStelle;
@@ -817,6 +827,7 @@ public class Statistics extends CustomComponent {
 
       String kostenStelle = "unknown";
       String institute = "unknown";
+      String project = "n/a";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       float cost = -1.f;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
@@ -825,12 +836,15 @@ public class Statistics extends CustomComponent {
         // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
+        // System.out.println("User Institute (fillRows): " + institute);
+        project = user.getProject();
+        // System.out.println("User Project (fillRows): " + project);
         // System.out.println(user.getId() + " ************************************* "
         // + mobean.getDeviceId());
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
       grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
-          kostenStelle, mobean.getStart(), end, cost, mobean.getUserFullName(), institute);
+          kostenStelle, project, institute, mobean.getStart(), end, cost, mobean.getUserFullName());
       // System.out.println("User: " + user.getName() + " Kostenstelle:" + kostenStelle);
       // kostenStelle.get(0), mobean.getStart(), end, cost, institute);
     }
@@ -854,6 +868,7 @@ public class Statistics extends CustomComponent {
       float cost = -1;
       String kostenStelle = "unknown";
       String institute = "unknown";
+      String project = "n/a";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
@@ -861,10 +876,12 @@ public class Statistics extends CustomComponent {
         // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
+        project = user.getProject();
+        // System.out.println("User Project (fillMatchedRows): " + project);
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, mobean.getCost(),
-          mobean.getUserFullName(), institute);
+      grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(), end,
+          mobean.getCost(), mobean.getUserFullName());
     }
 
   }
@@ -882,6 +899,7 @@ public class Statistics extends CustomComponent {
       float cost = -1;
       String kostenStelle = "unknown";
       String institute = "unknown";
+      String project = "n/a";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
@@ -889,10 +907,12 @@ public class Statistics extends CustomComponent {
         // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
+        project = user.getProject();
+        // System.out.println("User Project (fillNoCosts): " + project);
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, mobean.getStart(), end, mobean.getCost(),
-          mobean.getUserFullName(), institute);
+      grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(), end,
+          mobean.getCost(), mobean.getUserFullName());
     }
 
   }
@@ -924,11 +944,12 @@ public class Statistics extends CustomComponent {
     // some columns
     container.addContainerProperty(deviceCaption, String.class, null);
     container.addContainerProperty(kostenstelleCaption, String.class, null);
+    container.addContainerProperty(projectCaption, String.class, null);
+    container.addContainerProperty(instituteCaption, String.class, null);
     container.addContainerProperty(startCaption, Date.class, null);
     container.addContainerProperty(endCaption, Date.class, null);
     container.addContainerProperty(costCaption, Float.class, null);
     container.addContainerProperty(nameCaption, String.class, null);
-    container.addContainerProperty(instituteCaption, String.class, null);
     return container;
   }
 
