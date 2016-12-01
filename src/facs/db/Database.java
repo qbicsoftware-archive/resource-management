@@ -1025,6 +1025,55 @@ public enum Database {
     return booking_id;
   }
 
+  public ArrayList<CalendarEvent> getAllBookingsPlusMachineOutput(String uuid, String device_name) {
+    ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
+    String sql =
+        "SELECT DISTINCT * FROM logs INNER JOIN user ON logs.user_full_name = user.user_name WHERE user_ldap != 'deleted' AND logs.device_name = ?;";
+
+    String sql2 =
+        "SELECT DISTINCT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE user.user_ldap != 'deleted' AND booking.`deleted` IS NULL AND booking.device_name = ?;";
+
+    try (Connection conn = login();
+        PreparedStatement statement2 = conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS)) {
+      statement2.setString(1, device_name);
+      ResultSet rs2 = statement2.executeQuery();
+
+      while (rs2.next()) {
+
+        BasicEvent cannotbedeleted2 =
+            new BasicEvent(rs2.getString("user.user_name"), "Contact: "
+                + rs2.getString("user.email") + " · Tel: " + rs2.getString("user.phone"),
+                rs2.getTimestamp("booking.start"), rs2.getTimestamp("booking.end"));
+        cannotbedeleted2.setStyleName("color3");
+        events.add(cannotbedeleted2);
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, device_name);
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+
+        BasicEvent cannotbedeleted =
+            new BasicEvent(rs.getString("logs.user_full_name"), "Contact: "
+                + rs.getString("user.email") + " · Tel: " + rs.getString("user.phone"),
+                rs.getTimestamp("logs.start"), rs.getTimestamp("logs.end"));
+        cannotbedeleted.setStyleName("color5");
+        events.add(cannotbedeleted);
+
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return events;
+  }
+
   public ArrayList<CalendarEvent> getAllBookings(String uuid, String device_name) {
     ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
     String sql =
@@ -1157,9 +1206,7 @@ public enum Database {
 
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
       statement.setString(1, device_name);
-
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         bookings.add(new BookingBean(rs.getInt("booking_id"), rs.getString("user_name"), rs

@@ -7,5 +7,6 @@
         <portlet id="FacsSettings"/>
         <portlet id="FacsBookAdmin"/>
         <portlet id="FacsUserAdmin"/>
+        <portlet id="FacsCompareCal"/>
     </category>
 </display>

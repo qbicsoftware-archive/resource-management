@@ -65,4 +65,40 @@ public class FacsModelUtil {
 
   }
 
+  public static BookingModel getCompareBookingModel() {
+
+    DBManager.getDatabaseInstance();
+    db = Database.Instance;
+
+    ArrayList<String> deviceNames = new ArrayList<String>();
+
+    deviceNames = db.getDeviceNames();
+    UserBean user = db.getUserByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName());
+
+    BookingModel bookingModel = new BookingModel(user);
+
+    ArrayList<DeviceBean> dbs = new ArrayList<DeviceBean>(5);
+    dbs = (ArrayList<DeviceBean>) db.getDevices();
+
+    Map<String, List<CalendarEvent>> events = new HashMap<String, List<CalendarEvent>>();
+
+    ArrayList<CalendarEvent> allBookings = new ArrayList<CalendarEvent>();
+
+    Iterator<String> iterator = deviceNames.iterator();
+
+    int iterator_index = 0;
+
+    while (iterator.hasNext()) {
+      allBookings =
+          db.getAllBookingsPlusMachineOutput(bookingModel.getLDAP(),
+              deviceNames.get(iterator_index));
+      events.put(iterator.next(), allBookings);
+      iterator_index++;
+    }
+
+    bookingModel.setDeviceCalendarEvents(events);
+    bookingModel.setDevices(dbs);
+    return bookingModel;
+
+  }
 }
