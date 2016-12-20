@@ -35,7 +35,6 @@ public class BookingModel implements Serializable {
 
   private Map<String, List<CalendarEvent>> deviceCalendarEvents;
 
-
   public BookingModel(UserBean user) {
     this.user = user;
   }

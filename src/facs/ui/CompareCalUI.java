@@ -66,8 +66,6 @@ public class CompareCalUI extends UI {
     }
   }
 
-
-
   private Component errorView() {
     Label label = new Label();
     label.addStyleName(ValoTheme.LABEL_FAILURE);
