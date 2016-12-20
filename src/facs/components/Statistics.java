@@ -168,6 +168,7 @@ public class Statistics extends CustomComponent {
         statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
         statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
         statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
+        statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced");
 
         selectedYear.setCaption("Selected Year:");
         selectedQuarter.setCaption("Selected Quarter:");
@@ -398,6 +399,7 @@ public class Statistics extends CustomComponent {
 
               // ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
               entries.add(billing.new CostEntry(date, time_frame, description, cost));
+
             }
 
             billing.setCostEntries(entries);
@@ -408,6 +410,10 @@ public class Statistics extends CustomComponent {
               totalCosts +=
                   ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
                       .floatValue();
+              System.out.println("ItemIDs: " + itemId);
+
+              DBManager.getDatabaseInstance().itemInvoiced((int) itemId);
+
             }
 
             // totalCosts =
@@ -789,6 +795,83 @@ public class Statistics extends CustomComponent {
     return noCostLayout;
   }
 
+  private Component invoicedGrid(String dateStart, String dateEnd) {
+
+    String buttonRefreshTitle = "Refresh";
+    Button refreshMatched = new Button(buttonRefreshTitle);
+    refreshMatched.setIcon(FontAwesome.REFRESH);
+    refreshMatched.setDescription("Click here to reload the data from the database!");
+    refreshMatched.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+    Grid invoicedGrid;
+
+    refreshMatched.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        refreshDataSources();
+
+      }
+    });
+
+    IndexedContainer mcontainer = getEmptyContainer();
+
+    GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
+
+    VerticalLayout invoicedLayout = new VerticalLayout();
+
+    invoicedGrid = new Grid(mpc);
+
+    setRenderers(invoicedGrid);
+    fillInvoicedRows(invoicedGrid, dateStart, dateEnd);
+
+    // compute total costs
+    float totalCosts = 0.0f;
+    for (Object itemId : mpc.getItemIds())
+      totalCosts +=
+          ((Number) mpc.getContainerProperty(itemId, costCaption).getValue()).floatValue();
+
+    // compute total time in milliseconds
+    long total = 0;
+    for (Object itemId : mpc.getItemIds()) {
+      long s = ((Date) mpc.getContainerProperty(itemId, startCaption).getValue()).getTime();
+      long e = ((Date) mpc.getContainerProperty(itemId, endCaption).getValue()).getTime();
+      total += e - s;
+    }
+
+    // set footer to contain total cost and time in hours:minutes
+    FooterRow footer = invoicedGrid.appendFooterRow();
+    FooterCell footerCellCost = footer.getCell(costCaption);
+    footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
+
+    FooterCell footerCellEnd = footer.getCell(endCaption);
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+
+    // Set up a filter for all columns
+    HeaderRow filterRow = invoicedGrid.appendHeaderRow();
+    addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, nameCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, projectCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, instituteCaption, mcontainer, footer, mpc);
+
+    invoicedLayout.setMargin(true);
+    invoicedLayout.setSpacing(true);
+    // devicesGrid.setWidth("100%");
+    invoicedGrid.setSizeFull();
+
+    invoicedLayout.addComponent(invoicedGrid);
+    invoicedLayout.addComponent(refreshMatched);
+
+    return invoicedLayout;
+  }
+
+
   private void setRenderers(Grid grid) {
     grid.getColumn(costCaption).setRenderer(new NumberRenderer("%1$.2f €"));
 
@@ -917,7 +1000,34 @@ public class Statistics extends CustomComponent {
 
   }
 
+  private void fillInvoicedRows(Grid grid, String dateStart, String dateEnd) {
+    List<MachineOccupationBean> mobeans =
+        DBManager.getDatabaseInstance().getInvoicedTimeBlocksSetDates(dateStart, dateEnd);
 
+    if (mobeans.size() > 0)
+
+      for (MachineOccupationBean mobean : mobeans) {
+        int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+        float cost = -1;
+        String kostenStelle = "unknown";
+        String institute = "unknown";
+        String project = "n/a";
+        UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
+        Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
+        if (user != null) {
+          // System.out.println("userId: " + userId);
+          // System.out.println("name: " + mobean.getUserFullName());
+          kostenStelle = user.getKostenstelle();
+          institute = user.getInstitute();
+          project = user.getProject();
+          // System.out.println("User Project (fillNoCosts): " + project);
+          cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        }
+        grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(),
+            end, mobean.getCost(), mobean.getUserFullName());
+      }
+
+  }
 
   private float getCost(int userId, Date start, Date end, int resourceId) {
     // System.out.println("Statistics: UserId: " + userId + " ResourceId: " + resourceId);

@@ -1532,6 +1532,22 @@ public enum Database {
     }
   }
 
+  public void addNewUser(String name) {
+    String sql = "INSERT INTO user (user_name) VALUES(?)";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, name);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
   public int addKostenstelle(String name, String abbreviation) {
     int costLocId = -1;
     if (name == null || name.isEmpty()) {
@@ -2228,6 +2244,27 @@ public enum Database {
     return list;
   }
 
+
+  // when invoice for the logs are generated the items in the logs are updated as invoiced
+  public boolean itemInvoiced(int itemId) {
+    boolean success = false;
+    if (itemId < 0)
+      return success;
+    String sql = "UPDATE logs SET invoiced = 1 WHERE log_id = ?";
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setInt(1, itemId);
+      int result = statement.executeUpdate();
+      success = (result > 0);
+      // System.out.println("Database 782: "+ success);
+    } catch (SQLException e) {
+      // System.out.println("Database 784: "+ success);
+      e.printStackTrace();
+    }
+    // System.out.println("Database 787: "+ success);
+    return success;
+
+  }
+
   /**
    * return all group names to display inside the drop-down menu
    * 
@@ -2638,7 +2675,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocksSetDates(String dateStart, String dateEnd) {
 
     String sql =
-        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
+        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.invoiced IS NULL AND logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
             + dateStart + "' AND '" + dateEnd + "'";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
@@ -2665,7 +2702,9 @@ public enum Database {
 
   public List<MachineOccupationBean> getPhysicalTimeBlocksSetDates(String dateStart, String dateEnd) {
 
-    String sql = "SELECT * FROM logs WHERE start BETWEEN '" + dateStart + "' AND '" + dateEnd + "'";
+    String sql =
+        "SELECT * FROM logs WHERE invoiced IS NULL AND start BETWEEN '" + dateStart + "' AND '"
+            + dateEnd + "'";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
 
     // System.out.println(sql);
@@ -2690,7 +2729,7 @@ public enum Database {
   }
 
   public List<MachineOccupationBean> getNoCostTimeBlocks() {
-    String sql = "SELECT * FROM logs WHERE cost=0";
+    String sql = "SELECT * FROM logs WHERE cost=0 AND invoiced IS NULL";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
 
@@ -2737,6 +2776,30 @@ public enum Database {
     return obean;
   }
 
+  public List<MachineOccupationBean> getInvoicedTimeBlocksSetDates(String dateStart, String dateEnd) {
+    String sql =
+        "SELECT * FROM logs WHERE invoiced = 1 AND start BETWEEN '" + dateStart + "' AND '"
+            + dateEnd + "'";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setDeviceId(rs.getInt("device_id"));
+        m.setDeviceName(rs.getString("logs.device_name"));
+        m.setUserFullName(rs.getString("user_full_name"));
+        m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
 
 
   public UserBean getUserByLDAPId(String userId) {

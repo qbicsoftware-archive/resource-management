@@ -115,13 +115,19 @@ public class UserAdmin extends CustomComponent {
     refresh.setDescription("Click here to reload the data from the database!");
     refresh.addStyleName(ValoTheme.BUTTON_FRIENDLY);
 
+    String addUserTitle = "Add New User";
+    Button addUserButton = new Button(addUserTitle);
+    addUserButton.setIcon(FontAwesome.PLUS);
+    addUserButton.setSizeFull();
+    addUserButton
+        .setDescription("Click here to add a new user but don't forget to update the details");
+
     // String buttonTitleSave = "Save";
     // Button save = new Button(buttonTitleSave);
     // save.setIcon(FontAwesome.SAVE);
     // save.setSizeFull();
     // save.setDescription("Click here to save all changes!");
     // save.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-
 
     userDevice = new ListSelect("Instrument or Service");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
@@ -169,6 +175,24 @@ public class UserAdmin extends CustomComponent {
     Button updateUser = new Button(buttonTitle);
     updateUser.setIcon(FontAwesome.WRENCH);
     updateUser.setDescription("Click here to update your user role and group!");
+
+    addUserButton.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -8828850002167821419L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        DBManager.getDatabaseInstance().addNewUser("*** New User ***");
+        refreshDataSources();
+        Notification(
+            "New User Added",
+            "Please remind to edit user details such as 'username, name, email, phone, kostenstelle, project' and set the correct 'workgroup, role and group'.",
+            "success");
+      }
+    });
 
     refresh.addClickListener(new ClickListener() {
       private static final long serialVersionUID = -3610721151565496269L;
@@ -498,6 +522,7 @@ public class UserAdmin extends CustomComponent {
     // gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
     gridLayout.addComponent(userAdmin, 0, 1, 5, 1);
     gridLayout.addComponent(refresh, 0, 2);
+    gridLayout.addComponent(addUserButton, 1, 2);
     gridLayout.addComponent(isAdmin, 5, 2);
     // gridLayout.addComponent(save);
 
