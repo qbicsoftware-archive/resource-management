@@ -140,7 +140,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.161220");
+    versionLabel.setValue("Version 0.1.161227");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");

@@ -70,6 +70,7 @@ public class Statistics extends CustomComponent {
 
   private static final long serialVersionUID = 4811041982287436302L;
 
+  private final String logIdCaption = "LogId";
   private final String deviceCaption = "Device";
   private final String kostenstelleCaption = "Kostenstelle";
   private final String startCaption = "Start";
@@ -298,9 +299,13 @@ public class Statistics extends CustomComponent {
         // Notification.show("Select row: " + grid.getSelectedRow() + " Name: "
         // + gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption).getValue());
         downloadInvoice.setEnabled(false);
-        ReceiverPI =
-            (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
-                .getValue();
+        try {
+          ReceiverPI =
+              (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), nameCaption)
+                  .getValue();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
         createInvoice.setEnabled(true);
       }
     });
@@ -411,9 +416,9 @@ public class Statistics extends CustomComponent {
               totalCosts +=
                   ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
                       .floatValue();
-              // System.out.println("ItemIDs: " + itemId);
 
-              DBManager.getDatabaseInstance().itemInvoiced((int) itemId);
+              DBManager.getDatabaseInstance().itemInvoiced(
+                  (int) gpcontainer.getContainerProperty(itemId, logIdCaption).getValue());
 
             }
 
@@ -534,6 +539,7 @@ public class Statistics extends CustomComponent {
     mpc = new GeneratedPropertyContainer(mcontainer);
     VerticalLayout matchedLayout = new VerticalLayout();
     matchedGrid = new Grid(mpc);
+
     setRenderers(matchedGrid);
     fillMatchedRows(matchedGrid, dateStart, dateEnd);
 
@@ -660,6 +666,7 @@ public class Statistics extends CustomComponent {
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
 
             for (Object itemIdMatched : mpc.getItemIds()) {
+
               float cost =
               // grid.getSelectedRow() x4 is replaced by itemId below
                   ((Number) mpc.getContainerProperty(itemIdMatched, costCaption).getValue())
@@ -686,18 +693,21 @@ public class Statistics extends CustomComponent {
 
             // calculates the total cost of items
             for (Object itemIdMatched : mpc.getItemIds()) {
+
               totalCosts +=
                   ((Number) mpc.getContainerProperty(itemIdMatched, costCaption).getValue())
                       .floatValue();
 
-              System.out.println("ItemIDs: " + itemIdMatched);
+              // Notification.show("Selected "
+              // + DBManager.getDatabaseInstance().);
 
-              DBManager.getDatabaseInstance().itemInvoiced((int) itemIdMatched);
+              DBManager.getDatabaseInstance().itemInvoiced(
+                  (int) gpcontainer.getContainerProperty(itemIdMatched, logIdCaption).getValue());
+
 
             }
 
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
-
             bill = billing.createPdf();
             // System.out.println(bill.getAbsolutePath());
             if (fileDownloader != null)
@@ -942,7 +952,14 @@ public class Statistics extends CustomComponent {
         // + mobean.getDeviceId());
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
+
+      // System.out.println("LogId: " + mobean.getLogId() + " Device: "
+      // + DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName()
+      // + " Kostenstelle: " + kostenStelle + " Project: " + project + " Institute: " + institute
+      // + " Start: " + mobean.getStart() + " End: " + end + " Cost: " + cost
+      // + " User Full Name: " + mobean.getUserFullName());
+      grid.addRow(mobean.getLogId(),
+          DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
           kostenStelle, project, institute, mobean.getStart(), end, cost, mobean.getUserFullName());
       // System.out.println("User: " + user.getName() + " Kostenstelle:" + kostenStelle);
       // kostenStelle.get(0), mobean.getStart(), end, cost, institute);
@@ -979,8 +996,8 @@ public class Statistics extends CustomComponent {
         // System.out.println("User Project (fillMatchedRows): " + project);
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(), end,
-          mobean.getCost(), mobean.getUserFullName());
+      grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
+          mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
     }
 
   }
@@ -1010,8 +1027,8 @@ public class Statistics extends CustomComponent {
         // System.out.println("User Project (fillNoCosts): " + project);
         cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
       }
-      grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(), end,
-          mobean.getCost(), mobean.getUserFullName());
+      grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
+          mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
     }
 
   }
@@ -1039,8 +1056,8 @@ public class Statistics extends CustomComponent {
           // System.out.println("User Project (fillNoCosts): " + project);
           cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
         }
-        grid.addRow(mobean.getDeviceName(), kostenStelle, project, institute, mobean.getStart(),
-            end, mobean.getCost(), mobean.getUserFullName());
+        grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
+            mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
       }
 
   }
@@ -1068,6 +1085,7 @@ public class Statistics extends CustomComponent {
   private IndexedContainer getEmptyContainer() {
     final IndexedContainer container = new IndexedContainer();
     // some columns
+    container.addContainerProperty(logIdCaption, Integer.class, null);
     container.addContainerProperty(deviceCaption, String.class, null);
     container.addContainerProperty(kostenstelleCaption, String.class, null);
     container.addContainerProperty(projectCaption, String.class, null);
@@ -1092,7 +1110,7 @@ public class Statistics extends CustomComponent {
     HeaderCell headerCellDevice = headerRow.getCell(propertyId);
     // Have an input field to use for filter
     TextField filterField = new TextField();
-    filterField.setColumns(8);
+    filterField.setColumns(9);
     filterField.setInputPrompt("Filter");
     filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
     // Update filter When the filter input is changed

@@ -466,10 +466,10 @@ public class UserAdmin extends CustomComponent {
                       .toString()));
 
 
-              Notification
-                  .show("Selected "
-                      + usersGrid.getContainerDataSource().getItem(selected)
-                          .getItemProperty("user_id"));
+              Notification.show("Selected "
+                  + DBManager.getDatabaseInstance().getUserRoleByUserId(
+                      usersGrid.getContainerDataSource().getItem(selected)
+                          .getItemProperty("user_id").toString()));
             } else
               Notification.show("Nothing selected");
           });

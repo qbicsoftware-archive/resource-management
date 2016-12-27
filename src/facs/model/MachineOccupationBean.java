@@ -28,6 +28,7 @@ public class MachineOccupationBean implements Serializable {
   private static final long serialVersionUID = -5872162758160232199L;
 
   private int id;
+  private int logId;
   private int deviceId;
   private Date start;
   private Date end;
@@ -72,6 +73,13 @@ public class MachineOccupationBean implements Serializable {
     corrupted = false;
   }
 
+  public void setLogId(int logId) {
+    this.logId = logId;
+  }
+
+  public int getLogId() {
+    return logId;
+  }
 
   public void setCost(float cost) {
     this.cost = cost;

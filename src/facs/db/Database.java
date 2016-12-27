@@ -2255,12 +2255,9 @@ public enum Database {
       statement.setInt(1, itemId);
       int result = statement.executeUpdate();
       success = (result > 0);
-      // System.out.println("Database 782: "+ success);
     } catch (SQLException e) {
-      // System.out.println("Database 784: "+ success);
       e.printStackTrace();
     }
-    // System.out.println("Database 787: "+ success);
     return success;
 
   }
@@ -2632,6 +2629,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setId(rs.getInt("log_id"));
         m.setDeviceId(rs.getInt("device_id"));
         m.setUserFullName(rs.getString("user_full_name"));
         m.setUserName(rs.getString("user_name"));
@@ -2649,7 +2647,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocks() {
 
     String sql =
-        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
+        "SELECT DISTINCT logs.log_id logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -2657,6 +2655,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("logs.log_id"));
         m.setDeviceId(rs.getInt("logs.device_id"));
         m.setDeviceName(rs.getString("logs.device_name"));
         m.setUserFullName(rs.getString("user.user_name"));
@@ -2675,7 +2674,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocksSetDates(String dateStart, String dateEnd) {
 
     String sql =
-        "SELECT DISTINCT logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.invoiced IS NULL AND logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
+        "SELECT DISTINCT logs.log_id, logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.invoiced IS NULL AND logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
             + dateStart + "' AND '" + dateEnd + "'";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
@@ -2684,6 +2683,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("logs.log_id"));
         m.setDeviceId(rs.getInt("logs.device_id"));
         m.setDeviceName(rs.getString("logs.device_name"));
         m.setUserFullName(rs.getString("user.user_name"));
@@ -2699,7 +2699,6 @@ public enum Database {
     return obean;
   }
 
-
   public List<MachineOccupationBean> getPhysicalTimeBlocksSetDates(String dateStart, String dateEnd) {
 
     String sql =
@@ -2714,6 +2713,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("log_id"));
         m.setDeviceId(rs.getInt("device_id"));
         m.setUserFullName(rs.getString("user_full_name"));
         m.setUserName(rs.getString("user_name"));
@@ -2761,6 +2761,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("log_id"));
         m.setDeviceId(rs.getInt("device_id"));
         m.setDeviceName(rs.getString("logs.device_name"));
         m.setUserFullName(rs.getString("user_full_name"));
@@ -2786,6 +2787,7 @@ public enum Database {
       ResultSet rs = statement.executeQuery();
       while (rs.next()) {
         MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("log_id"));
         m.setDeviceId(rs.getInt("device_id"));
         m.setDeviceName(rs.getString("logs.device_name"));
         m.setUserFullName(rs.getString("user_full_name"));
@@ -2800,7 +2802,6 @@ public enum Database {
     }
     return obean;
   }
-
 
   public UserBean getUserByLDAPId(String userId) {
     String sql =
