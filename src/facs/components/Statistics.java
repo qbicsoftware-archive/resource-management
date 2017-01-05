@@ -537,6 +537,7 @@ public class Statistics extends CustomComponent {
 
     IndexedContainer mcontainer = getEmptyContainer();
     mpc = new GeneratedPropertyContainer(mcontainer);
+
     VerticalLayout matchedLayout = new VerticalLayout();
     matchedGrid = new Grid(mpc);
 
@@ -702,7 +703,7 @@ public class Statistics extends CustomComponent {
               // + DBManager.getDatabaseInstance().);
 
               DBManager.getDatabaseInstance().itemInvoiced(
-                  (int) gpcontainer.getContainerProperty(itemIdMatched, logIdCaption).getValue());
+                  (int) mpc.getContainerProperty(itemIdMatched, logIdCaption).getValue());
 
 
             }
@@ -723,7 +724,7 @@ public class Statistics extends CustomComponent {
             downloadInvoiceMatched.setEnabled(false);
             showErrorNotification(
                 "No such user found!",
-                "An error occured while trying to create the invoice. The common problem occurs to be: this no such user in the database.");
+                "An error occured while trying to create the invoice. The common problem occurs to be: there is no such user in the database. Make sure that each Workgroup has a main contact person assigned.");
           }
         }
 
