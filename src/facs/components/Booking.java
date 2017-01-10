@@ -140,7 +140,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.170105");
+    versionLabel.setValue("Version 0.1.170110");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -825,12 +825,17 @@ public class Booking extends CustomComponent {
               // user =
               // UserLocalServiceUtil.getUser(Long.parseLong(VaadinService.getCurrent().getCurrentRequest().getRemoteUser()));
 
+              long s = event.getStart().getTime();
+              long e = event.getEnd().getTime();
+              long duration = e - s;
+
               ((BasicEvent) event).setStyleName("color2");
               db.addBooking(
                   bookingModel.getLDAP(),
                   (String) selectedDevice.getValue(),
                   event.getStart(),
                   event.getEnd(),
+                  duration,
                   (String) selectedService.getValue(),
                   (String) selectedKostenstelle.getValue(),
                   bookingModel.cost(
@@ -868,6 +873,10 @@ public class Booking extends CustomComponent {
               // user =
               // UserLocalServiceUtil.getUser(Long.parseLong(VaadinService.getCurrent().getCurrentRequest().getRemoteUser()));
 
+              long s = event.getStart().getTime();
+              long e = event.getEnd().getTime();
+              long duration = e - s;
+
               ((BasicEvent) event).setStyleName("color2");
               if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
                 db.addBooking(
@@ -875,6 +884,7 @@ public class Booking extends CustomComponent {
                     (String) selectedDevice.getValue(),
                     event.getStart(),
                     event.getEnd(),
+                    duration,
                     (String) selectedService.getValue(),
                     (String) selectedKostenstelle.getValue(),
                     bookingModel.cost(
@@ -891,6 +901,7 @@ public class Booking extends CustomComponent {
                     (String) selectedDevice.getValue(),
                     event.getStart(),
                     event.getEnd(),
+                    duration,
                     (String) selectedService.getValue(),
                     (String) selectedKostenstelle.getValue(),
                     bookingModel.cost(
@@ -904,6 +915,7 @@ public class Booking extends CustomComponent {
                     (String) selectedDevice.getValue(),
                     event.getStart(),
                     event.getEnd(),
+                    duration,
                     (String) selectedService.getValue(),
                     (String) selectedKostenstelle.getValue(),
                     bookingModel.cost(

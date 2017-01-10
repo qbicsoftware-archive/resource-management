@@ -944,8 +944,8 @@ public enum Database {
     return success;
   }
 
-  public int addBooking(String uuid, String device_name, Date start, Date end, String service,
-      String kostenstelle, double cost) {
+  public int addBooking(String uuid, String device_name, Date start, Date end, long duration,
+      String service, String kostenstelle, double cost) {
     int booking_id = -1;
     if (uuid == null || uuid.isEmpty() || start == null || end == null) {
       return booking_id;
@@ -957,7 +957,7 @@ public enum Database {
     // System.out.println("Database.java 131 sql start: " + sqlStart);
     // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
     String sql =
-        "INSERT INTO booking (user_ldap, device_name, start, end, service, kostenstelle, price) VALUES(?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO booking (user_ldap, device_name, start, end, duration, service, kostenstelle, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -966,9 +966,10 @@ public enum Database {
       statement.setString(2, device_name);
       statement.setTimestamp(3, sqlStart);
       statement.setTimestamp(4, sqlEnd);
-      statement.setString(5, service);
-      statement.setString(6, kostenstelle);
-      statement.setDouble(7, cost);
+      statement.setLong(5, duration);
+      statement.setString(6, service);
+      statement.setString(7, kostenstelle);
+      statement.setDouble(8, cost);
       // execute the statement, data IS NOT commit yet
       statement.execute();
       ResultSet rs = statement.getGeneratedKeys();
@@ -984,8 +985,8 @@ public enum Database {
     return booking_id;
   }
 
-  public int addBooking(String uuid, String device_name, Date start, Date end, String service,
-      String kostenstelle, double cost, boolean confirmation) {
+  public int addBooking(String uuid, String device_name, Date start, Date end, long duration,
+      String service, String kostenstelle, double cost, boolean confirmation) {
     int booking_id = -1;
     if (uuid == null || uuid.isEmpty() || start == null || end == null) {
       return booking_id;
@@ -997,7 +998,7 @@ public enum Database {
     // System.out.println("Database.java 131 sql start: " + sqlStart);
     // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
     String sql =
-        "INSERT INTO booking (user_ldap, device_name, start, end, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO booking (user_ldap, device_name, start, end, duration, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -1006,10 +1007,11 @@ public enum Database {
       statement.setString(2, device_name);
       statement.setTimestamp(3, sqlStart);
       statement.setTimestamp(4, sqlEnd);
-      statement.setString(5, service);
-      statement.setString(6, kostenstelle);
-      statement.setDouble(7, cost);
-      statement.setBoolean(8, confirmation);
+      statement.setLong(5, duration);
+      statement.setString(6, service);
+      statement.setString(7, kostenstelle);
+      statement.setDouble(8, cost);
+      statement.setBoolean(9, confirmation);
       // execute the statement, data IS NOT commit yet
       statement.execute();
       ResultSet rs = statement.getGeneratedKeys();
@@ -2518,7 +2520,8 @@ public enum Database {
    * @return
    */
   public boolean addPhysicalTimeBlock(int deviceId, String deviceName, String userName,
-      String userFullName, Date startRound, Date start, Date end, String byUser, float Cost) {
+      String userFullName, Date startRound, Date start, Date end, long duration, String byUser,
+      float Cost) {
     // select user_id from users where name = '?';
     boolean id = false;
     if (deviceId == -1 || userName == null) {
@@ -2528,7 +2531,7 @@ public enum Database {
     userFullName = userFullName.replace("\"", "");
 
     String sql =
-        "INSERT INTO logs (device_id, device_name, user_name, user_full_name, start_round, start, end, by_user, corrupt, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO logs (device_id, device_name, user_name, user_full_name, start_round, start, end, duration, by_user, corrupt, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     // The following statement is an try-with-resources statement, which declares two resources,
     // conn and statement, which will be automatically closed when the try block terminates
@@ -2549,23 +2552,27 @@ public enum Database {
       } else {
         statement.setTimestamp(6, new Timestamp(start.getTime()));
       }
+
       if (end == null) {
         statement.setNull(7, java.sql.Types.TIMESTAMP);
       } else {
         statement.setTimestamp(7, new Timestamp(end.getTime()));
       }
-      statement.setString(8, byUser);
+
+      statement.setLong(8, duration);
+
+      statement.setString(9, byUser);
 
       // System.out.println("Username: " + userFullName + " length: " + userFullName.length()
       // + " is empty: " + userFullName.isEmpty());
 
       if (userFullName.length() < 2 || end == null || start == null) {
         int corrupt = 1;
-        statement.setInt(9, corrupt);
+        statement.setInt(10, corrupt);
       } else
-        statement.setNull(9, java.sql.Types.INTEGER);
+        statement.setNull(10, java.sql.Types.INTEGER);
 
-      statement.setFloat(10, Cost);
+      statement.setFloat(11, Cost);
 
       // System.out.println("Statement: " + statement);
 

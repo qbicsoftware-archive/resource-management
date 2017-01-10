@@ -89,6 +89,7 @@ public class Billing {
       ParseErrorException, Exception {
     this.templateFileName = templateFileName;
     template = Velocity.getTemplate(templateFileName);
+    System.out.println("Template Name: " + template);
     tempTexFile =
         new File(Paths.get(this.templatesPath.getAbsolutePath(), templateFileName + "tmp.tex")
             .toFile().toString());
@@ -175,6 +176,10 @@ public class Billing {
     context.put("project_short_description", shortDesc);
   }
 
+  public void setProjectLongDescription(String longDesc) {
+    context.put("project_long_description", longDesc);
+  }
+
   public void setProjectNumber(String number) {
     context.put("project_number", number);
   }
@@ -182,6 +187,14 @@ public class Billing {
   public void setTotalCost(String costs) {
     context.put("total_cost", costs);
   }
+
+  public void setMwStShare(String share) {
+    context.put("mwst_share", share);
+  }
+
+  /*
+   * public void setDate(String date) { context.put("todays_Date", date); }
+   */
 
   public void setCostEntries(List<CostEntry> entries) {
     ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();

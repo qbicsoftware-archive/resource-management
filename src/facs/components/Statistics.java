@@ -20,6 +20,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -367,15 +368,67 @@ public class Statistics extends CustomComponent {
             billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
             billing.setSenderUrl("www.medizin.uni-tuebingen.de");
 
-            if (user.getKostenstelle() != null)
-              billing.setProjectDescription("Rechnungs-Nr: " + user.getKostenstelle() + "\n"
-                  + "Kostenstelle: " + user.getKostenstelle());
-            else
-              billing.setProjectDescription("Keine kostenstelle verfügbar.");
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-            billing.setProjectShortDescription("Dieses Angebot beinhaltet jede Menge Extras.");
+            /*
+             * try {
+             * 
+             * billing.setDate(dateFormat.format(calendar.getTime()));
+             * System.out.println(dateFormat.format(calendar.getTime()));
+             * 
+             * } catch (Exception e) { e.printStackTrace(); }
+             */
 
-            // billing.setInvoiceNumber("FCF2015-001");
+            String selectedKostenstelleInitial =
+                (String) gpcontainer.getContainerProperty(grid.getSelectedRow(),
+                    kostenstelleCaption).getValue();
+            String selectedProjectInitial =
+                (String) gpcontainer.getContainerProperty(grid.getSelectedRow(), projectCaption)
+                    .getValue();
+
+            if (selectedKostenstelleInitial != null && selectedProjectInitial == null) {
+
+              System.out.println("User Project: " + selectedProjectInitial);
+
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleInitial);
+
+              billing
+                  .setProjectShortDescription("Aufstellung zur Internen Leistungsverrechnung (ILV)");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleInitial + " abgebucht.");
+
+              billing.setMwStShare("0%");
+
+            } else if (selectedKostenstelleInitial != null && selectedProjectInitial != null) {
+
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleInitial);
+
+              billing.setProjectShortDescription("");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleInitial + " " + selectedProjectInitial + " abgebucht.");
+
+              billing.setMwStShare("0%");
+
+            } else {
+
+              billing.setProjectShortDescription("Rechnung");
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+
+              billing
+                  .setProjectLongDescription("Bitte überweisen Sie den Rechnungsbetrag innerhalb von 30 Tagen auf das angegeben Konto des Universitätsklinikums Tübingen unter Angabe der Rechnungsnummer und Kostenstelle.");
+
+              billing.setMwStShare("19%");
+
+            }
 
             if (user.getProject() != null)
               billing.setProjectNumber("Kostenstelle: " + user.getKostenstelle());
@@ -400,7 +453,9 @@ public class Statistics extends CustomComponent {
                   ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
               SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
               String date = ft.format(start);
-              String description = "No Description is Available";
+              String description =
+                  ((String) gpcontainer.getContainerProperty(itemId, deviceCaption).getValue())
+                      + " Pries/Std: ";
               String time_frame = Formatter.toHoursAndMinutes(timeFrame);
 
               // ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
@@ -651,18 +706,54 @@ public class Statistics extends CustomComponent {
             billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
             billing.setSenderUrl("www.medizin.uni-tuebingen.de");
 
-            if (user.getKostenstelle() != null)
-              billing.setProjectDescription("Rechnungs-Nr: " + user.getKostenstelle() + "\n"
-                  + "Kostenstelle: " + user.getKostenstelle());
-            else
-              billing.setProjectDescription("Keine kostenstelle verfügbar.");
+            String selectedKostenstelleMatched =
+                (String) mpc
+                    .getContainerProperty(matchedGrid.getSelectedRow(), kostenstelleCaption)
+                    .getValue();
+            String selectedProjectMatched =
+                (String) mpc.getContainerProperty(matchedGrid.getSelectedRow(), projectCaption)
+                    .getValue();
 
-            billing.setProjectShortDescription("Dieses Angebot beinhaltet jede Menge Extras.");
 
-            if (user.getProject() != null)
-              billing.setProjectNumber("Kostenstelle: " + user.getKostenstelle());
-            else
-              billing.setProjectNumber("Keine project nummer verfügbar.");
+            if (selectedKostenstelleMatched != null && selectedProjectMatched == null) {
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleMatched);
+
+              billing
+                  .setProjectShortDescription("Aufstellung zur Internen Leistungsverrechnung (ILV)");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleMatched + " abgebucht.");
+
+              billing.setMwStShare("0%");
+
+            } else if (selectedKostenstelleMatched != null && selectedProjectMatched != null) {
+
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleMatched);
+
+              billing.setProjectShortDescription("");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleMatched + " " + selectedProjectMatched + " abgebucht.");
+
+              billing.setMwStShare("0%");
+
+            } else {
+
+              billing.setProjectShortDescription("Rechnung");
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+
+              billing
+                  .setProjectLongDescription("Bitte überweisen Sie den Rechnungsbetrag innerhalb von 30 Tagen auf das angegeben Konto des Universitätsklinikums Tübingen unter Angabe der Rechnungsnummer und Kostenstelle.");
+
+              billing.setMwStShare("19%");
+
+            }
 
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
 
@@ -682,10 +773,16 @@ public class Statistics extends CustomComponent {
                   ((Date) mpc.getContainerProperty(itemIdMatched, startCaption).getValue());
               SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
               String date = ft.format(start);
-              String description = "No Description is Available";
+
+              String description =
+                  ((String) mpc.getContainerProperty(itemIdMatched, deviceCaption).getValue())
+                      + " Pries/Std: ";
+              System.out.println("Time Frame: " + timeFrame);
               String time_frame = Formatter.toHoursAndMinutes(timeFrame);
 
               entries.add(billing.new CostEntry(date, time_frame, description, cost));
+              System.out.println("Date: " + date + " Time Frame: " + time_frame + " Description: "
+                  + description + " Cost: " + cost);
 
             }
 

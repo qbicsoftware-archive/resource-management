@@ -12,25 +12,20 @@
 \newcommand{\profname}{$sender_function} %Name
 \newcommand{\funkt}{$sender_name} %Funktion
 \newcommand{\anschrift}{$sender_institute \par $sender_street \par $sender_postalcode $sender_city \par}
-\newcommand{\tel}{Ansprechpartner \par $sender_name \par Telefon $sender_phone}
-\newcommand{\web}{\mbox{$sender_email}\par $sender_url \par} % Beim Zeilenumbruch \par behalten.
+\newcommand{\tel}{Ansprechpartner: \par $sender_name \par Telefon $sender_phone}
+\newcommand{\web}{\mbox{$sender_email} $sender_url \par \medskip \normalsize\monthyeardate\today} % Beim Zeilenumbruch \par behalten.
 \newcommand{\vspace{20 mm}}
-%\newcommand{\ang}{Rechnungs-Nr:}{$invoice_number}
-%\newcommand{\ang}{\normalsize Anfordernde Kostenstelle:}{$project_number}
 \newcommand{\angbeschr}{\Large Rechnung}
-\newcommand{\angbeschr}{\normalsize $project_short_description} %Bezeichnung des Angebots
-\newcommand{\ort}{$sender_city} %T\"{u}bingen}%Ort
-\newcommand{\vspace{20 mm}}
-\newcommand{\datum}{\today}	%aktuelles Datum
 \newcommand{\empfaenger}{$PI \\ $institute \\ $street \\ $postalcode $city} % bis zu 5 Zeilen
 \newcommand{\strasse}{$sender_street} % für kleine Zeile über dem Adressfeld
 \newcommand{\plzort}{$sender_postalcode $sender_city} % für kleine Zeile über dem Adressfeld%------------------------------------------------------
 \begin{document}
 \angebot %schreibt Header und Betreffzeile
 
-\section*{Ablauf}
-$project_description
+\section*{$project_short_description}
+$invoice_number \\ $project_description
 \section*{Preisangaben}
+
 {
 \renewcommand{\arraystretch}{2}
 \footnotesize
@@ -51,11 +46,15 @@ $project_description
 
 \end{tabular}
 }
-\vspace{10 mm}
+\vspace{5 mm}
 
-\textbf{Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den n\"{a}chsten
-Tagen der von Ihnen angegebenen Kostenstelle abgebucht.}
+\textbf{$project_long_description}
 
-\vspace{10 mm}
+\vspace{5 mm}
 Mit freundlichen Gr\"{u}{\ss}en
+
+\vspace{10 mm}
+\begin{center}
+\includegraphics[scale=0.35, keepaspectratio=true]{logos/footnote.png}
+\end{center}
 \end{document}

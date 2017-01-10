@@ -194,13 +194,18 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         calendar.set(Calendar.MILLISECOND, 0);
 
         float cost = -1.f;
+
         Date end = bean.getEnd() == null ? bean.getStart() : bean.getEnd();
 
         cost = getCost(userId, bean.getStart(), end, bean.getDeviceId());
 
+        long s = bean.getStart().getTime();
+        long e = bean.getEnd().getTime();
+        long duration = e - s;
+
         DBManager.getDatabaseInstance().addPhysicalTimeBlock(bean.getDeviceId(),
             devices.getValue().toString(), bean.getUserName(), bean.getUserFullName(),
-            calendar.getTime(), bean.getStart(), bean.getEnd(),
+            calendar.getTime(), bean.getStart(), bean.getEnd(), duration,
             LiferayAndVaadinUtils.getUser().getScreenName(), cost);
 
         // System.out.println("Cost: " + cost);
