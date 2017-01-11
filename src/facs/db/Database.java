@@ -456,7 +456,7 @@ public enum Database {
 
       statement.setString(1, uuid);
       ResultSet rs = statement.executeQuery();
-      System.out.println("getUserIDbyLDAPID: " + statement);
+      // System.out.println("getUserIDbyLDAPID: " + statement);
       while (rs.next()) {
         userrole = rs.getString(1);
       }
@@ -838,7 +838,7 @@ public enum Database {
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
       statement.setString(1, workgroup_id);
       statement.setString(2, uuid);
-      System.out.println("adminUpdatesUserWorkgroup: " + statement);
+      // System.out.println("adminUpdatesUserWorkgroup: " + statement);
       int result = statement.executeUpdate();
       // System.out.println("getShitDone: " + statement);
       success = (result > 0);
@@ -883,7 +883,7 @@ public enum Database {
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, user_group);
       statement.setString(2, uuid);
-      System.out.println("adminUpdatesUserGroup: " + statement);
+      // System.out.println("adminUpdatesUserGroup: " + statement);
       int result = statement.executeUpdate();
       // System.out.println("getShitDone: " + statement);
       success = (result > 0);
@@ -1226,7 +1226,7 @@ public enum Database {
     ArrayList<UserBean> users = new ArrayList<UserBean>();
     String sql =
         "SELECT * FROM user INNER JOIN groups ON user.group_id=groups.group_id INNER JOIN workgroups ON user.workgroup_id=workgroups.workgroup_id;";
-    System.out.println("here");
+    // System.out.println("here");
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 

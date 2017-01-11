@@ -20,7 +20,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -368,10 +367,11 @@ public class Statistics extends CustomComponent {
             billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
             billing.setSenderUrl("www.medizin.uni-tuebingen.de");
 
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
             /*
+             * Calendar calendar = Calendar.getInstance(); SimpleDateFormat dateFormat = new
+             * SimpleDateFormat("dd/MM/yyyy");
+             * 
+             * 
              * try {
              * 
              * billing.setDate(dateFormat.format(calendar.getTime()));
@@ -389,7 +389,7 @@ public class Statistics extends CustomComponent {
 
             if (selectedKostenstelleInitial != null && selectedProjectInitial == null) {
 
-              System.out.println("User Project: " + selectedProjectInitial);
+              // System.out.println("User Project: " + selectedProjectInitial);
 
               billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
               billing.setProjectDescription("Anfordernde Kostenstelle: "
@@ -402,7 +402,8 @@ public class Statistics extends CustomComponent {
                   .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleInitial + " abgebucht.");
 
-              billing.setMwStShare("0%");
+              billing.setMwstShare("(0%)");
+              billing.setMwstCost("0");
 
             } else if (selectedKostenstelleInitial != null && selectedProjectInitial != null) {
 
@@ -416,7 +417,8 @@ public class Statistics extends CustomComponent {
                   .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleInitial + " " + selectedProjectInitial + " abgebucht.");
 
-              billing.setMwStShare("0%");
+              billing.setMwstShare("(0%)");
+              billing.setMwstCost("0");
 
             } else {
 
@@ -426,7 +428,7 @@ public class Statistics extends CustomComponent {
               billing
                   .setProjectLongDescription("Bitte überweisen Sie den Rechnungsbetrag innerhalb von 30 Tagen auf das angegeben Konto des Universitätsklinikums Tübingen unter Angabe der Rechnungsnummer und Kostenstelle.");
 
-              billing.setMwStShare("19%");
+              billing.setMwstShare("(19%)");
 
             }
 
@@ -437,9 +439,22 @@ public class Statistics extends CustomComponent {
 
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
 
+            float ariaCosts = 0.0f;
+            float lsrFortessaCosts = 0.0f;
+            float cantoCosts = 0.0f;
+            float fc500Costs = 0.0f;
+            float consultingCosts = 0.0f;
+            float cost = 0.0f;
+
+            long ariaTime = 0;
+            long lsrFortessaTime = 0;
+            long cantoTime = 0;
+            long fc500Time = 0;
+            long consultingTime = 0;
+
             for (Object itemId : gpcontainer.getItemIds()) {
-              float cost =
-              // grid.getSelectedRow() x4 is replaced by itemId below
+
+              cost =
                   ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
                       .floatValue();
               long s =
@@ -448,22 +463,70 @@ public class Statistics extends CustomComponent {
               long e =
                   ((Date) gpcontainer.getContainerProperty(itemId, endCaption).getValue())
                       .getTime();
-              long timeFrame = e - s;
-              Date start =
-                  ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue());
-              SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
-              String date = ft.format(start);
-              String description =
-                  ((String) gpcontainer.getContainerProperty(itemId, deviceCaption).getValue())
-                      + " Pries/Std: ";
-              String time_frame = Formatter.toHoursAndMinutes(timeFrame);
 
-              // ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
-              entries.add(billing.new CostEntry(date, time_frame, description, cost));
+              long timeFrame = e - s;
+
+              String selectedDevice =
+                  (String) gpcontainer.getContainerProperty(itemId, deviceCaption).getValue();
+
+              // System.out.println("Selected Device: " + selectedDevice + " Time Frame: " +
+              // timeFrame + " Cost: " + cost);
+
+              if (selectedDevice.equals("Aria")) {
+
+                ariaCosts = ariaCosts + cost;
+                ariaTime = ariaTime + timeFrame;
+                // System.out.println("Aria Costs: " + ariaCosts + " Time: " + ariaTime);
+
+              } else if (selectedDevice.equals("LSR Fortessa")) {
+
+                lsrFortessaCosts = lsrFortessaCosts + cost;
+                lsrFortessaTime = lsrFortessaTime + timeFrame;
+                // System.out.println("LSR Fortessa Costs: " + lsrFortessaCosts + " Time: "
+                // + lsrFortessaTime);
+
+              } else if (selectedDevice.equals("Canto")) {
+
+                cantoCosts = cantoCosts + cost;
+                cantoTime = cantoTime + timeFrame;
+                // System.out.println("Canto Costs: " + cantoCosts + " Time: " + cantoTime);
+
+              } else if (selectedDevice.equals("FC500")) {
+
+                fc500Costs = fc500Costs + cost;
+                fc500Time = fc500Time + timeFrame;
+
+              } else if (selectedDevice.equals("Consulting")) {
+
+                consultingCosts = consultingCosts + cost;
+                consultingTime = consultingTime + timeFrame;
+
+              }
 
             }
 
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(ariaTime),
+                "L4.1 Sortierung Aria", ariaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(lsrFortessaTime),
+                "L4.2 Messung LSR Fortessa", lsrFortessaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(cantoTime),
+                "L4.3 Messung Canto", cantoCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(fc500Time), "L4.4 FC500",
+                fc500Costs));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
+                "L4.5 Consulting", consultingCosts));
+
             billing.setCostEntries(entries);
+
             float totalCosts = 0.0f;
 
             // calculates the total cost of items
@@ -476,10 +539,6 @@ public class Statistics extends CustomComponent {
                   (int) gpcontainer.getContainerProperty(itemId, logIdCaption).getValue());
 
             }
-
-            // totalCosts =
-            // ((Number) gpcontainer.getContainerProperty(grid.getSelectedRow(), costCaption)
-            // .getValue()).floatValue();
 
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
 
@@ -727,7 +786,8 @@ public class Statistics extends CustomComponent {
                   .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleMatched + " abgebucht.");
 
-              billing.setMwStShare("0%");
+              billing.setMwstShare("0%");
+              billing.setMwstCost("0");
 
             } else if (selectedKostenstelleMatched != null && selectedProjectMatched != null) {
 
@@ -741,7 +801,8 @@ public class Statistics extends CustomComponent {
                   .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleMatched + " " + selectedProjectMatched + " abgebucht.");
 
-              billing.setMwStShare("0%");
+              billing.setMwstShare("0%");
+              billing.setMwstCost("0");
 
             } else {
 
@@ -751,16 +812,50 @@ public class Statistics extends CustomComponent {
               billing
                   .setProjectLongDescription("Bitte überweisen Sie den Rechnungsbetrag innerhalb von 30 Tagen auf das angegeben Konto des Universitätsklinikums Tübingen unter Angabe der Rechnungsnummer und Kostenstelle.");
 
-              billing.setMwStShare("19%");
+              billing.setMwstShare("19%");
 
             }
 
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
 
+            /*
+             * for (Object itemIdMatched : mpc.getItemIds()) {
+             * 
+             * float cost = // grid.getSelectedRow() x4 is replaced by itemId below ((Number)
+             * mpc.getContainerProperty(itemIdMatched, costCaption).getValue()) .floatValue(); long
+             * s = ((Date) mpc.getContainerProperty(itemIdMatched, startCaption).getValue())
+             * .getTime(); long e = ((Date) mpc.getContainerProperty(itemIdMatched,
+             * endCaption).getValue()).getTime(); long timeFrame = e - s; Date start = ((Date)
+             * mpc.getContainerProperty(itemIdMatched, startCaption).getValue()); SimpleDateFormat
+             * ft = new SimpleDateFormat("dd.MM.yyyy"); String date = ft.format(start);
+             * 
+             * String description = ((String) mpc.getContainerProperty(itemIdMatched,
+             * deviceCaption).getValue()) + " Pries/Std: "; System.out.println("Time Frame: " +
+             * timeFrame); String time_frame = Formatter.toHoursAndMinutes(timeFrame);
+             * 
+             * entries.add(billing.new CostEntry(date, time_frame, description, cost));
+             * System.out.println("Date: " + date + " Time Frame: " + time_frame + " Description: "
+             * + description + " Cost: " + cost);
+             * 
+             * }
+             */
+
+            float ariaCosts = 0.0f;
+            float lsrFortessaCosts = 0.0f;
+            float cantoCosts = 0.0f;
+            float fc500Costs = 0.0f;
+            float consultingCosts = 0.0f;
+            float cost = 0.0f;
+
+            long ariaTime = 0;
+            long lsrFortessaTime = 0;
+            long cantoTime = 0;
+            long fc500Time = 0;
+            long consultingTime = 0;
+
             for (Object itemIdMatched : mpc.getItemIds()) {
 
-              float cost =
-              // grid.getSelectedRow() x4 is replaced by itemId below
+              cost =
                   ((Number) mpc.getContainerProperty(itemIdMatched, costCaption).getValue())
                       .floatValue();
               long s =
@@ -768,23 +863,68 @@ public class Statistics extends CustomComponent {
                       .getTime();
               long e =
                   ((Date) mpc.getContainerProperty(itemIdMatched, endCaption).getValue()).getTime();
+
               long timeFrame = e - s;
-              Date start =
-                  ((Date) mpc.getContainerProperty(itemIdMatched, startCaption).getValue());
-              SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy");
-              String date = ft.format(start);
 
-              String description =
-                  ((String) mpc.getContainerProperty(itemIdMatched, deviceCaption).getValue())
-                      + " Pries/Std: ";
-              System.out.println("Time Frame: " + timeFrame);
-              String time_frame = Formatter.toHoursAndMinutes(timeFrame);
+              String selectedDevice =
+                  (String) mpc.getContainerProperty(itemIdMatched, deviceCaption).getValue();
 
-              entries.add(billing.new CostEntry(date, time_frame, description, cost));
-              System.out.println("Date: " + date + " Time Frame: " + time_frame + " Description: "
-                  + description + " Cost: " + cost);
+              // System.out.println("Selected Device: " + selectedDevice + " Time Frame: " +
+              // timeFrame
+              // + " Cost: " + cost);
+
+              if (selectedDevice.equals("Aria")) {
+
+                ariaCosts = ariaCosts + cost;
+                ariaTime = ariaTime + timeFrame;
+                // System.out.println("Aria Costs: " + ariaCosts + " Time: " + ariaTime);
+
+              } else if (selectedDevice.equals("LSR Fortessa")) {
+
+                lsrFortessaCosts = lsrFortessaCosts + cost;
+                lsrFortessaTime = lsrFortessaTime + timeFrame;
+                // System.out.println("LSR Fortessa Costs: " + lsrFortessaCosts + " Time: "
+                // + lsrFortessaTime);
+
+              } else if (selectedDevice.equals("Canto")) {
+
+                cantoCosts = cantoCosts + cost;
+                cantoTime = cantoTime + timeFrame;
+                // System.out.println("Canto Costs: " + cantoCosts + " Time: " + cantoTime);
+
+              } else if (selectedDevice.equals("FC500")) {
+
+                fc500Costs = fc500Costs + cost;
+                fc500Time = fc500Time + timeFrame;
+
+              } else if (selectedDevice.equals("Consulting")) {
+
+                consultingCosts = consultingCosts + cost;
+                consultingTime = consultingTime + timeFrame;
+
+              }
 
             }
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(ariaTime),
+                "L4.1 Sortierung Aria", ariaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(lsrFortessaTime),
+                "L4.2 Messung LSR Fortessa", lsrFortessaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(cantoTime),
+                "L4.3 Messung Canto", cantoCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(fc500Time), "L4.4 FC500",
+                fc500Costs));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
+                "L4.5 Consulting", consultingCosts));
 
             billing.setCostEntries(entries);
             float totalCosts = 0.0f;
@@ -802,10 +942,10 @@ public class Statistics extends CustomComponent {
               DBManager.getDatabaseInstance().itemInvoiced(
                   (int) mpc.getContainerProperty(itemIdMatched, logIdCaption).getValue());
 
-
             }
 
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
+
             bill = billing.createPdf();
             // System.out.println(bill.getAbsolutePath());
             if (fileDownloader != null)

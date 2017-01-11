@@ -59,10 +59,10 @@ public class Billing {
   String templateFileName;
 
   // pdflatex path for local development
-  String pdflatexPath = "/Library/TeX/texbin/pdflatex";
+  // String pdflatexPath = "/Library/TeX/texbin/pdflatex";
 
   // pdflatex path for testing and production
-  // String pdflatexPath = "pdflatex";
+  String pdflatexPath = "pdflatex";
 
   Template template;
   File tempTexFile;
@@ -89,7 +89,7 @@ public class Billing {
       ParseErrorException, Exception {
     this.templateFileName = templateFileName;
     template = Velocity.getTemplate(templateFileName);
-    System.out.println("Template Name: " + template);
+    // System.out.println("Template Name: " + template);
     tempTexFile =
         new File(Paths.get(this.templatesPath.getAbsolutePath(), templateFileName + "tmp.tex")
             .toFile().toString());
@@ -188,8 +188,12 @@ public class Billing {
     context.put("total_cost", costs);
   }
 
-  public void setMwStShare(String share) {
-    context.put("mwst_share", share);
+  public void setMwstShare(String mwstshare) {
+    context.put("mwst_share", mwstshare);
+  }
+
+  public void setMwstCost(String mwstcost) {
+    context.put("mwst_cost", mwstcost);
   }
 
   /*
@@ -203,6 +207,7 @@ public class Billing {
       map.put("date", entry.getDate());
       map.put("time_frame", entry.getTime_frame());
       map.put("description", entry.getDescription());
+      // map.put("mwst", String.format("%1$.2f", entry.getMwst()));
       map.put("cost", String.format("%1$.2f", entry.getCost()));
       list.add(map);
     }
@@ -239,7 +244,7 @@ public class Billing {
     // Process p = rt.exec(cmd);
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.directory(tempTexFile.getParentFile());
-    System.out.println("Basename: " + basename + " fileNamme: " + fileNamme);
+    // System.out.println("Basename: " + basename + " fileNamme: " + fileNamme);
     Process p = pb.start();
 
     int exitValue = p.waitFor();
@@ -251,7 +256,7 @@ public class Billing {
       while ((line = reader.readLine()) != null) {
         sb.append(line + "\n");
       }
-      System.out.println(sb.toString());
+      // System.out.println(sb.toString());
 
 
       // TODO There is for sure a better exception to say that pdflatex failed?
@@ -273,6 +278,7 @@ public class Billing {
     private String date;
     private String time_frame;
     private String description;
+    // private float mwst;
     private float cost;
 
     public CostEntry(String date, String time_frame, String description, float cost) {
@@ -280,6 +286,7 @@ public class Billing {
       this.date = date;
       this.time_frame = time_frame;
       this.description = description;
+      // this.mwst = mwst;
       this.cost = cost;
     }
 
@@ -314,6 +321,12 @@ public class Billing {
     public void setCost(float cost) {
       this.cost = cost;
     }
+
+    /*
+     * public float getMwst() { return mwst; }
+     * 
+     * public void setMwst(float mwst) { this.mwst = mwst; }
+     */
 
   }
 
