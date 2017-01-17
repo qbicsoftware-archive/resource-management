@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License along with this program. If
  * not, see http://www.gnu.org/licenses/.
  *******************************************************************************/
+
 package facs.components;
 
 import java.math.BigDecimal;
@@ -183,7 +184,6 @@ public class BookAdmin extends CustomComponent {
       }
     });
 
-
     // only admins are allowed to see the admin panel ;)
     if (!DBManager.getDatabaseInstance()
         .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
@@ -197,8 +197,6 @@ public class BookAdmin extends CustomComponent {
       setCompositionRoot(errorLayout);
       return;
     }
-
-
 
     this.setCaption("Admin");
 
@@ -216,8 +214,6 @@ public class BookAdmin extends CustomComponent {
     }
 
     bookAdmin.addTab(deletedBookingsGrid());
-
-
 
     bookAdmin.addSelectedTabChangeListener(new SelectedTabChangeListener() {
 
@@ -268,7 +264,6 @@ public class BookAdmin extends CustomComponent {
      * 
      * } });
      */
-
   }
 
   private Component newDeviceGrid(final String deviceName) {
@@ -281,8 +276,6 @@ public class BookAdmin extends CustomComponent {
     // them
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
-
-
 
     BeanItemContainer<BookingBean> booking = getBookingList(deviceName);
 
@@ -342,7 +335,6 @@ public class BookAdmin extends CustomComponent {
 
     return devicesLayout;
   }
-
 
   private Component deletedBookingsGrid() {
     VerticalLayout devicesLayout = new VerticalLayout();

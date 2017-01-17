@@ -115,7 +115,6 @@ public class Booking extends CustomComponent {
   private TabSheet booking;
   private Grid next3HoursBookings;
 
-
   private static Database db;
 
   public Booking(final BookingModel bookingModel, Date referenceDate) {
