@@ -1268,7 +1268,6 @@ public class Statistics extends CustomComponent {
       grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
           mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
     }
-
   }
 
   private void fillInvoicedRows(Grid grid, String dateStart, String dateEnd) {

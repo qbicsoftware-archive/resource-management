@@ -834,7 +834,7 @@ public enum Database {
   public boolean adminUpdatesUserWorkgroup(String workgroup_id, String uuid) {
     boolean success = false;
 
-    String sqlUpdate = "UPDATE user SET workgroup_id=? WHERE user_ldap=?";
+    String sqlUpdate = "UPDATE user SET workgroup_id=? WHERE user_id=?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sqlUpdate)) {
       statement.setString(1, workgroup_id);
       statement.setString(2, uuid);

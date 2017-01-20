@@ -233,12 +233,25 @@ public class UserAdmin extends CustomComponent {
                 "Please make sure that you selected the user and workgroup! Make sure they are highlighted.",
                 "error");
           } else {
+
+
             DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
                 DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
-                    userWorkgroup.getValue().toString()),
-                DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
+                    userWorkgroup.getValue().toString()), selectedRow.toString());
 
-            System.out.println("Edit Workgroup: " + userWorkgroup.getValue().toString());
+            /*
+             * System.out.println("Workgroup Name: " + userWorkgroup.getValue().toString() +
+             * " Workgroup ID: " + DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
+             * userWorkgroup.getValue().toString()) + " ID: " + selectedRow.toString());
+             * 
+             * 
+             * DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
+             * DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
+             * userWorkgroup.getValue().toString()),
+             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
+             */
+
+            // System.out.println("Edit Workgroup: " + userWorkgroup.getValue().toString());
 
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
@@ -278,7 +291,9 @@ public class UserAdmin extends CustomComponent {
           Object selectedRow =
               ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
 
-          if (selectedRow == null || userWorkgroup.getValue().equals(null)) {
+          if (selectedRow == null || userGroup.getValue().equals(null)) {
+            // System.out.println("Selected Row: " + selectedRow + " Value:"
+            // + userGroup.getValue());
             Notification(
                 "Something's missing!",
                 "Please make sure that you selected the user and group! Make sure they are highlighted.",
@@ -288,8 +303,8 @@ public class UserAdmin extends CustomComponent {
                 DBManager.getDatabaseInstance().getUserGroupIDByName(
                     userGroup.getValue().toString()), selectedRow.toString());
 
-            System.out.println("Edit Workgroup: " + userGroup.getValue().toString() + " UserId: "
-                + DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
+            // System.out.println("Edit Workgroup: " + userGroup.getValue().toString() + " UserId: "
+            // + DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
 
             /*
              * DBManager.getDatabaseInstance().adminUpdatesUserGroups( selectedRow.toString(),
@@ -332,21 +347,54 @@ public class UserAdmin extends CustomComponent {
           Object selectedRow =
               ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
 
-          if (selectedRow == null || userDevice.getValue().equals(null)
+          if (userRole.getValue().equals("N/A")) {
+            Notification(
+                "Hmmmmm?!",
+                "Nothing has changed because you didn't select any user role but N/A so why should I bother? ;)",
+                "");
+          }
+
+          else if (selectedRow == null || userDevice.getValue().equals(null)
               || userRole.getValue().equals(null)) {
+            System.out.println("Selected Row: "
+                + ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow()
+                + " Values: " + userDevice.getValue() + " and " + userRole.getValue());
             Notification(
                 "Something's missing!",
                 "Please make sure that you selected the user, device and role! Each list has to have one highlighted option.",
                 "error");
           } else {
+
             DBManager.getDatabaseInstance()
                 .adminUpdatesUserRoleForDevice(
                     DBManager.getDatabaseInstance().getUserRoleIDbyDesc(
                         userRole.getValue().toString()),
-                    DBManager.getDatabaseInstance().getUserIDbyLDAPID(
-                        DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())),
+                    selectedRow.toString(),
                     DBManager.getDatabaseInstance().getDeviceIDByName(
                         userDevice.getValue().toString()));
+
+            /*
+             * if multiple users has no LDAP ID assigned of same ID assigned the DB call updates all
+             * of the users therefore the fix was performed
+             * 
+             * DBManager.getDatabaseInstance() .adminUpdatesUserRoleForDevice(
+             * DBManager.getDatabaseInstance().getUserRoleIDbyDesc( userRole.getValue().toString()),
+             * DBManager.getDatabaseInstance().getUserIDbyLDAPID(
+             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())),
+             * DBManager.getDatabaseInstance().getDeviceIDByName(
+             * userDevice.getValue().toString()));
+             * 
+             * System.out.println("User Role: " +
+             * DBManager.getDatabaseInstance().getUserRoleIDbyDesc( userRole.getValue().toString())
+             * + " LdapID: " + DBManager.getDatabaseInstance().getUserIDbyLDAPID(
+             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())) +
+             * " Device: " + DBManager.getDatabaseInstance().getDeviceIDByName(
+             * userDevice.getValue().toString()) + " ID: " + selectedRow.toString());
+             * 
+             * System.out.println("Selected Row: " + ((SingleSelectionModel)
+             * usersGrid.getSelectionModel()).getSelectedRow() + " Device: " + userDevice.getValue()
+             * + " Role: " + userRole.getValue() + " ID: " + selectedRow.toString());
+             */
 
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance()
