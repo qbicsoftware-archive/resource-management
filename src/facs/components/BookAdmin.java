@@ -193,7 +193,7 @@ public class BookAdmin extends CustomComponent {
       errorLayout.addComponent(infoLabel);
       showErrorNotification(
           "Access Denied!",
-          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'.");
+          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'.");
       setCompositionRoot(errorLayout);
       return;
     }

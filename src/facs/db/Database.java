@@ -395,7 +395,7 @@ public enum Database {
 
     String sql = "SELECT email FROM user WHERE user_name = ?";
 
-    String email = "info@qbic.uni-tuebingen.de";
+    String email = "'helpdesk@qbic.uni-tuebingen.de'";
 
     try (Connection conn = login();
         PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -706,7 +706,6 @@ public enum Database {
 
     return userrole;
   }
-
 
   public boolean adminUpdatesUserGroups(String uuid, String group_id) {
     int count = 0;
@@ -2306,6 +2305,7 @@ public enum Database {
     return list;
   }
 
+
   public ArrayList<String> getProjects() {
     ArrayList<String> list = new ArrayList<String>();
     String sql = "SELECT DISTINCT project FROM user WHERE project IS NOT NULL";
@@ -2528,64 +2528,106 @@ public enum Database {
       return id;
     }
 
-    userFullName = userFullName.replace("\"", "");
+    int count = 0;
 
-    String sql =
-        "INSERT INTO logs (device_id, device_name, user_name, user_full_name, start_round, start, end, duration, by_user, corrupt, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    String sqlCheck =
+        "SELECT COUNT(*) FROM logs WHERE device_id = ? AND device_name = ? AND user_name = ? AND start = ? AND end = ? AND by_user = ?";
 
-    // The following statement is an try-with-resources statement, which declares two resources,
-    // conn and statement, which will be automatically closed when the try block terminates
-    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
-      statement.setInt(1, deviceId);
-      statement.setString(2, deviceName);
-      statement.setString(3, userName);
-      statement.setString(4, userFullName);
+    try (Connection connCheck = login();
+        PreparedStatement statementCheck =
+            connCheck.prepareStatement(sqlCheck, Statement.RETURN_GENERATED_KEYS)) {
+      statementCheck.setInt(1, deviceId);
+      statementCheck.setString(2, deviceName);
+      statementCheck.setString(3, userName);
 
-      if (start == null) {
-        statement.setNull(5, java.sql.Types.TIMESTAMP);
-      } else {
-        statement.setTimestamp(5, new Timestamp(startRound.getTime()));
-      }
 
       if (start == null) {
-        statement.setNull(6, java.sql.Types.TIMESTAMP);
+        statementCheck.setNull(4, java.sql.Types.TIMESTAMP);
       } else {
-        statement.setTimestamp(6, new Timestamp(start.getTime()));
+        statementCheck.setTimestamp(4, new Timestamp(start.getTime()));
       }
 
       if (end == null) {
-        statement.setNull(7, java.sql.Types.TIMESTAMP);
+        statementCheck.setNull(5, java.sql.Types.TIMESTAMP);
       } else {
-        statement.setTimestamp(7, new Timestamp(end.getTime()));
+        statementCheck.setTimestamp(5, new Timestamp(end.getTime()));
       }
 
-      statement.setLong(8, duration);
+      statementCheck.setString(6, byUser);
 
-      statement.setString(9, byUser);
-
-      // System.out.println("Username: " + userFullName + " length: " + userFullName.length()
-      // + " is empty: " + userFullName.isEmpty());
-
-      if (userFullName.length() < 2 || end == null || start == null) {
-        int corrupt = 1;
-        statement.setInt(10, corrupt);
-      } else
-        statement.setNull(10, java.sql.Types.INTEGER);
-
-      statement.setFloat(11, Cost);
-
-      // System.out.println("Statement: " + statement);
-
-      statement.executeUpdate();
-      // if (rs.next()) {
-      // id =rs.getInt("id");
-      // }
-      statement.close();
+      ResultSet resultCheck = statementCheck.executeQuery();
+      // System.out.println("Exists: " + statementCheck);
+      while (resultCheck.next()) {
+        count = resultCheck.getInt(1);
+      }
+      // System.out.println("resultCheck: " + count);
     } catch (SQLException e) {
       e.printStackTrace();
-      return false;
     }
+
+    if (count == 0) {
+      userFullName = userFullName.replace("\"", "");
+
+      String sql =
+          "INSERT INTO logs (device_id, device_name, user_name, user_full_name, start_round, start, end, duration, by_user, corrupt, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+      // The following statement is an try-with-resources statement, which declares two resources,
+      // conn and statement, which will be automatically closed when the try block terminates
+      try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+        statement.setInt(1, deviceId);
+        statement.setString(2, deviceName);
+        statement.setString(3, userName);
+        statement.setString(4, userFullName);
+
+        if (start == null) {
+          statement.setNull(5, java.sql.Types.TIMESTAMP);
+        } else {
+          statement.setTimestamp(5, new Timestamp(startRound.getTime()));
+        }
+
+        if (start == null) {
+          statement.setNull(6, java.sql.Types.TIMESTAMP);
+        } else {
+          statement.setTimestamp(6, new Timestamp(start.getTime()));
+        }
+
+        if (end == null) {
+          statement.setNull(7, java.sql.Types.TIMESTAMP);
+        } else {
+          statement.setTimestamp(7, new Timestamp(end.getTime()));
+        }
+
+        statement.setLong(8, duration);
+
+        statement.setString(9, byUser);
+
+        // System.out.println("Username: " + userFullName + " length: " + userFullName.length()
+        // + " is empty: " + userFullName.isEmpty());
+
+        if (userFullName.length() < 2 || end == null || start == null) {
+          int corrupt = 1;
+          statement.setInt(10, corrupt);
+        } else
+          statement.setNull(10, java.sql.Types.INTEGER);
+
+        statement.setFloat(11, Cost);
+
+        // System.out.println("Statement: " + statement + " Sql: " + sql);
+
+        statement.executeUpdate();
+        // if (rs.next()) {
+        // id =rs.getInt("id");
+        // }
+        statement.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+      }
+      return true;
+    }
+
     return true;
+
   }
 
   public boolean addUserGroup(String name) {

@@ -399,7 +399,7 @@ public class Statistics extends CustomComponent {
                   .setProjectShortDescription("Aufstellung zur Internen Leistungsverrechnung (ILV)");
 
               billing
-                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleInitial + " abgebucht.");
 
               billing.setMwstShare("(0%)");
@@ -414,7 +414,7 @@ public class Statistics extends CustomComponent {
               billing.setProjectShortDescription("");
 
               billing
-                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleInitial + " " + selectedProjectInitial + " abgebucht.");
 
               billing.setMwstShare("(0%)");
@@ -783,7 +783,7 @@ public class Statistics extends CustomComponent {
                   .setProjectShortDescription("Aufstellung zur Internen Leistungsverrechnung (ILV)");
 
               billing
-                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleMatched + " abgebucht.");
 
               billing.setMwstShare("0%");
@@ -798,7 +798,7 @@ public class Statistics extends CustomComponent {
               billing.setProjectShortDescription("");
 
               billing
-                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
                       + selectedKostenstelleMatched + " " + selectedProjectMatched + " abgebucht.");
 
               billing.setMwstShare("0%");
