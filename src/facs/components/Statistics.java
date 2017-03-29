@@ -169,6 +169,7 @@ public class Statistics extends CustomComponent {
         statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
         statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
         statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
+        statistics.addTab(serviceGrid(dateStart, dateEnd)).setCaption("Service");
         statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
         statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced");
 
@@ -444,6 +445,7 @@ public class Statistics extends CustomComponent {
             float cantoCosts = 0.0f;
             float fc500Costs = 0.0f;
             float consultingCosts = 0.0f;
+            float lyricCosts = 0.0f;
             float cost = 0.0f;
 
             long ariaTime = 0;
@@ -451,6 +453,7 @@ public class Statistics extends CustomComponent {
             long cantoTime = 0;
             long fc500Time = 0;
             long consultingTime = 0;
+            long lyricTime = 0;
 
             for (Object itemId : gpcontainer.getItemIds()) {
 
@@ -501,6 +504,11 @@ public class Statistics extends CustomComponent {
                 consultingCosts = consultingCosts + cost;
                 consultingTime = consultingTime + timeFrame;
 
+              } else if (selectedDevice.equals("Lyric")) {
+
+                lyricCosts = lyricCosts + cost;
+                lyricTime = lyricTime + timeFrame;
+
               }
 
             }
@@ -524,6 +532,10 @@ public class Statistics extends CustomComponent {
             entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
                 + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
                 "L4.5 Consulting", consultingCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(lyricTime), "L4.6 Lyric",
+                lyricCosts));
 
             billing.setCostEntries(entries);
 
@@ -845,6 +857,7 @@ public class Statistics extends CustomComponent {
             float cantoCosts = 0.0f;
             float fc500Costs = 0.0f;
             float consultingCosts = 0.0f;
+            float lyricCosts = 0.0f;
             float cost = 0.0f;
 
             long ariaTime = 0;
@@ -852,6 +865,7 @@ public class Statistics extends CustomComponent {
             long cantoTime = 0;
             long fc500Time = 0;
             long consultingTime = 0;
+            long lyricTime = 0;
 
             for (Object itemIdMatched : mpc.getItemIds()) {
 
@@ -904,6 +918,13 @@ public class Statistics extends CustomComponent {
 
               }
 
+              else if (selectedDevice.equals("Lyric")) {
+
+                lyricCosts = lyricCosts + cost;
+                lyricTime = lyricTime + timeFrame;
+
+              }
+
             }
 
             entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
@@ -925,6 +946,10 @@ public class Statistics extends CustomComponent {
             entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
                 + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
                 "L4.5 Consulting", consultingCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
+                "L4.6 Lyric", lyricCosts));
 
             billing.setCostEntries(entries);
             float totalCosts = 0.0f;
@@ -1054,6 +1079,82 @@ public class Statistics extends CustomComponent {
     noCostsGrid.setSizeFull();
 
     noCostLayout.addComponent(noCostsGrid);
+    noCostLayout.addComponent(refreshMatched);
+
+    return noCostLayout;
+  }
+
+  private Component serviceGrid(String dateStart, String dateEnd) {
+
+    String buttonRefreshTitle = "Refresh";
+    Button refreshMatched = new Button(buttonRefreshTitle);
+    refreshMatched.setIcon(FontAwesome.REFRESH);
+    refreshMatched.setDescription("Click here to reload the data from the database!");
+    refreshMatched.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+    Grid serviceGrid;
+
+    refreshMatched.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        refreshDataSources();
+
+      }
+    });
+
+    IndexedContainer mcontainer = getEmptyContainer();
+
+    GeneratedPropertyContainer mpc = new GeneratedPropertyContainer(mcontainer);
+
+    VerticalLayout noCostLayout = new VerticalLayout();
+
+    serviceGrid = new Grid(mpc);
+
+    setRenderers(serviceGrid);
+    fillNoCostRows(serviceGrid, dateStart, dateEnd);
+
+    // compute total costs
+    float totalCosts = 0.0f;
+    for (Object itemIdNoCosts : mpc.getItemIds())
+      totalCosts +=
+          ((Number) mpc.getContainerProperty(itemIdNoCosts, costCaption).getValue()).floatValue();
+
+    // compute total time in milliseconds
+    long total = 0;
+    for (Object itemIdNoCosts : mpc.getItemIds()) {
+      long s = ((Date) mpc.getContainerProperty(itemIdNoCosts, startCaption).getValue()).getTime();
+      long e = ((Date) mpc.getContainerProperty(itemIdNoCosts, endCaption).getValue()).getTime();
+      total += e - s;
+    }
+
+    // set footer to contain total cost and time in hours:minutes
+    FooterRow footer = serviceGrid.appendFooterRow();
+    FooterCell footerCellCost = footer.getCell(costCaption);
+    footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
+
+    FooterCell footerCellEnd = footer.getCell(endCaption);
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+
+    // Set up a filter for all columns
+    HeaderRow filterRow = serviceGrid.appendHeaderRow();
+    addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, nameCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, projectCaption, mcontainer, footer, mpc);
+    addRowFilter(filterRow, instituteCaption, mcontainer, footer, mpc);
+
+    noCostLayout.setMargin(true);
+    noCostLayout.setSpacing(true);
+    // devicesGrid.setWidth("100%");
+    serviceGrid.setSizeFull();
+
+    noCostLayout.addComponent(serviceGrid);
     noCostLayout.addComponent(refreshMatched);
 
     return noCostLayout;

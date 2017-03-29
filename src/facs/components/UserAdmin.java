@@ -47,7 +47,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
@@ -122,6 +124,12 @@ public class UserAdmin extends CustomComponent {
     addUserButton
         .setDescription("Click here to add a new user but don't forget to update the details");
 
+    String deleteUserTitle = "Delete User";
+    Button deleteUserButton = new Button(deleteUserTitle);
+    deleteUserButton.setIcon(FontAwesome.TRASH);
+    deleteUserButton.setSizeFull();
+    deleteUserButton.setDescription("Click here to delete the selected user");
+
     // String buttonTitleSave = "Save";
     // Button save = new Button(buttonTitleSave);
     // save.setIcon(FontAwesome.SAVE);
@@ -192,6 +200,105 @@ public class UserAdmin extends CustomComponent {
             "Please remind to edit user details such as 'username, name, email, phone, kostenstelle, project' and set the correct 'workgroup, role and group'.",
             "success");
       }
+    });
+
+
+    deleteUserButton.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -8828850002167821419L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+
+        try {
+
+          Window cd = new Window("Delete User?");
+
+          cd.setHeight("200px");
+          cd.setWidth("400px");
+          cd.setResizable(false);
+
+          GridLayout dialogLayout = new GridLayout(3, 3);
+
+          Button okButton = new Button("Yes");
+          okButton.addStyleName(ValoTheme.BUTTON_DANGER);
+          Button cancelButton = new Button("No, I'm actually not sure!");
+          cancelButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+          Label information = new Label("Are you sure you want to trash this user?");
+          information.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+
+          okButton.addClickListener(new Button.ClickListener() {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 1778157399909757369L;
+
+            @Override
+            public void buttonClick(ClickEvent okEvent) {
+
+              try {
+                Object selectedRow =
+                    ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+                if (selectedRow == null) {
+                  Notification(
+                      "Something's missing!",
+                      "Please make sure that you select the user and the selected user is highlighted in the user list.",
+                      "error");
+                  cd.close();
+
+                } else {
+
+                  // System.out.println("Selected Row: " + selectedRow.toString());
+                  DBManager.getDatabaseInstance().deleteUser(selectedRow.toString());
+
+                  refreshDataSources();
+                  cd.close();
+
+                  Notification(
+                      "Selected user was deleted!",
+                      "You wanted to delete a user and you were pretty sure. All good, you're the Admin ultimately.",
+                      "success");
+
+                }
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+
+            }
+          });
+
+          cancelButton.addClickListener(new Button.ClickListener() {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = -8957620319158438769L;
+
+            @Override
+            public void buttonClick(ClickEvent okEvent) {
+              cd.close();
+            }
+          });
+
+          dialogLayout.addComponent(information, 0, 0, 2, 0);
+          dialogLayout.addComponent(okButton, 0, 1);
+          dialogLayout.addComponent(cancelButton, 1, 1);
+          dialogLayout.setMargin(true);
+          dialogLayout.setSpacing(true);
+          cd.setContent(dialogLayout);
+          cd.center();
+          UI.getCurrent().addWindow(cd);
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+
+
+      }
+
     });
 
     refresh.addClickListener(new ClickListener() {
@@ -571,6 +678,7 @@ public class UserAdmin extends CustomComponent {
     gridLayout.addComponent(userAdmin, 0, 1, 5, 1);
     gridLayout.addComponent(refresh, 0, 2);
     gridLayout.addComponent(addUserButton, 1, 2);
+    gridLayout.addComponent(deleteUserButton, 2, 2);
     gridLayout.addComponent(isAdmin, 5, 2);
     // gridLayout.addComponent(save);
 

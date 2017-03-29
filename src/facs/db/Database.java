@@ -1026,6 +1026,28 @@ public enum Database {
     return booking_id;
   }
 
+  /**
+   * return all device names to display inside the drop-down menu
+   * 
+   * @return
+   */
+  public ArrayList<String> getAllUserNames() {
+    ArrayList<String> list = new ArrayList<String>();
+    String sql = "SELECT user_name FROM user";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login(); Statement statement = conn.createStatement()) {
+      ResultSet rs = statement.executeQuery(sql);
+      while (rs.next()) {
+        list.add(rs.getString("user_name"));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return list;
+  }
+
+
   public ArrayList<CalendarEvent> getAllBookingsPlusMachineOutput(String uuid, String device_name) {
     ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
     String sql =
@@ -1547,6 +1569,38 @@ public enum Database {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  public boolean deleteUser(String index) {
+    boolean success = false;
+    String sql = "INSERT user_deleted SELECT * FROM user WHERE user.user_id = ?";
+    // The following statement is an try-with-resources statement, which declares two resources,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, index);
+      statement.execute();
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+      success = true;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    if (success) {
+      String sql2 = "DELETE FROM user WHERE user.user_id = ?";
+      try (Connection conn = login();
+          PreparedStatement statement2 =
+              conn.prepareStatement(sql2, Statement.RETURN_GENERATED_KEYS)) {
+
+        statement2.setString(1, index);
+        statement2.execute();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+      success = true;
+    }
+    return success;
   }
 
   public int addKostenstelle(String name, String abbreviation) {
