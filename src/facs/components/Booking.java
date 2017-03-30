@@ -144,7 +144,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.170329");
+    versionLabel.setValue("Version 0.1.170330");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -153,7 +153,7 @@ public class Booking extends CustomComponent {
     // + bookingModel.userName() + "!", "");
 
     Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
     System.out.println(ft.format(dNow) + "  INFO  Calendar initiated! - User: "
         + bookingModel.getLDAP() + " " + versionLabel);
 
@@ -164,7 +164,7 @@ public class Booking extends CustomComponent {
       errorLayout.addComponent(infoLabel);
       showErrorNotification(
           "Access Denied!",
-          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'.");
+          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'.");
       setCompositionRoot(errorLayout);
       return;
     }

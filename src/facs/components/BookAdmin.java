@@ -85,7 +85,7 @@ public class BookAdmin extends CustomComponent {
   public BookAdmin(User user) {
 
     Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
     System.out.println(ft.format(dNow) + "  INFO  Calendar Admin accessed! - User: "
         + LiferayAndVaadinUtils.getUser().getScreenName());
 

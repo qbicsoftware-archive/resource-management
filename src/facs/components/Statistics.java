@@ -119,7 +119,7 @@ public class Statistics extends CustomComponent {
   private void init() {
 
     Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
     System.out.println(ft.format(dNow) + "  INFO  Statistics accessed! - User: "
         + LiferayAndVaadinUtils.getUser().getScreenName());
 

@@ -79,7 +79,7 @@ public class CompareCal extends CustomComponent {
     countLabel.addStyleName("h6");
 
     Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
     System.out.println(ft.format(dNow) + "  INFO  Compare Calendar initiated! - User: "
         + bookingModel.getLDAP());
 
@@ -88,7 +88,7 @@ public class CompareCal extends CustomComponent {
       VerticalLayout errorLayout = new VerticalLayout();
       showErrorNotification(
           "Access Denied!",
-          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'.");
+          "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'.");
       setCompositionRoot(errorLayout);
       return;
     }

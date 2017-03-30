@@ -71,7 +71,7 @@ public class BookUI extends UI {
     label.addStyleName(ValoTheme.LABEL_FAILURE);
     label.setIcon(FontAwesome.FROWN_O);
     label
-        .setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact info@qbic.uni-tuebingen.de");
+        .setValue("Initialization has failed! Are you logged out? Please try to login! If the problem continues please contact helpdesk@qbic.uni-tuebingen.de");
     return label;
   }
 

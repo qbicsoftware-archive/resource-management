@@ -78,7 +78,7 @@ public class UserAdmin extends CustomComponent {
   public UserAdmin(User user) {
 
     Date dNow = new Date();
-    SimpleDateFormat ft = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
     System.out.println(ft.format(dNow) + "  INFO  Calendar User Manager accessed! - User: "
         + LiferayAndVaadinUtils.getUser().getScreenName());
 
@@ -644,7 +644,7 @@ public class UserAdmin extends CustomComponent {
      * .equals("1")) { VerticalLayout errorLayout = new VerticalLayout();
      * infoLabel.setValue("ACCESS DENIED"); errorLayout.addComponent(infoLabel);
      * showErrorNotification( "Access Denied!",
-     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'."
+     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'."
      * ); setCompositionRoot(errorLayout); return; }
      */
 
@@ -654,7 +654,7 @@ public class UserAdmin extends CustomComponent {
      * .equals("1")) { VerticalLayout errorLayout = new VerticalLayout();
      * infoLabel.setValue("ACCESS DENIED"); errorLayout.addComponent(infoLabel); Notification(
      * "Access Denied!",
-     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'info@qbic.uni-tuebingen.de'."
+     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'."
      * , "error"); setCompositionRoot(errorLayout); return; }
      */
 
