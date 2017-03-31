@@ -49,7 +49,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Calendar;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
@@ -111,7 +110,7 @@ public class Booking extends CustomComponent {
   private Grid upcomingBookings;
   // private Grid next24HoursBookings;
   private Grid pastBookings;
-  private CheckBox bookMaintenance;
+  // private CheckBox bookMaintenance;
   // private String defaultKostenstelle;
   private TabSheet booking;
   private Grid next3HoursBookings;
@@ -136,15 +135,17 @@ public class Booking extends CustomComponent {
     selectDeviceLabel.addStyleName("h4");
     selectDeviceLabel.setValue("Please Select a Device");
 
-    bookMaintenance = new CheckBox("maintenance");
-    bookMaintenance.setEnabled(true);
+    // bookMaintenance = new CheckBox("maintenance");
+    // bookMaintenance.setEnabled(true);
 
-    book4Users = new ComboBox();
+    book4Users = new ComboBox("Select Maintenance or User: ");
+    book4Users
+        .setDescription("FACS Admins can book on behalf of other users or Maintenance/Service");
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
     versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.170330");
+    versionLabel.setValue("Version 0.1.170331");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -332,7 +333,7 @@ public class Booking extends CustomComponent {
     gridLayout.addComponent(submit, 1, 3, 5, 3);
     gridLayout.addComponent(image, 0, 6, 2, 6);
 
-    gridLayout.addComponent(bookMaintenance, 3, 4);
+    // gridLayout.addComponent(bookMaintenance, 3, 4);
     gridLayout.addComponent(book4Users, 4, 4);
 
     gridLayout.addComponent(countLabel, 3, 0);
@@ -352,7 +353,7 @@ public class Booking extends CustomComponent {
     setCompositionRoot(booking);
 
     if (bookingModel.getAdminAccess() != 1) {
-      bookMaintenance.setEnabled(false);
+      // bookMaintenance.setEnabled(false);
       book4Users.setEnabled(false);
 
     }
@@ -808,7 +809,7 @@ public class Booking extends CustomComponent {
 
     if (db.getDeviceRestriction(currentDevice) == true) {
 
-      System.out.println("I am here: True - " + db.getDeviceRestriction(currentDevice));
+      // System.out.println("I am here: True - " + db.getDeviceRestriction(currentDevice));
 
       if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
         showErrorNotification(
@@ -890,7 +891,7 @@ public class Booking extends CustomComponent {
               ((BasicEvent) event).setStyleName("color2");
               if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
 
-                System.out.println("Current User: V");
+                // System.out.println("Current User: V");
 
                 db.addBooking(
                     bookingModel.getLDAP(),
@@ -908,12 +909,14 @@ public class Booking extends CustomComponent {
               } else
 
               // admins can book slots for maintenance/service
-              if (!bookMaintenance.isEmpty()) {
+              if (book4Users.getValue() != null) {
 
-                System.out.println("Maintanence selected!");
+                String userLDAPId = db.getUserLDAPIDbyUserName(book4Users.getValue().toString());
+                // System.out.println("maintenance selected!: " + book4Users.getValue()
+                // + " toString: " + book4Users.getValue().toString());
 
                 db.addBooking(
-                    "maintenance",
+                    userLDAPId,
                     (String) selectedDevice.getValue(),
                     event.getStart(),
                     event.getEnd(),
@@ -925,12 +928,9 @@ public class Booking extends CustomComponent {
                         event.getEnd(),
                         getCost((String) selectedDevice.getValue(),
                             (String) selectedService.getValue(), getGroupID())));
-              } else if (book4Users.getValue().toString() != null) {
-                System.out.println("book4Users dropdown new value selected!");
-
               } else {
 
-                System.out.println("Booking Triggered!");
+                // System.out.println("Booking Triggered!");
 
                 db.addBooking(
                     bookingModel.getLDAP(),

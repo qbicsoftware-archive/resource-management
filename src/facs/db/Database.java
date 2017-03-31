@@ -442,6 +442,33 @@ public enum Database {
   }
 
   /**
+   * Returns the user LDAP ID from the user table by using users UserName
+   * 
+   * @param uuid
+   * @return
+   */
+  public String getUserLDAPIDbyUserName(String user_name) {
+    String userLDAP = "";
+
+    String sql = "SELECT user_ldap FROM user WHERE user_name=?";
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+      statement.setString(1, user_name);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        userLDAP = rs.getString(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return userLDAP;
+  }
+
+  /**
    * Returns the user ID from the user table by using users LDAP ID
    * 
    * @param uuid
