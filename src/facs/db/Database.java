@@ -1024,7 +1024,7 @@ public enum Database {
     // System.out.println("Database.java 131 sql start: " + sqlStart);
     // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
     String sql =
-        "INSERT INTO booking (user_ldap, device_name, start, end, duration, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO booking (user_ldap, device_name, start, end, duration, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     // The following statement is an try-with-devices statement, which declares two devices,
     // conn and statement, which will be automatically closed when the try block terminates
     try (Connection conn = login();
@@ -1215,7 +1215,7 @@ public enum Database {
   public int getAllUnconfirmedCount() {
     int count = 0;
     String sql =
-        "SELECT COUNT(*) FROM booking WHERE device_name = 'Aria' AND confirmation IS NOT NULL AND deleted IS NULL AND start > DATE(NOW())";
+        "SELECT COUNT(*) FROM booking WHERE confirmation IS NOT NULL AND deleted IS NULL AND start > DATE(NOW())";
     try (Connection connCheck = login();
         PreparedStatement statementCheck =
             connCheck.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

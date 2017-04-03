@@ -130,7 +130,7 @@ public class Settings extends CustomComponent {
       devicesGrid.getContainerDataSource().removeItem(db);
     } else {
       // TODO log failed operation
-      Notification.show("Failed to remove device from database.", Type.ERROR_MESSAGE);
+      Notification.show("Failed to remove instrument from database.", Type.ERROR_MESSAGE);
     }
   }
 

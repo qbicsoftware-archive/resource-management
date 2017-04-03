@@ -133,22 +133,28 @@ public class Booking extends CustomComponent {
 
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
-    selectDeviceLabel.setValue("Please Select a Device");
+    selectDeviceLabel.setValue("Select Device");
 
     // bookMaintenance = new CheckBox("maintenance");
     // bookMaintenance.setEnabled(true);
 
-    book4Users = new ComboBox("Select Maintenance or User: ");
+    book4Users = new ComboBox("Select User/Maintenance/Service");
     book4Users
         .setDescription("FACS Admins can book on behalf of other users or Maintenance/Service");
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
-    versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.1.170331");
+    // versionLabel.addStyleName("h4");
+    versionLabel.setValue("Version 0.2.170403");
+
+    Label userNameLabel = new Label();
+    Label userRoleLabel = new Label();
+    Label userKostenstelleLabel = new Label();
+    Label userProjectLabel = new Label();
+    Label userInstituteLabel = new Label();
 
     Label countLabel = new Label();
-    countLabel.addStyleName("h6");
+    Label totalCountLabel = new Label();
 
     // showSuccessfulNotification(sayHello[(int) (Math.random() * sayHello.length)] + ", "
     // + bookingModel.userName() + "!", "");
@@ -180,10 +186,10 @@ public class Booking extends CustomComponent {
 
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
-    selectedService = new NativeSelect("Please select a Service:");
+    selectedService = new NativeSelect("Select Service");
     selectedService.setDescription("Please select the service you would like to receive!");
 
-    selectedKostenstelle = new NativeSelect("Please select Kostenstelle:");
+    selectedKostenstelle = new NativeSelect("Select Kostenstelle");
     selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
 
     book4Users.addItems(db.getAllUserNames());
@@ -198,7 +204,8 @@ public class Booking extends CustomComponent {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        versionLabel.setValue(db.getUserRoleDescByLDAPId(bookingModel.getLDAP(), getCurrentDevice()));
+        userRoleLabel.setValue(db.getUserRoleDescByLDAPId(bookingModel.getLDAP(),
+            getCurrentDevice()));
 
         selectedKostenstelle.setVisible(true);
 
@@ -246,18 +253,73 @@ public class Booking extends CustomComponent {
     });
 
     if (bookingModel.getProject().isEmpty()) {
-      infoLabel.setValue(bookingModel.userName() + " · Kostenstelle: "
-          + bookingModel.getKostenstelle() + " · Institute: " + bookingModel.getInstitute());
+      userNameLabel.setValue("Name: " + bookingModel.userName());
+      userKostenstelleLabel.setValue("Kostenstelle: " + bookingModel.getKostenstelle());
+      userProjectLabel.setValue("No project found.");
+      userInstituteLabel.setValue("Institute: " + bookingModel.getInstitute());
+      userRoleLabel.setValue("Cal role will appear here!");
+
+      userNameLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userKostenstelleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userProjectLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+      userInstituteLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userRoleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+
+      // infoLabel.setValue(bookingModel.userName() + " · Kostenstelle: "
+      // + bookingModel.getKostenstelle() + " · Institute: " + bookingModel.getInstitute());
 
     } else {
-      infoLabel.setValue(bookingModel.userName() + " · Kostenstelle: "
-          + bookingModel.getKostenstelle() + " · Project: " + bookingModel.getProject()
-          + " · Institute: " + bookingModel.getInstitute());
+
+      userNameLabel.setValue("Name: " + bookingModel.userName());
+      userKostenstelleLabel.setValue("Kostenstelle: " + bookingModel.getKostenstelle());
+      userProjectLabel.setValue("Project: " + bookingModel.getProject());
+      userInstituteLabel.setValue("Institute: " + bookingModel.getInstitute());
+      userRoleLabel.setValue("Cal role will appear here!");
+
+      userNameLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userKostenstelleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userProjectLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userInstituteLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      userRoleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+      // infoLabel.setValue(bookingModel.userName() + " · Kostenstelle: "
+      // + bookingModel.getKostenstelle() + " · Project: " + bookingModel.getProject()
+      // + " · Institute: " + bookingModel.getInstitute());
     }
 
     // countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " Booking(s)");
-    countLabel.setValue("Unconfirmed: " + db.getAllUnconfirmedCount() + " - Total Bookings: "
-        + db.getAllBookingTotalCount());
+    countLabel.setSizeFull();
+    countLabel.setValue("Unconfirmed Bookings: " + db.getAllUnconfirmedCount());
+    countLabel.setDescription("FACS admins need to confirm these bookings.");
+    countLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+
+    totalCountLabel.setSizeFull();
+    totalCountLabel.setValue("Total # of Bookings: " + db.getAllBookingTotalCount());
+    totalCountLabel.setDescription("Total # of completed bookings.");
+    totalCountLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
+
+    versionLabel.addStyleName(ValoTheme.LABEL_SMALL);
+
+    Panel deviceSelectionPanel = new Panel("");
+    deviceSelectionPanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
+    HorizontalLayout rightDeviceSelection = new HorizontalLayout();
+    rightDeviceSelection.setSpacing(true);
+    rightDeviceSelection.setMargin(true);
+    rightDeviceSelection.setSizeFull();
+    deviceSelectionPanel.setContent(rightDeviceSelection);
+
+    Panel bookingStatsPanel = new Panel("Booking Stats & Legend");
+    VerticalLayout rightBookingStats = new VerticalLayout();
+    rightBookingStats.setSpacing(true);
+    rightBookingStats.setMargin(true);
+    rightBookingStats.setSizeFull();
+    bookingStatsPanel.setContent(rightBookingStats);
+
+    Panel userDetailsPanel = new Panel("User Details");
+    VerticalLayout rightUserDetails = new VerticalLayout();
+    rightUserDetails.setSpacing(true);
+    rightUserDetails.setMargin(true);
+    rightUserDetails.setSizeFull();
+    userDetailsPanel.setContent(rightUserDetails);
 
     selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
     // System.out.println("Kost: " + db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
@@ -311,32 +373,59 @@ public class Booking extends CustomComponent {
     FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/legend.png"));
 
     // Show the image in the application
-    Image image = new Image("Color Legend:", resource);
+    Image image = new Image("", resource);
     image.setSizeUndefined();
     // image.setWidth("100%");
     // Let the user view the file in browser or download it
     // Link link = new Link("Link to the image file", resource);
+
+    selectedDevice.setSizeFull();
+    selectedService.setSizeFull();
+    selectedKostenstelle.setSizeFull();
+    book4Users.setSizeFull();
+
+    submit.setSizeFull();
+
+    rightDeviceSelection.addComponent(selectedDevice);
+    rightDeviceSelection.addComponent(selectedService);
+    rightDeviceSelection.addComponent(selectedKostenstelle);
+
+    rightBookingStats.addComponent(countLabel);
+    rightBookingStats.addComponent(totalCountLabel);
+    rightBookingStats.addComponent(image);
+    rightBookingStats.addComponent(versionLabel);
+
+    rightUserDetails.addComponent(book4Users);
+    rightUserDetails.addComponent(userNameLabel);
+    rightUserDetails.addComponent(userKostenstelleLabel);
+    rightUserDetails.addComponent(userProjectLabel);
+    rightUserDetails.addComponent(userInstituteLabel);
+    rightUserDetails.addComponent(userRoleLabel);
+
     gridLayout.setWidth("100%");
     // add components to the grid layout
-    gridLayout.addComponent(infoLabel, 0, 4, 2, 4);
-    gridLayout.addComponent(versionLabel, 0, 5);
+    // gridLayout.addComponent(infoLabel, 0, 4, 2, 4);
+    // gridLayout.addComponent(versionLabel, 0, 5);
 
     // gridLayout.addComponent(selectDeviceLabel,0,1);
-    gridLayout.addComponent(selectedDevice, 0, 0);
-    gridLayout.addComponent(selectedService, 1, 0);
-    gridLayout.addComponent(selectedKostenstelle, 2, 0);
+    // gridLayout.addComponent(selectedDevice, 0, 0);
+    // gridLayout.addComponent(selectedService, 1, 0);
+    // gridLayout.addComponent(selectedKostenstelle, 2, 0);
     // gridLayout.addComponent(bookAsAdmin, 3, 0);
     selectedService.setVisible(false);
 
+    gridLayout.addComponent(deviceSelectionPanel, 0, 1, 5, 1);
     gridLayout.addComponent(cal, 0, 2, 5, 2);
     gridLayout.addComponent(refresh, 0, 3);
     gridLayout.addComponent(submit, 1, 3, 5, 3);
-    gridLayout.addComponent(image, 0, 6, 2, 6);
+    // gridLayout.addComponent(book4Users, 4, 4, 5, 4);
+    gridLayout.addComponent(bookingStatsPanel, 0, 6, 3, 6);
+    gridLayout.addComponent(userDetailsPanel, 4, 6, 5, 6);
+    // gridLayout.addComponent(image, 0, 6, 2, 6);
 
     // gridLayout.addComponent(bookMaintenance, 3, 4);
-    gridLayout.addComponent(book4Users, 4, 4);
 
-    gridLayout.addComponent(countLabel, 3, 0);
+    // gridLayout.addComponent(countLabel, 3, 0, 5, 0);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
@@ -355,6 +444,7 @@ public class Booking extends CustomComponent {
     if (bookingModel.getAdminAccess() != 1) {
       // bookMaintenance.setEnabled(false);
       book4Users.setEnabled(false);
+      book4Users.setVisible(false);
 
     }
 
@@ -825,7 +915,7 @@ public class Booking extends CustomComponent {
       while (it.hasNext()) {
         Entry<String, Set<CalendarEvent>> entry = it.next();
         description += entry.getValue().size();
-        description += " new booking(s) for device ";
+        description += " new booking(s) for instrument ";
         description += entry.getKey();
         description +=
             ". \nPlease keep in mind that Aria, Mac and Consulting requests has to be confirmed by FACS Facility managers.";
@@ -841,19 +931,44 @@ public class Booking extends CustomComponent {
               long duration = e - s;
 
               ((BasicEvent) event).setStyleName("color2");
-              db.addBooking(
-                  bookingModel.getLDAP(),
-                  (String) selectedDevice.getValue(),
-                  event.getStart(),
-                  event.getEnd(),
-                  duration,
-                  (String) selectedService.getValue(),
-                  (String) selectedKostenstelle.getValue(),
-                  bookingModel.cost(
-                      event.getStart(),
-                      event.getEnd(),
-                      getCost((String) selectedDevice.getValue(),
-                          (String) selectedService.getValue(), getGroupID())));
+
+              if (book4Users.getValue() != null) {
+
+                String userLDAPId = db.getUserLDAPIDbyUserName(book4Users.getValue().toString());
+                // System.out.println("maintenance selected!: " + book4Users.getValue()
+                // + " toString: " + book4Users.getValue().toString());
+
+                // System.out.println("Restricted Device: " + currentDevice
+                // + " Admin Power Book4Users");
+                db.addBooking(
+                    userLDAPId,
+                    (String) selectedDevice.getValue(),
+                    event.getStart(),
+                    event.getEnd(),
+                    duration,
+                    (String) selectedService.getValue(),
+                    (String) selectedKostenstelle.getValue(),
+                    bookingModel.cost(
+                        event.getStart(),
+                        event.getEnd(),
+                        getCost((String) selectedDevice.getValue(),
+                            (String) selectedService.getValue(), getGroupID())));
+              } else {
+                // System.out.println("Restricted Device: " + currentDevice);
+                db.addBooking(
+                    bookingModel.getLDAP(),
+                    (String) selectedDevice.getValue(),
+                    event.getStart(),
+                    event.getEnd(),
+                    duration,
+                    (String) selectedService.getValue(),
+                    (String) selectedKostenstelle.getValue(),
+                    bookingModel.cost(
+                        event.getStart(),
+                        event.getEnd(),
+                        getCost((String) selectedDevice.getValue(),
+                            (String) selectedService.getValue(), getGroupID())), true);
+              }
             } catch (NumberFormatException e) {
               e.printStackTrace();
             }
@@ -865,7 +980,7 @@ public class Booking extends CustomComponent {
     } else {
 
       // System.out.println("I am here: False? - "+db.getDeviceRestriction(currentDevice));
-
+      System.out.println("No Restriction on Device: " + currentDevice);
       Iterator<Entry<String, Set<CalendarEvent>>> it = newEvents.entrySet().iterator();
 
       String title = "Booking completed!";
@@ -873,7 +988,7 @@ public class Booking extends CustomComponent {
       while (it.hasNext()) {
         Entry<String, Set<CalendarEvent>> entry = it.next();
         description += entry.getValue().size();
-        description += " new booking(s) for device ";
+        description += " new booking(s) for instrument ";
         description += entry.getKey();
         description +=
             ". \nPlease keep in mind that Aria, Mac and Consulting requests has to be confirmed by FACS Facility managers.";
@@ -892,7 +1007,7 @@ public class Booking extends CustomComponent {
               if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
 
                 // System.out.println("Current User: V");
-
+                // System.out.println("No Restriction on Device: " + currentDevice + " Novice ");
                 db.addBooking(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
@@ -906,11 +1021,9 @@ public class Booking extends CustomComponent {
                         event.getEnd(),
                         getCost((String) selectedDevice.getValue(),
                             (String) selectedService.getValue(), getGroupID())), true);
-              } else
-
-              // admins can book slots for maintenance/service
-              if (book4Users.getValue() != null) {
-
+              } else if (book4Users.getValue() != null) {
+                // System.out.println("No Restriction on Device: " + selectedDevice.getValue()
+                // + " Admin Power Book4Users");
                 String userLDAPId = db.getUserLDAPIDbyUserName(book4Users.getValue().toString());
                 // System.out.println("maintenance selected!: " + book4Users.getValue()
                 // + " toString: " + book4Users.getValue().toString());
@@ -931,7 +1044,8 @@ public class Booking extends CustomComponent {
               } else {
 
                 // System.out.println("Booking Triggered!");
-
+                // System.out.println("No Restriction on Device: " + selectedDevice.getValue()
+                // + " Rest of the Users");
                 db.addBooking(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
@@ -1151,9 +1265,9 @@ public class Booking extends CustomComponent {
   }
 
   NativeSelect initCalendars(List<String> devices) {
-    String selectDeviceCaption = "Please select an Instrument or a Service:";
+    String selectDeviceCaption = "Select Instrument";
     String selectDeviceDescription =
-        "Please select a device to ask for a booking request or to book!";
+        "Please select a instrument to ask for a booking request or to book!";
     NativeSelect selectDevice = new NativeSelect();
     selectDevice.addItems(devices);
     selectDevice.setCaption(selectDeviceCaption);

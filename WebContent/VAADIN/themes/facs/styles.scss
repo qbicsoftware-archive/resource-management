@@ -7,3 +7,11 @@
   @include addons;
   @include facs;
 }
+
+
+.center {
+  height: 90px;
+  line-height: 90px;
+  text-align: center;
+  border: 2px dashed #f69c55;
+}

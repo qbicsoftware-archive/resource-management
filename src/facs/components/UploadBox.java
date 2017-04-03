@@ -60,7 +60,7 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
    */
   private static final long serialVersionUID = 1L;
   private final String UPLOAD_CAPTION = "Upload Statistics Here";
-  private final String CAPTION = "Upload Device Statistics";
+  private final String CAPTION = "Upload Instrument Statistics";
   // Put upload in this memory buffer that grows automatically
   ByteArrayOutputStream os = new ByteArrayOutputStream(10240);
   // Name of the uploaded file
@@ -78,9 +78,9 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   public UploadBox() {
     this.setCaption(CAPTION);
     // there has to be a device selected.
-    devices = new NativeSelect("Devices");
+    devices = new NativeSelect("Select Instrument");
     devices
-        .setDescription("Select a device in order to upload information for that specific devices.");
+        .setDescription("Select an instrument in order to upload information for that specific instrument.");
     devices.setNullSelectionAllowed(false);
     deviceNameToId = new HashMap<String, Integer>();
     for (DeviceBean bean : DBManager.getDatabaseInstance().getDevices()) {

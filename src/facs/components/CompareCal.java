@@ -73,7 +73,7 @@ public class CompareCal extends CustomComponent {
 
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
-    selectDeviceLabel.setValue("Please Select a Device");
+    selectDeviceLabel.setValue("Select Instrument");
 
     Label countLabel = new Label();
     countLabel.addStyleName("h6");
@@ -103,7 +103,7 @@ public class CompareCal extends CustomComponent {
 
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
-    selectedService = new NativeSelect("Please select a Service:");
+    selectedService = new NativeSelect("Select Service");
     selectedService.setDescription("Please select the service you would like to receive!");
 
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
@@ -171,7 +171,7 @@ public class CompareCal extends CustomComponent {
     book.setContent(gridLayout);
     booking = new TabSheet();
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
-    booking.addTab(book).setCaption("Calendar");
+    booking.addTab(book).setCaption("Compare Instrument Usage");
     setCompositionRoot(booking);
 
   }
@@ -244,9 +244,9 @@ public class CompareCal extends CustomComponent {
   }
 
   NativeSelect initCalendars(List<String> devices) {
-    String selectDeviceCaption = "Please select an Instrument or a Service:";
+    String selectDeviceCaption = "Select Instrument";
     String selectDeviceDescription =
-        "Please select a device to ask for a booking request or to book!";
+        "Please select an instrument to ask for a booking request or to book!";
     NativeSelect selectDevice = new NativeSelect();
     selectDevice.addItems(devices);
     selectDevice.setCaption(selectDeviceCaption);

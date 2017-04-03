@@ -137,7 +137,7 @@ public class UserAdmin extends CustomComponent {
     // save.setDescription("Click here to save all changes!");
     // save.addStyleName(ValoTheme.BUTTON_BORDERLESS);
 
-    userDevice = new ListSelect("Instrument or Service");
+    userDevice = new ListSelect("Instruments");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
     userDevice.setRows(6);
     userDevice.setNullSelectionAllowed(false);

@@ -108,7 +108,7 @@ public class BookAdmin extends CustomComponent {
     updateUser.setSizeFull();
     updateUser.setDescription("Click here to update your user role and group!");
 
-    userDevice = new ListSelect("Select an Instrument or a Service");
+    userDevice = new ListSelect("Select Instrument");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
     userDevice.setRows(6);
     userDevice.setNullSelectionAllowed(false);
@@ -118,7 +118,7 @@ public class BookAdmin extends CustomComponent {
      * userDevice.addValueChangeListener(e -> Notification.show("Device:",
      * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
      */
-    userGroup = new ListSelect("Select a User Group");
+    userGroup = new ListSelect("Select User Group");
     userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
     userGroup.setRows(6);
     userGroup.setNullSelectionAllowed(false);
@@ -128,7 +128,7 @@ public class BookAdmin extends CustomComponent {
      * userGroup.addValueChangeListener(e -> Notification.show("User Group:",
      * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
      */
-    userRole = new ListSelect("Select a User Role");
+    userRole = new ListSelect("Select User Role");
     userRole.addItems(DBManager.getDatabaseInstance().getUserRoles());
     userRole.setRows(6);
     userRole.setNullSelectionAllowed(false);
@@ -157,7 +157,7 @@ public class BookAdmin extends CustomComponent {
               || userGroup.getValue().equals(null)) {
             showErrorNotification(
                 "Something's missing!",
-                "Please make sure that you selected a Device, a Role and a Group! Each list has to have one highligthed option.'.");
+                "Please make sure that you selected an Instrument, a Role and a Group! Each list has to have one highligthed option.'.");
             // System.out.println("Device: "+userDevice.getValue()+" Group: "+userGroup.getValue()+" Role: "+userRole.getValue());
           } else {
             DBManager.getDatabaseInstance()
@@ -178,7 +178,7 @@ public class BookAdmin extends CustomComponent {
         } catch (Exception e) {
           showErrorNotification(
               "Something's missing!",
-              "Please make sure that you selected a Device, a Role and a Group! Each list has to have one highligthed option.'.");
+              "Please make sure that you selected an Instrument, a Role and a Group! Each list has to have one highligthed option.'.");
         }
         refreshDataSources();
       }

@@ -131,11 +131,11 @@ public class Statistics extends CustomComponent {
 
     TabSheet statistics = new TabSheet();
 
-    selectedYear = new ComboBox("Please select a year:");
+    selectedYear = new ComboBox("Select Year");
     selectedYear.setDescription("to be added!");
     selectedYear.addItems(DBManager.getDatabaseInstance().getLoggedYears());
 
-    selectedQuarter = new ComboBox("Please select quarter of the year:");
+    selectedQuarter = new ComboBox("Select Quarter");
     selectedQuarter.setDescription("to be added!");
 
     selectedQuarter.addItems("Jan-Mar", "Apr-Jun", "Jul-Sep", "Oct-Dec");
@@ -173,8 +173,8 @@ public class Statistics extends CustomComponent {
         statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
         statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced");
 
-        selectedYear.setCaption("Selected Year:");
-        selectedQuarter.setCaption("Selected Quarter:");
+        selectedYear.setCaption("Selected Year");
+        selectedQuarter.setCaption("Selected Quarter");
 
         selectedYear.setEnabled(false);
         selectedQuarter.setEnabled(false);
@@ -1315,7 +1315,7 @@ public class Statistics extends CustomComponent {
     if (mobeans.size() <= 0)
       Notification(
           "Oops! No Matches Found",
-          "Apparently there no entries or no matches between the entries of the booking system and the machine output.",
+          "Apparently there no entries or no matches between the entries of the booking system and the instrument output.",
           "error");
 
     for (MachineOccupationBean mobean : mobeans) {
