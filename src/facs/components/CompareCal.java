@@ -171,6 +171,7 @@ public class CompareCal extends CustomComponent {
     book.setContent(gridLayout);
     booking = new TabSheet();
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    booking.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     booking.addTab(book).setCaption("Compare Instrument Usage");
     setCompositionRoot(booking);
 

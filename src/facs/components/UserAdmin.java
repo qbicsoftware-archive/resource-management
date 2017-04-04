@@ -103,12 +103,12 @@ public class UserAdmin extends CustomComponent {
     updateUserWorkgroup.setSizeFull();
     updateUserWorkgroup.setDescription("Click here to update the workgroup of the user!");
 
-    String buttonUpdateTitle = "Update (user role & group for device)";
+    String buttonUpdateTitle = "Update (user role & group for instrument)";
     Button updateUserRightsAndRoles = new Button(buttonUpdateTitle);
     updateUserRightsAndRoles.setIcon(FontAwesome.WRENCH);
     updateUserRightsAndRoles.setSizeFull();
     updateUserRightsAndRoles
-        .setDescription("Click here to update the user's role and group for a device!");
+        .setDescription("Click here to update the user's role and group for an instrument!");
 
     String buttonTitle = "Refresh";
     Button refresh = new Button(buttonTitle);
@@ -468,7 +468,7 @@ public class UserAdmin extends CustomComponent {
                 + " Values: " + userDevice.getValue() + " and " + userRole.getValue());
             Notification(
                 "Something's missing!",
-                "Please make sure that you selected the user, device and role! Each list has to have one highlighted option.",
+                "Please make sure that you selected the user, instrument and role! Each list has to have one highlighted option.",
                 "error");
           } else {
 
@@ -504,9 +504,9 @@ public class UserAdmin extends CustomComponent {
              */
 
             // log changes in 'user_log' table
-            DBManager.getDatabaseInstance()
-                .logEverything(LiferayAndVaadinUtils.getUser().getScreenName(),
-                    "Admin edited Device, Role, Group");
+            DBManager.getDatabaseInstance().logEverything(
+                LiferayAndVaadinUtils.getUser().getScreenName(),
+                "Admin edited Instrument, Role, Group");
 
             Notification(
                 "Successfully Updated",
@@ -519,7 +519,7 @@ public class UserAdmin extends CustomComponent {
         } catch (Exception e) {
           Notification(
               "Something's missing!",
-              "Please make sure that you selected the user, device and role! Each list has to have one highlighted option.",
+              "Please make sure that you selected the user, instrument and role! Each list has to have one highlighted option.",
               "error");
         }
 
@@ -662,7 +662,9 @@ public class UserAdmin extends CustomComponent {
 
     final TabSheet userAdmin = new TabSheet();
     userAdmin.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    userAdmin.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     userAdmin.addTab(usersGrid());
+    userAdmin.getTab(0).setIcon(FontAwesome.USERS);
     /*
      * userAdmin.addSelectedTabChangeListener(new SelectedTabChangeListener() {
      * 

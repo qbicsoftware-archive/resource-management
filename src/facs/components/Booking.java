@@ -133,7 +133,7 @@ public class Booking extends CustomComponent {
 
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
-    selectDeviceLabel.setValue("Select Device");
+    selectDeviceLabel.setValue("Select Instrument");
 
     // bookMaintenance = new CheckBox("maintenance");
     // bookMaintenance.setEnabled(true);
@@ -145,7 +145,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     // versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.2.170403");
+    versionLabel.setValue("Version 0.2.170404");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();
@@ -300,7 +300,7 @@ public class Booking extends CustomComponent {
     versionLabel.addStyleName(ValoTheme.LABEL_SMALL);
 
     Panel deviceSelectionPanel = new Panel("");
-    deviceSelectionPanel.addStyleName(ValoTheme.PANEL_BORDERLESS);
+    deviceSelectionPanel.addStyleName(ValoTheme.PANEL_WELL);
     HorizontalLayout rightDeviceSelection = new HorizontalLayout();
     rightDeviceSelection.setSpacing(true);
     rightDeviceSelection.setMargin(true);
@@ -333,7 +333,8 @@ public class Booking extends CustomComponent {
     String submitTitle = "Book";
     Button submit = new Button(submitTitle);
     submit.setIcon(FontAwesome.CALENDAR);
-    submit.setDescription("Please select a device and a time frame at first then click 'BOOK'!");
+    submit
+        .setDescription("Please select an instrument and a time frame at first then click 'BOOK'!");
     submit.setSizeFull();
 
     // submit.setVisible(false);
@@ -434,10 +435,15 @@ public class Booking extends CustomComponent {
     book.setContent(gridLayout);
     booking = new TabSheet();
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    booking.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     booking.addTab(book).setCaption("Calendar");
+    booking.getTab(0).setIcon(FontAwesome.CALENDAR);
     booking.addTab(myNext3HoursBookings()).setCaption("Next 3 Hours");
+    booking.getTab(1).setIcon(FontAwesome.LOCK);
     booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
+    booking.getTab(2).setIcon(FontAwesome.CLOCK_O);
     booking.addTab(myPastBookings()).setCaption("Past Bookings");
+    booking.getTab(3).setIcon(FontAwesome.HISTORY);
     // booking.addTab(myUpcomingBookingsSQLContainer()).setCaption("Test");
     setCompositionRoot(booking);
 
@@ -493,6 +499,7 @@ public class Booking extends CustomComponent {
 
     next3HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
         "end", "username", "phone", "price");
+    next3HoursBookings.getColumn("deviceName").setHeaderCaption("Instrument");
     next3HoursBookings.getColumn("price").setHeaderCaption("Approx. Price");
     setRenderers(next3HoursBookings);
     devicesLayout.addComponent(next3HoursBookings);
@@ -526,6 +533,7 @@ public class Booking extends CustomComponent {
     pastBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
         "username", "phone", "price");
 
+    pastBookings.getColumn("deviceName").setHeaderCaption("Instrument");
     pastBookings.getColumn("price").setHeaderCaption("Approx. Price");
 
     setRenderers(pastBookings);
@@ -670,6 +678,7 @@ public class Booking extends CustomComponent {
 
     upcomingBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
         "username", "phone", "price");
+    upcomingBookings.getColumn("deviceName").setHeaderCaption("Instrument");
     upcomingBookings.getColumn("price").setHeaderCaption("Approx. Price");
 
     // System.out.println(myBookings.getColumns());
@@ -980,7 +989,7 @@ public class Booking extends CustomComponent {
     } else {
 
       // System.out.println("I am here: False? - "+db.getDeviceRestriction(currentDevice));
-      System.out.println("No Restriction on Device: " + currentDevice);
+      // System.out.println("No Restriction on Device: " + currentDevice);
       Iterator<Entry<String, Set<CalendarEvent>>> it = newEvents.entrySet().iterator();
 
       String title = "Booking completed!";

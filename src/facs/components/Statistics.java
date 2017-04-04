@@ -71,7 +71,7 @@ public class Statistics extends CustomComponent {
   private static final long serialVersionUID = 4811041982287436302L;
 
   private final String logIdCaption = "LogId";
-  private final String deviceCaption = "Device";
+  private final String deviceCaption = "Instrument";
   private final String kostenstelleCaption = "Kostenstelle";
   private final String startCaption = "Start";
   private final String endCaption = "End";
@@ -167,6 +167,7 @@ public class Statistics extends CustomComponent {
         }
 
         statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
+        statistics.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
         statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
         statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
         statistics.addTab(serviceGrid(dateStart, dateEnd)).setCaption("Service");

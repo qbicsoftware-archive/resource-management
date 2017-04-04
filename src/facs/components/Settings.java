@@ -46,6 +46,7 @@ public class Settings extends CustomComponent {
     this.setCaption("Settings");
     TabSheet settings = new TabSheet();
     settings.addStyleName(ValoTheme.TABSHEET_FRAMED);
+    settings.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
 
     // TODO: a new device functionality is temporarily removed from the user interface
     // settings.addTab(newDeviceGrid());

@@ -405,6 +405,7 @@ public class BookAdmin extends CustomComponent {
     setRenderers(devicesGridTrash);
     devicesGridTrash.setColumnOrder("ID", "deviceName", "service", "start", "end", "username",
         "phone", "price");
+    devicesGridTrash.getColumn("deviceName").setHeaderCaption("Instrument");
 
     // Render a button that deletes the data row (item)
 
@@ -618,6 +619,7 @@ public class BookAdmin extends CustomComponent {
     setRenderers(devicesGridConfirm);
     devicesGridConfirm.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
         "end", "username", "phone", "price");
+    devicesGridConfirm.getColumn("deviceName").setHeaderCaption("Instrument");
 
     // Render a button that deletes the data row (item)
     devicesGridConfirm.getColumn("delete").setRenderer(
