@@ -43,6 +43,7 @@ public class MachineOccupationBean implements Serializable {
   private String serialno;
   private String custom;
   private String deviceName;
+  private int duration;
   private float cost;
   private boolean corrupted;
 
@@ -71,6 +72,14 @@ public class MachineOccupationBean implements Serializable {
     custom = info[13];
     cost = -1;
     corrupted = false;
+  }
+
+  public void setDuration(int duration) {
+    this.duration = duration;
+  }
+
+  public int getDuration() {
+    return duration;
   }
 
   public void setLogId(int logId) {
@@ -289,5 +298,4 @@ public class MachineOccupationBean implements Serializable {
     return (s == null || s < 0 || s >= row.length || e == null || e < 0 || e >= row.length) ? null
         : parser.parse(row[s] + " " + row[e]);
   }
-
 }

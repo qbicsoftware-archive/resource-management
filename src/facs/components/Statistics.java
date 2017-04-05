@@ -79,6 +79,7 @@ public class Statistics extends CustomComponent {
   private final String nameCaption = "Name";
   private final String instituteCaption = "Institute";
   private final String projectCaption = "Project";
+  private final String durationCaption = "Duration";
   private final String CAPTION = "Usage/Statistics";
 
   // private NativeSelect selectedYear;
@@ -1274,11 +1275,11 @@ public class Statistics extends CustomComponent {
       // String kostenStelle;
       // kostenStelle.add("unknown");
 
-      String kostenStelle = "unknown";
-      String institute = "unknown";
-      String project = "n/a";
+      String kostenStelle = "";
+      String institute = "";
+      String project = "";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
-      float cost = -1.f;
+      float cost = 0f;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
         // System.out.println("userId: " + userId);
@@ -1290,7 +1291,9 @@ public class Statistics extends CustomComponent {
         // System.out.println("User Project (fillRows): " + project);
         // System.out.println(user.getId() + " ************************************* "
         // + mobean.getDeviceId());
-        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        // duration = mobean.getDuration();
+        cost = mobean.getCost();
       }
 
       // System.out.println("LogId: " + mobean.getLogId() + " Device: "
@@ -1321,10 +1324,10 @@ public class Statistics extends CustomComponent {
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
-      float cost = -1;
-      String kostenStelle = "unknown";
-      String institute = "unknown";
-      String project = "n/a";
+      float cost = 0;
+      String kostenStelle = "";
+      String institute = "";
+      String project = "";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
@@ -1334,7 +1337,9 @@ public class Statistics extends CustomComponent {
         institute = user.getInstitute();
         project = user.getProject();
         // System.out.println("User Project (fillMatchedRows): " + project);
-        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        cost = mobean.getCost();
+        // cost = getCostByDuration(user.getId(), mobean.getDuration(), mobean.getDeviceId());
       }
       grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
           mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
@@ -1352,10 +1357,10 @@ public class Statistics extends CustomComponent {
 
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
-      float cost = -1;
-      String kostenStelle = "unknown";
-      String institute = "unknown";
-      String project = "n/a";
+      float cost = 0;
+      String kostenStelle = "";
+      String institute = "";
+      String project = "";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
@@ -1365,7 +1370,8 @@ public class Statistics extends CustomComponent {
         institute = user.getInstitute();
         project = user.getProject();
         // System.out.println("User Project (fillNoCosts): " + project);
-        cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        cost = mobean.getCost();
       }
       grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
           mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
@@ -1380,10 +1386,10 @@ public class Statistics extends CustomComponent {
 
       for (MachineOccupationBean mobean : mobeans) {
         int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
-        float cost = -1;
-        String kostenStelle = "unknown";
-        String institute = "unknown";
-        String project = "n/a";
+        float cost = 0;
+        String kostenStelle = "";
+        String institute = "";
+        String project = "";
         UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
         Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
         if (user != null) {
@@ -1393,10 +1399,11 @@ public class Statistics extends CustomComponent {
           institute = user.getInstitute();
           project = user.getProject();
           // System.out.println("User Project (fillNoCosts): " + project);
-          cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+          // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+          cost = mobean.getCost();
         }
         grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
-            mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
+            mobean.getStart(), end, cost, mobean.getUserFullName());
       }
 
   }
@@ -1411,6 +1418,22 @@ public class Statistics extends CustomComponent {
       float hoursUsed = Formatter.toHours(start, end);
       // System.out.println("Hours Used: " + hoursUsed);
       cost = hoursUsed * costPerHour;
+      // System.out.println("Cost: " + cost);
+    }
+    return cost;
+  }
+
+
+  private float getCostByDuration(int userId, float durationInMS, int resourceId) {
+    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
+    float cost = 0f;
+    float costPerHour =
+        DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+    // System.out.println("Cost per Hour: " + costPerHour);
+    if (costPerHour > 0) {
+      // float hoursUsed = Formatter.toHours(start, end);
+      // System.out.println("durationInHours: " + durationInHours);
+      cost = (float) (((durationInMS / 900000) * 0.25) * costPerHour);
       // System.out.println("Cost: " + cost);
     }
     return cost;

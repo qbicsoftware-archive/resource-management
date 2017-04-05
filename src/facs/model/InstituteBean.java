@@ -26,6 +26,7 @@ public class InstituteBean implements Serializable {
   private String street = "";
   private String postalCode = "";
   private String city = "";
+  private String country = "";
   private String shortName = "";
 
   public InstituteBean(String name, String street, String postalCode, String city, String shortName) {
@@ -53,6 +54,10 @@ public class InstituteBean implements Serializable {
     return street;
   }
 
+  public String getCountry() {
+    return country;
+  }
+
   public void setStreet(String street) {
     this.street = street;
   }
@@ -71,6 +76,10 @@ public class InstituteBean implements Serializable {
 
   public void setCity(String city) {
     this.city = city;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
   }
 
   public String getShortName() {

@@ -2832,8 +2832,8 @@ public enum Database {
   public List<MachineOccupationBean> getPhysicalTimeBlocksSetDates(String dateStart, String dateEnd) {
 
     String sql =
-        "SELECT * FROM logs WHERE invoiced IS NULL AND start BETWEEN '" + dateStart + "' AND '"
-            + dateEnd + "'";
+        "SELECT * FROM logs WHERE invoiced IS NULL AND corrupt IS NULL AND start BETWEEN '"
+            + dateStart + "' AND '" + dateEnd + "'";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
 
     // System.out.println(sql);
@@ -2849,6 +2849,8 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("duration"));
+        m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
       statement.close();
@@ -2859,7 +2861,7 @@ public enum Database {
   }
 
   public List<MachineOccupationBean> getNoCostTimeBlocks() {
-    String sql = "SELECT * FROM logs WHERE cost=0 AND invoiced IS NULL";
+    String sql = "SELECT * FROM logs WHERE cost = 0 AND invoiced IS NULL";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
 
@@ -2872,6 +2874,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
       statement.close();
@@ -2883,7 +2886,7 @@ public enum Database {
 
   public List<MachineOccupationBean> getNoCostTimeBlocksSetDates(String dateStart, String dateEnd) {
     String sql =
-        "SELECT * FROM logs WHERE cost=0 AND start BETWEEN '" + dateStart + "' AND '" + dateEnd
+        "SELECT * FROM logs WHERE cost = 0 AND start BETWEEN '" + dateStart + "' AND '" + dateEnd
             + "'";
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -2898,6 +2901,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
       statement.close();
@@ -2924,6 +2928,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
       statement.close();

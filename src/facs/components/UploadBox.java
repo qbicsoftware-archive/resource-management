@@ -202,6 +202,19 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         long s = bean.getStart().getTime();
         long e = bean.getEnd().getTime();
         long duration = e - s;
+        int durationTimes = 0;
+        float durationInHours = 0;
+
+        if (duration <= 900000) {
+          duration = 900000;
+          durationInHours = (float) 0.25;
+        } else {
+          durationTimes = (int) (duration / 900000);
+          duration = (durationTimes++) * 900000;
+          durationInHours = (float) ((durationTimes++) * 0.25);
+        }
+
+        cost = getCostByDuration(userId, durationInHours, bean.getDeviceId());
 
         DBManager.getDatabaseInstance().addPhysicalTimeBlock(bean.getDeviceId(),
             devices.getValue().toString(), bean.getUserName(), bean.getUserFullName(),
@@ -238,12 +251,28 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     // System.out.println("Cost per Hour: " + costPerHour);
     if (costPerHour > 0) {
       float hoursUsed = Formatter.toHours(start, end);
-      // System.out.println("Hours Used: " + hoursUsed);
+      System.out.println("Hours Used: " + hoursUsed);
       cost = hoursUsed * costPerHour;
-      // System.out.println("Cost: " + cost);
+      System.out.println("Cost: " + cost);
     }
     return cost;
   }
+
+  private float getCostByDuration(int userId, float durationInHours, int resourceId) {
+    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
+    float cost = 0f;
+    float costPerHour =
+        DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+    // System.out.println("Cost per Hour: " + costPerHour);
+    if (costPerHour > 0) {
+      // float hoursUsed = Formatter.toHours(start, end);
+      System.out.println("durationInHours: " + durationInHours);
+      cost = durationInHours * costPerHour;
+      System.out.println("Cost: " + cost);
+    }
+    return cost;
+  }
+
 
 
   private void showErrorNotification(String title, String description) {

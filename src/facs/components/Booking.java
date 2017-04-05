@@ -145,7 +145,7 @@ public class Booking extends CustomComponent {
 
     final Label versionLabel = new Label();
     // versionLabel.addStyleName("h4");
-    versionLabel.setValue("Version 0.2.170404");
+    versionLabel.setValue("Version 0.2.170405");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();
@@ -1276,7 +1276,7 @@ public class Booking extends CustomComponent {
   NativeSelect initCalendars(List<String> devices) {
     String selectDeviceCaption = "Select Instrument";
     String selectDeviceDescription =
-        "Please select a instrument to ask for a booking request or to book!";
+        "Please select an instrument to ask for a booking request or to book!";
     NativeSelect selectDevice = new NativeSelect();
     selectDevice.addItems(devices);
     selectDevice.setCaption(selectDeviceCaption);
