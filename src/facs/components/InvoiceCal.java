@@ -16,7 +16,6 @@
  *******************************************************************************/
 package facs.components;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -30,33 +29,22 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.Action;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Calendar;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
@@ -76,22 +64,15 @@ import com.vaadin.ui.components.calendar.CalendarDateRange;
 import com.vaadin.ui.components.calendar.event.BasicEvent;
 import com.vaadin.ui.components.calendar.event.CalendarEvent;
 import com.vaadin.ui.components.calendar.event.EditableCalendarEvent;
-import com.vaadin.ui.renderers.ButtonRenderer;
-import com.vaadin.ui.renderers.ClickableRenderer;
-import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
-import com.vaadin.ui.renderers.DateRenderer;
-import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 
 import facs.db.DBManager;
 import facs.db.Database;
-import facs.model.BookingBean;
 import facs.model.BookingModel;
-import facs.model.Constants;
 import facs.model.FacsModelUtil;
 
-public class Booking extends CustomComponent {
-  private static final long serialVersionUID = -4396068933947619408L;
+public class InvoiceCal extends CustomComponent {
+  private static final long serialVersionUID = -4396068933947619423L;
 
   private HorizontalLayout cal = new HorizontalLayout();
   private GridLayout gridLayout = new GridLayout(6, 7);
@@ -101,61 +82,69 @@ public class Booking extends CustomComponent {
   private Map<String, Calendar> bookMap = new HashMap<String, Calendar>();
   private Map<String, Set<CalendarEvent>> newEvents = new HashMap<String, Set<CalendarEvent>>();
   private int eventCounter = 0;
-  private NativeSelect selectedKostenstelle;
   private Date referenceDate;
+
+  private ComboBox invoice4Users;
+
   private NativeSelect selectedService;
-  private Grid upcomingBookings;
-  private Grid pastBookings;
+  private NativeSelect selectedKostenstelle;
   private TabSheet booking;
-  private Grid next3HoursBookings;
-  private ComboBox book4Users;
 
   private static Database db;
 
-  public Booking(final BookingModel bookingModel, Date referenceDate) {
+  public InvoiceCal(final BookingModel bookingModel, Date referenceDate) {
 
     this.bookingModel = bookingModel;
     this.referenceDate = referenceDate;
-
-    Label infoLabel = new Label();
-    infoLabel.addStyleName("h4");
 
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
     selectDeviceLabel.setValue("Select Instrument");
 
-    book4Users = new ComboBox("Select User/Maintenance/Service");
-    book4Users
+    invoice4Users = new ComboBox("Select User/Maintenance/Service");
+    invoice4Users
         .setDescription("FACS Admins can book on behalf of other users or Maintenance/Service");
-    book4Users.setEnabled(true);
-
-    final Label versionLabel = new Label();
-    versionLabel.setValue("Version 0.2.170405");
-
-    Label userNameLabel = new Label();
-    Label userRoleLabel = new Label();
-    Label userKostenstelleLabel = new Label();
-    Label userProjectLabel = new Label();
-    Label userInstituteLabel = new Label();
+    invoice4Users.setEnabled(true);
 
     Label countLabel = new Label();
-    Label totalCountLabel = new Label();
+    countLabel.addStyleName("h6");
+
+    String invoiceTitle = "Invoice";
+    Button invoice = new Button(invoiceTitle);
+    invoice.setIcon(FontAwesome.CALENDAR);
+    invoice
+        .setDescription("Please select an instrument and a time frame at first then click 'BOOK'!");
+    invoice.setSizeFull();
 
     Date dNow = new Date();
     SimpleDateFormat ft = new SimpleDateFormat("dd.MMM.yyyy HH:mm:ss");
-    System.out.println(ft.format(dNow) + "  INFO  Calendar initiated! - User: "
-        + bookingModel.getLDAP() + " " + versionLabel);
+    System.out.println(ft.format(dNow) + "  INFO  Invoice Calendar initiated! - User: "
+        + bookingModel.getLDAP());
 
+    // only users who are allowed to book devices will be able to do so
     if (bookingModel.isNotAllowed()) {
       VerticalLayout errorLayout = new VerticalLayout();
-      infoLabel.setValue("ACCESS DENIED");
-      errorLayout.addComponent(infoLabel);
       showErrorNotification(
           "Access Denied!",
           "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'.");
       setCompositionRoot(errorLayout);
       return;
     }
+
+    invoice.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 7518184802334872415L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        submitInvoice(bookingModel.getLDAP(), getCurrentDevice());
+        newEvents.clear();
+        refreshDataSources();
+      }
+    });
 
     Panel book = new Panel();
     book.addStyleName(ValoTheme.PANEL_BORDERLESS);
@@ -167,30 +156,19 @@ public class Booking extends CustomComponent {
 
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
-    selectedService = new NativeSelect("Select Service");
-    selectedService.setDescription("Please select the service you would like to receive!");
-
     selectedKostenstelle = new NativeSelect("Select Kostenstelle");
     selectedKostenstelle.setDescription("Please select the Kostenstelle you would like to use!");
 
-    book4Users.addItems(db.getAllUserNames());
+    selectedService = new NativeSelect("Select Service");
+    selectedService.setDescription("Please select the service you would like to receive!");
 
-    selectedKostenstelle.addItems(db.getKostenstelleCodes());
+    invoice4Users.addItems(db.getAllUserNames());
 
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
-
-
-      /**
-       * 
-       */
-      private static final long serialVersionUID = -4030281517085490538L;
+      private static final long serialVersionUID = 8153818693511960689L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        userRoleLabel.setValue(db.getUserRoleDescByLDAPId(bookingModel.getLDAP(),
-            getCurrentDevice()));
-
-        selectedKostenstelle.setVisible(true);
 
         if (bookMap.containsKey(getCurrentDevice())) {
           cal.removeAllComponents();
@@ -217,510 +195,71 @@ public class Booking extends CustomComponent {
           cal.removeAllComponents();
           setCalendar();
 
-          if (selectedDevice.getValue().equals("Aria")) {
-            selectedService.removeAllItems();
-            selectedService.addItems("Full Service", "Partial Service", "Self Service");
-            selectedService.setValue("Full Service");
-            selectedService.setVisible(true);
-          } else if (selectedDevice.getValue().equals("Mac")) {
-            selectedService.removeAllItems();
-            selectedService.addItems("Self", "Service");
-            selectedService.setValue("Service");
-            selectedService.setVisible(true);
-          } else {
-            selectedService.setValue(null);
-            selectedService.setVisible(false);
-          }
         }
       }
     });
 
-    if (bookingModel.getProject().isEmpty()) {
-      userNameLabel.setValue("Name: " + bookingModel.userName());
-      userKostenstelleLabel.setValue("Kostenstelle: " + bookingModel.getKostenstelle());
-      userProjectLabel.setValue("No project found.");
-      userInstituteLabel.setValue("Institute: " + bookingModel.getInstitute());
-      userRoleLabel.setValue("Cal role will appear here!");
-
-      userNameLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userKostenstelleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userProjectLabel.addStyleName(ValoTheme.LABEL_FAILURE);
-      userInstituteLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userRoleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-
-    } else {
-
-      userNameLabel.setValue("Name: " + bookingModel.userName());
-      userKostenstelleLabel.setValue("Kostenstelle: " + bookingModel.getKostenstelle());
-      userProjectLabel.setValue("Project: " + bookingModel.getProject());
-      userInstituteLabel.setValue("Institute: " + bookingModel.getInstitute());
-      userRoleLabel.setValue("Cal role will appear here!");
-
-      userNameLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userKostenstelleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userProjectLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userInstituteLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-      userRoleLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-
-    }
-
-    countLabel.setSizeFull();
-    countLabel.setValue("Unconfirmed Bookings: " + db.getAllUnconfirmedCount());
-    countLabel.setDescription("FACS admins need to confirm these bookings.");
-    countLabel.addStyleName(ValoTheme.LABEL_FAILURE);
-
-    totalCountLabel.setSizeFull();
-    totalCountLabel.setValue("Total # of Bookings: " + db.getAllBookingTotalCount());
-    totalCountLabel.setDescription("Total # of completed bookings.");
-    totalCountLabel.addStyleName(ValoTheme.LABEL_SUCCESS);
-
-    versionLabel.addStyleName(ValoTheme.LABEL_SMALL);
-
-    Panel deviceSelectionPanel = new Panel("");
-    deviceSelectionPanel.addStyleName(ValoTheme.PANEL_WELL);
-    HorizontalLayout rightDeviceSelection = new HorizontalLayout();
-    rightDeviceSelection.setSpacing(true);
-    rightDeviceSelection.setMargin(true);
-    rightDeviceSelection.setSizeFull();
-    deviceSelectionPanel.setContent(rightDeviceSelection);
-
-    Panel bookingStatsPanel = new Panel("Booking Stats & Legend");
-    VerticalLayout rightBookingStats = new VerticalLayout();
-    rightBookingStats.setSpacing(true);
-    rightBookingStats.setMargin(true);
-    rightBookingStats.setSizeFull();
-    bookingStatsPanel.setContent(rightBookingStats);
-
-    Panel userDetailsPanel = new Panel("User Details");
-    VerticalLayout rightUserDetails = new VerticalLayout();
-    rightUserDetails.setSpacing(true);
-    rightUserDetails.setMargin(true);
-    rightUserDetails.setSizeFull();
-    userDetailsPanel.setContent(rightUserDetails);
-
-    selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
+    countLabel.setValue("Invoice Count: " + db.getAllUnconfirmedCount() + " - Machine Output: "
+        + db.getAllBookingTotalCount());
 
     cal.setLocale(Locale.getDefault());
     cal.setImmediate(true);
     selectedService.setImmediate(true);
     cal.setSizeFull();
+    cal.isReadOnly();
 
-    String submitTitle = "Book";
-    Button submit = new Button(submitTitle);
-    submit.setIcon(FontAwesome.CALENDAR);
-    submit
-        .setDescription("Please select an instrument and a time frame at first then click 'BOOK'!");
-    submit.setSizeFull();
-
-    submit.addClickListener(new ClickListener() {
-
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 7518184802334872415L;
-
-      @Override
-      public void buttonClick(ClickEvent event) {
-        submit(bookingModel.getLDAP(), getCurrentDevice());
-        newEvents.clear();
-        refreshDataSources();
-      }
-    });
-
-    String buttonTitle = "Refresh";
-    Button refresh = new Button(buttonTitle);
-    refresh.setIcon(FontAwesome.REFRESH);
-    refresh.setSizeFull();
-    refresh.setDescription("Click here to reload the data from the database!");
-    refresh.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-
-    refresh.addClickListener(new ClickListener() {
-
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 2646232766520616273L;
-
-      @Override
-      public void buttonClick(ClickEvent event) {
-
-        refreshDataSources();
-
-      }
-    });
-
-    String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-
-    FileResource resource = new FileResource(new File(basepath + "/WEB-INF/images/legend.png"));
-
-    Image image = new Image("", resource);
-    image.setSizeUndefined();
-
-    selectedDevice.setSizeFull();
-    selectedService.setSizeFull();
-    selectedKostenstelle.setSizeFull();
-    book4Users.setSizeFull();
-
-    submit.setSizeFull();
-
-    rightDeviceSelection.addComponent(selectedDevice);
-    rightDeviceSelection.addComponent(selectedService);
-    rightDeviceSelection.addComponent(selectedKostenstelle);
-
-    rightBookingStats.addComponent(countLabel);
-    rightBookingStats.addComponent(totalCountLabel);
-    rightBookingStats.addComponent(image);
-    rightBookingStats.addComponent(versionLabel);
-
-    rightUserDetails.addComponent(book4Users);
-    rightUserDetails.addComponent(userNameLabel);
-    rightUserDetails.addComponent(userKostenstelleLabel);
-    rightUserDetails.addComponent(userProjectLabel);
-    rightUserDetails.addComponent(userInstituteLabel);
-    rightUserDetails.addComponent(userRoleLabel);
-
+    // Show the image in the application
+    // image.setWidth("100%");
+    // Let the user view the file in browser or download it
+    // Link link = new Link("Link to the image file", resource);
     gridLayout.setWidth("100%");
+
+    gridLayout.addComponent(selectedDevice, 0, 0);
+    // gridLayout.addComponent(selectedService, 1, 0);
 
     selectedService.setVisible(false);
 
-    gridLayout.addComponent(deviceSelectionPanel, 0, 1, 5, 1);
-    gridLayout.addComponent(cal, 0, 2, 5, 2);
-    gridLayout.addComponent(refresh, 0, 3);
-    gridLayout.addComponent(submit, 1, 3, 5, 3);
-    gridLayout.addComponent(bookingStatsPanel, 0, 6, 3, 6);
-    gridLayout.addComponent(userDetailsPanel, 4, 6, 5, 6);
+    gridLayout.addComponent(cal, 0, 1, 5, 1);
+
+    gridLayout.addComponent(invoice4Users, 0, 2);
+    gridLayout.addComponent(invoice, 0, 3);
+    // gridLayout.addComponent(countLabel, 2, 0);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
+    invoice4Users.setSizeFull();
 
     book.setContent(gridLayout);
     booking = new TabSheet();
     booking.addStyleName(ValoTheme.TABSHEET_FRAMED);
     booking.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
-    booking.addTab(book).setCaption("Calendar");
-    booking.getTab(0).setIcon(FontAwesome.CALENDAR);
-    booking.addTab(myNext3HoursBookings()).setCaption("Next 3 Hours");
-    booking.getTab(1).setIcon(FontAwesome.LOCK);
-    booking.addTab(myUpcomingBookings()).setCaption("Upcoming");
-    booking.getTab(2).setIcon(FontAwesome.CLOCK_O);
-    booking.addTab(myPastBookings()).setCaption("Past Bookings");
-    booking.getTab(3).setIcon(FontAwesome.HISTORY);
+    booking.addTab(book).setCaption("Invoicing Calendar Usage");
     setCompositionRoot(booking);
 
-    if (bookingModel.getAdminAccess() != 1) {
-      book4Users.setEnabled(false);
-      book4Users.setVisible(false);
-
-    }
-
   }
 
-  private void setRenderers(Grid grid) {
-    grid.getColumn("price").setRenderer(new NumberRenderer("%1$.2f €"));
+  void submitInvoice(String user_ldap, String currentDevice) {
 
-    grid.getColumn("start").setRenderer(
-        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));
-
-    grid.getColumn("end").setRenderer(
-        new DateRenderer("%1$tB %1$te %1$tY, %1$tH:%1$tM:%1$tS", Locale.GERMAN));
-  }
-
-
-  protected void setCalendar() {
-    cal.removeAllComponents();
-    cal.addComponent(bookMap.get(getCurrentDevice()));
-  }
-
-  private Component myNext3HoursBookings() {
-    VerticalLayout devicesLayout = new VerticalLayout();
-
-    devicesLayout.setMargin(true);
-    devicesLayout.setSpacing(true);
-
-    Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
-
-    BeanItemContainer<BookingBean> users =
-        getMyNext3HoursBookings(bookingModel.getLDAP(), serverTime, nextDayTime);
-
-    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
-
-    next3HoursBookings = new Grid(gpc);
-
-    next3HoursBookings.setStyleName("my-style");
-    next3HoursBookings.setWidth("100%");
-    next3HoursBookings.setSelectionMode(SelectionMode.SINGLE);
-    next3HoursBookings.setEditorEnabled(false);
-
-    next3HoursBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start",
-        "end", "username", "phone", "price");
-    next3HoursBookings.getColumn("deviceName").setHeaderCaption("Instrument");
-    next3HoursBookings.getColumn("price").setHeaderCaption("Approx. Price");
-    setRenderers(next3HoursBookings);
-    devicesLayout.addComponent(next3HoursBookings);
-
-    return devicesLayout;
-  }
-
-  private Component myPastBookings() {
-    VerticalLayout devicesLayout = new VerticalLayout();
-
-    devicesLayout.setMargin(true);
-    devicesLayout.setSpacing(true);
-
-    Date serverTime = new WebBrowser().getCurrentDate();
-
-    BeanItemContainer<BookingBean> users = getMyPastBookings(bookingModel.getLDAP(), serverTime);
-
-    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
-
-    pastBookings = new Grid(gpc);
-
-    pastBookings.setStyleName("my-style");
-    pastBookings.setWidth("100%");
-    pastBookings.setSelectionMode(SelectionMode.SINGLE);
-    pastBookings.setEditorEnabled(false);
-
-    pastBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
-        "username", "phone", "price");
-
-    pastBookings.getColumn("deviceName").setHeaderCaption("Instrument");
-    pastBookings.getColumn("price").setHeaderCaption("Approx. Price");
-
-    setRenderers(pastBookings);
-    devicesLayout.addComponent(pastBookings);
-
-    return devicesLayout;
-  }
-
-  private Component myUpcomingBookings() {
-    VerticalLayout devicesLayout = new VerticalLayout();
-
-    devicesLayout.setMargin(true);
-    devicesLayout.setSpacing(true);
-
-    Date serverTime = new WebBrowser().getCurrentDate();
-    Date nextDayTime = new Date(serverTime.getTime() + (1000 * 60 * 60 * 3));
-
-    BeanItemContainer<BookingBean> users =
-        getMyUpcomingBookings(bookingModel.getLDAP(), nextDayTime);
-
-
-    GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
-    gpc.addGeneratedProperty("delete", new PropertyValueGenerator<String>() {
-
-
-      /**
-       * 
-       */
-      private static final long serialVersionUID = 2319976637634488204L;
-
-      @Override
-      public String getValue(Item item, Object itemId, Object propertyId) {
-        return "Trash"; // The caption
-
-      }
-
-      @Override
-      public Class<String> getType() {
-        return String.class;
-      }
-    });
-
-    upcomingBookings = new Grid(gpc);
-
-    upcomingBookings.setStyleName("my-style");
-    upcomingBookings.setWidth("100%");
-    upcomingBookings.setSelectionMode(SelectionMode.SINGLE);
-    upcomingBookings.setEditorEnabled(false);
-
-    upcomingBookings.setColumnOrder("ID", "confirmation", "deviceName", "service", "start", "end",
-        "username", "phone", "price");
-    upcomingBookings.getColumn("deviceName").setHeaderCaption("Instrument");
-    upcomingBookings.getColumn("price").setHeaderCaption("Approx. Price");
-
-    setRenderers(upcomingBookings);
-    devicesLayout.addComponent(upcomingBookings);
-
-    upcomingBookings.getColumn("delete").setRenderer(
-        new ButtonRenderer(new ClickableRenderer.RendererClickListener() {
-
-          /**
-           * 
-           */
-          private static final long serialVersionUID = 8236764262983894939L;
-
-          @Override
-          public void click(RendererClickEvent event) {
-
-            try {
-
-              Window cd = new Window("Delete Booking?");
-
-              cd.setHeight("200px");
-              cd.setWidth("400px");
-              cd.setResizable(false);
-
-              GridLayout dialogLayout = new GridLayout(3, 3);
-
-              Button okButton = new Button("Yes");
-              okButton.addStyleName(ValoTheme.BUTTON_DANGER);
-              Button cancelButton = new Button("No, I'm actually not sure!");
-              cancelButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-              Label information = new Label("Are you sure you want to trash this item?");
-              information.addStyleName(ValoTheme.LABEL_NO_MARGIN);
-
-              okButton.addClickListener(new Button.ClickListener() {
-
-                /**
-                 * 
-                 */
-                private static final long serialVersionUID = 6619791395651961832L;
-
-                @Override
-                public void buttonClick(ClickEvent okEvent) {
-
-                  purgeBooking((BookingBean) event.getItemId());
-
-                  booking.setSelectedTab(myUpcomingBookings());
-
-                  cd.close();
-
-                  showNotification(
-                      "The booking was deleted!",
-                      "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.");
-                }
-              });
-
-              cancelButton.addClickListener(new Button.ClickListener() {
-
-                /**
-                 * 
-                 */
-                private static final long serialVersionUID = 827588709488118131L;
-
-                @Override
-                public void buttonClick(ClickEvent okEvent) {
-                  cd.close();
-                }
-              });
-
-              dialogLayout.addComponent(information, 0, 0, 2, 0);
-              dialogLayout.addComponent(okButton, 0, 1);
-              dialogLayout.addComponent(cancelButton, 1, 1);
-              dialogLayout.setMargin(true);
-              dialogLayout.setSpacing(true);
-              cd.setContent(dialogLayout);
-              cd.center();
-              UI.getCurrent().addWindow(cd);
-
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-
-          }
-
-        }));
-
-    return devicesLayout;
-  }
-
-  private BeanItemContainer<BookingBean> getMyNext3HoursBookings(String LDAP, Date start, Date end) {
-    BeanItemContainer<BookingBean> bookingList =
-        new BeanItemContainer<BookingBean>(BookingBean.class);
-    List<BookingBean> bookings =
-        DBManager.getDatabaseInstance().getMyNext3HoursBookings(LDAP, start, end);
-    assert bookings != null;
-    bookingList.addAll(bookings);
-    return bookingList;
-  }
-
-  private BeanItemContainer<BookingBean> getMyUpcomingBookings(String LDAP, Date start) {
-    BeanItemContainer<BookingBean> bookingList =
-        new BeanItemContainer<BookingBean>(BookingBean.class);
-    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyUpcomingBookings(LDAP, start);
-    assert bookings != null;
-    bookingList.addAll(bookings);
-    return bookingList;
-  }
-
-  private BeanItemContainer<BookingBean> getMyPastBookings(String LDAP, Date start) {
-    BeanItemContainer<BookingBean> bookingList =
-        new BeanItemContainer<BookingBean>(BookingBean.class);
-    List<BookingBean> bookings = DBManager.getDatabaseInstance().getMyPastBookings(LDAP, start);
-    assert bookings != null;
-    bookingList.addAll(bookings);
-    return bookingList;
-  }
-
-  private void showErrorNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(16000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.FROWN_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.MEH_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showSuccessfulNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.SMILE_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  protected void purgeBooking(BookingBean db) {
-    boolean purged = DBManager.getDatabaseInstance().purgeBooking(db);
-    if (purged) {
-      upcomingBookings.getContainerDataSource().removeItem(db);
-      showNotification(
-          "The booking was deleted!",
-          "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.");
-    } else {
-      showErrorNotification(
-          "Jeez! It's not fair!",
-          "For some reason we couldn't PURGE this booking. Maybe it's already restored or already purged from the database.");
-    }
-  }
-
-  public void refreshDataSources() {
-    BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
-    setCompositionRoot(new Booking(bookingModel, referenceDate));
-
-  }
-
-  public void refreshDataSourcesGrid() {
-    BookingModel bookingModel = FacsModelUtil.getNoviceBookingModel();
-    setCompositionRoot(new Booking(bookingModel, referenceDate));
-  }
-
-
-  void submit(String user_ldap, String currentDevice) {
     if (eventCounter == 0) {
+
       showNotification("We couldn't find any event to add!",
           "Did you select a time frame?\nPlease select a time frame at first then try again.");
+
       return;
+
     }
 
     if (db.getDeviceRestriction(currentDevice) == true) {
 
       if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
+
         showErrorNotification(
             "Access Denied!",
             "Sorry, you are not authorized to book. However, you can still view the calendars. Please click here to discard this message.");
+
         return;
+
       }
 
       Iterator<Entry<String, Set<CalendarEvent>>> it = newEvents.entrySet().iterator();
@@ -745,11 +284,11 @@ public class Booking extends CustomComponent {
 
               ((BasicEvent) event).setStyleName("color2");
 
-              if (book4Users.getValue() != null) {
+              if (invoice4Users.getValue() != null) {
 
-                String userLDAPId = db.getUserLDAPIDbyUserName(book4Users.getValue().toString());
+                String userLDAPId = db.getUserLDAPIDbyUserName(invoice4Users.getValue().toString());
 
-                db.addBooking(
+                db.addInvoice(
                     userLDAPId,
                     (String) selectedDevice.getValue(),
                     event.getStart(),
@@ -764,7 +303,7 @@ public class Booking extends CustomComponent {
                             (String) selectedService.getValue(), getGroupID())));
               } else {
 
-                db.addBooking(
+                db.addInvoice(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
                     event.getStart(),
@@ -811,7 +350,7 @@ public class Booking extends CustomComponent {
               ((BasicEvent) event).setStyleName("color2");
               if (db.getUserRoleByLDAPId(user_ldap, currentDevice).equals("V")) {
 
-                db.addBooking(
+                db.addInvoice(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
                     event.getStart(),
@@ -824,10 +363,10 @@ public class Booking extends CustomComponent {
                         event.getEnd(),
                         getCost((String) selectedDevice.getValue(),
                             (String) selectedService.getValue(), getGroupID())), true);
-              } else if (book4Users.getValue() != null) {
-                String userLDAPId = db.getUserLDAPIDbyUserName(book4Users.getValue().toString());
+              } else if (invoice4Users.getValue() != null) {
+                String userLDAPId = db.getUserLDAPIDbyUserName(invoice4Users.getValue().toString());
 
-                db.addBooking(
+                db.addInvoice(
                     userLDAPId,
                     (String) selectedDevice.getValue(),
                     event.getStart(),
@@ -842,7 +381,7 @@ public class Booking extends CustomComponent {
                             (String) selectedService.getValue(), getGroupID())));
               } else {
 
-                db.addBooking(
+                db.addInvoice(
                     bookingModel.getLDAP(),
                     (String) selectedDevice.getValue(),
                     event.getStart(),
@@ -868,103 +407,59 @@ public class Booking extends CustomComponent {
     }
   }
 
+  protected void setCalendar() {
+    cal.removeAllComponents();
+    cal.addComponent(bookMap.get(getCurrentDevice()));
+  }
+
+  private void showErrorNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(16000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.FROWN_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+  private void showNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(8000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.MEH_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+  private void showSuccessfulNotification(String title, String description) {
+    Notification notify = new Notification(title, description);
+    notify.setDelayMsec(8000);
+    notify.setPosition(Position.TOP_CENTER);
+    notify.setIcon(FontAwesome.SMILE_O);
+    notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
+    notify.show(Page.getCurrent());
+  }
+
+
+  public void refreshDataSources() {
+    BookingModel bookingModel = FacsModelUtil.getInvoicingBookingModel();
+    setCompositionRoot(new InvoiceCal(bookingModel, referenceDate));
+
+  }
+
   Calendar initCal(BookingModel bookingmodel, String currentDevice) {
 
-    Calendar calendar;
-
-    switch (db.getUserRoleByLDAPId(bookingModel.getLDAP(), currentDevice)) {
-      case Constants.ADMIN_ROLE:
-        calendar = adminCalendar(bookingmodel);
-        break;
-      case Constants.ADVANCED_ROLE:
-        calendar = advancedCalendar(bookingmodel);
-        break;
-      case Constants.SUPER_ROLE:
-        calendar = superCalendar(bookingmodel);
-        break;
-      case Constants.NOVICE_ROLE:
-        calendar = noviceCalendar(bookingmodel);
-        break;
-      case Constants.BASIC_ROLE:
-      default: {
-        calendar = basicCalendar(bookingmodel);
-      }
-    }
-
+    Calendar calendar = invoiceCalendar(bookingmodel);
     return calendar;
 
   }
 
-  // BASIC users are allowed to see from MON-FRI from 08:00 until 17:59
-
-  private Calendar basicCalendar(final BookingModel bookingmodel) {
+  private Calendar invoiceCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
-
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
-
-    cal.setFirstVisibleHourOfDay(8);
-    cal.setLastVisibleHourOfDay(18);
-
-    for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
-      cal.addEvent(event);
-      // System.out.println("Booking.java 251 Current Device: " + getCurrentDevice());
-    }
-    cal.setHandler(new MyEventRangeSelectHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventMoveHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventResizeHandler(cal, bookingmodel));
-    cal.addActionHandler(new MyActionHandler(cal, bookingmodel));
-
-    cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-    cal.setLocale(Locale.GERMANY);
-    cal.setWidth("100%");
-    // cal.setHeight("100%");
-    cal.setHeight("1000px");
-
-    return cal;
-  }
-
-  // NOVICE users are allowed to see from MON-FRI from 09:00 to 16:59
-
-  private Calendar noviceCalendar(final BookingModel bookingmodel) {
-    final Calendar cal = new Calendar();
-
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
-
-    cal.setFirstVisibleHourOfDay(9);
-    cal.setLastVisibleHourOfDay(17);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);
     }
-    cal.setHandler(new MyEventRangeSelectHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventMoveHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventResizeHandler(cal, bookingmodel));
-    cal.addActionHandler(new MyActionHandler(cal, bookingmodel));
 
-    cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-    cal.setLocale(Locale.GERMANY);
-    cal.setWidth("100%");
-    // cal.setHeight("100%");
-    cal.setHeight("1000px");
-
-
-
-    return cal;
-  }
-
-  // ADVANCED users are allowed to see MON-FRI from 00:00 to 23:59
-
-  private Calendar advancedCalendar(final BookingModel bookingmodel) {
-    final Calendar cal = new Calendar();
-
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
-
-    for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
-      cal.addEvent(event);
-    }
     cal.setHandler(new MyEventRangeSelectHandler(cal, bookingmodel));
     cal.setHandler(new MyEventMoveHandler(cal, bookingmodel));
     cal.setHandler(new MyEventResizeHandler(cal, bookingmodel));
@@ -978,52 +473,29 @@ public class Booking extends CustomComponent {
     return cal;
   }
 
-  // SUPER users are allowed to see MON-SUN from 00:00 to 23:59
-
-  private Calendar superCalendar(final BookingModel bookingmodel) {
-    final Calendar cal = new Calendar();
-
-    for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
-      cal.addEvent(event);
-    }
-    cal.setHandler(new MyEventRangeSelectHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventMoveHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventResizeHandler(cal, bookingmodel));
-    cal.addActionHandler(new MyActionHandler(cal, bookingmodel));
-
-    cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-    cal.setLocale(Locale.GERMANY);
-    cal.setWidth("100%");
-    cal.setHeight("1000px");
-
-    return cal;
+  protected String getCurrentDevice() {
+    return (String) selectedDevice.getValue();
   }
 
-
-  // ADMIN user can see everything!
-
-  private Calendar adminCalendar(final BookingModel bookingmodel) {
-    final Calendar cal = new Calendar();
-
-    for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
-      cal.addEvent(event);
-    }
-    cal.setHandler(new MyEventRangeSelectHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventMoveHandler(cal, bookingmodel));
-    cal.setHandler(new MyEventResizeHandler(cal, bookingmodel));
-    cal.addActionHandler(new MyActionHandler(cal, bookingmodel));
-
-    cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-    cal.setLocale(Locale.GERMANY);
-    cal.setWidth("100%");
-    cal.setHeight("1000px");
-
-    return cal;
+  protected String getGroupID() {
+    return bookingModel.getGroupID();
   }
 
-  void removeEvent(CalendarEvent event) {
-    bookMap.get(getCurrentDevice()).removeEvent(event);
-    eventCounter--;
+  protected int getCost(String currentDevice, String currentService, String groupID) {
+    // System.out.println("getCost: " +currentDevice+" "+currentService+" "+groupID);
+    return db.getDeviceCostPerGroup(currentDevice, currentService, groupID);
+  }
+
+  NativeSelect initCalendars(List<String> devices) {
+    String selectDeviceCaption = "Select Instrument";
+    String selectDeviceDescription =
+        "Please select an instrument to ask for a booking request or to book!";
+    NativeSelect selectDevice = new NativeSelect();
+    selectDevice.addItems(devices);
+    selectDevice.setCaption(selectDeviceCaption);
+    selectDevice.setDescription(selectDeviceDescription);
+    selectDevice.setNullSelectionAllowed(false);
+    return selectDevice;
   }
 
   void addEvent(Date start, Date end) {
@@ -1049,29 +521,12 @@ public class Booking extends CustomComponent {
     }
   }
 
-  protected String getCurrentDevice() {
-    return (String) selectedDevice.getValue();
+
+  void removeEvent(CalendarEvent event) {
+    bookMap.get(getCurrentDevice()).removeEvent(event);
+    eventCounter--;
   }
 
-  protected String getGroupID() {
-    return bookingModel.getGroupID();
-  }
-
-  protected int getCost(String currentDevice, String currentService, String groupID) {
-    return db.getDeviceCostPerGroup(currentDevice, currentService, groupID);
-  }
-
-  NativeSelect initCalendars(List<String> devices) {
-    String selectDeviceCaption = "Select Instrument";
-    String selectDeviceDescription =
-        "Please select an instrument to ask for a booking request or to book!";
-    NativeSelect selectDevice = new NativeSelect();
-    selectDevice.addItems(devices);
-    selectDevice.setCaption(selectDeviceCaption);
-    selectDevice.setDescription(selectDeviceDescription);
-    selectDevice.setNullSelectionAllowed(false);
-    return selectDevice;
-  }
 
   class MyEventHandler {
 

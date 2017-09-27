@@ -18,15 +18,10 @@ package facs.components;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.liferay.portal.model.User;
-import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.MethodProperty;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.server.FontAwesome;
@@ -54,20 +49,13 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import de.uni_tuebingen.qbic.main.LiferayAndVaadinUtils;
 import facs.db.DBManager;
-import facs.model.BookingBean;
 
 public class UserAdmin extends CustomComponent {
   private static final long serialVersionUID = 2183973381935176872L;
-  private static final Object propertyId = null;
-  // private Grid devicesGrid;
-  // private Grid devicesGridConfirm;
-  // private Grid devicesGridTrash;
   private Grid usersGrid;
-  // private Grid newContainerGrid;
-
-  private final String usernameCaption = "username";
-
-  private Map<String, Grid> gridMap = new HashMap<String, Grid>();
+  // private static final Object propertyId = null;
+  // private final String usernameCaption = "username";
+  // private Map<String, Grid> gridMap = new HashMap<String, Grid>();
   private GridLayout gridLayout = new GridLayout(6, 6);
 
   private ListSelect userDevice;
@@ -130,23 +118,13 @@ public class UserAdmin extends CustomComponent {
     deleteUserButton.setSizeFull();
     deleteUserButton.setDescription("Click here to delete the selected user");
 
-    // String buttonTitleSave = "Save";
-    // Button save = new Button(buttonTitleSave);
-    // save.setIcon(FontAwesome.SAVE);
-    // save.setSizeFull();
-    // save.setDescription("Click here to save all changes!");
-    // save.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-
     userDevice = new ListSelect("Instruments");
     userDevice.addItems(DBManager.getDatabaseInstance().getDeviceNames());
     userDevice.setRows(6);
     userDevice.setNullSelectionAllowed(false);
     userDevice.setSizeFull();
     userDevice.setImmediate(true);
-    /*
-     * userDevice.addValueChangeListener(e -> Notification.show("Device:",
-     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
-     */
+
     userGroup = new ListSelect("User Groups");
     userGroup.addItems(DBManager.getDatabaseInstance().getUserGroups());
     userGroup.addItem("N/A");
@@ -154,10 +132,7 @@ public class UserAdmin extends CustomComponent {
     userGroup.setNullSelectionAllowed(false);
     userGroup.setSizeFull();
     userGroup.setImmediate(true);
-    /*
-     * userGroup.addValueChangeListener(e -> Notification.show("User Group:",
-     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
-     */
+
     userRole = new ListSelect("User Roles");
     userRole.addItems(DBManager.getDatabaseInstance().getUserRoles());
     userRole.addItem("N/A");
@@ -165,20 +140,14 @@ public class UserAdmin extends CustomComponent {
     userRole.setNullSelectionAllowed(false);
     userRole.setSizeFull();
     userRole.setImmediate(true);
-    /*
-     * userRole.addValueChangeListener(e -> Notification.show("User Role:",
-     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
-     */
+
     userWorkgroup = new ListSelect("Workgroups");
     userWorkgroup.addItems(DBManager.getDatabaseInstance().getUserWorkgroups());
     userWorkgroup.setRows(6);
     userWorkgroup.setNullSelectionAllowed(false);
     userWorkgroup.setSizeFull();
     userWorkgroup.setImmediate(true);
-    /*
-     * userRole.addValueChangeListener(e -> Notification.show("User Role:",
-     * String.valueOf(e.getProperty().getValue()), Type.TRAY_NOTIFICATION));
-     */
+
 
     Button updateUser = new Button(buttonTitle);
     updateUser.setIcon(FontAwesome.WRENCH);
@@ -202,13 +171,12 @@ public class UserAdmin extends CustomComponent {
       }
     });
 
-
     deleteUserButton.addClickListener(new ClickListener() {
 
       /**
        * 
        */
-      private static final long serialVersionUID = -8828850002167821419L;
+      private static final long serialVersionUID = 5618347988962756291L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -231,10 +199,11 @@ public class UserAdmin extends CustomComponent {
           information.addStyleName(ValoTheme.LABEL_NO_MARGIN);
 
           okButton.addClickListener(new Button.ClickListener() {
+
             /**
              * 
              */
-            private static final long serialVersionUID = 1778157399909757369L;
+            private static final long serialVersionUID = 2080658782727777516L;
 
             @Override
             public void buttonClick(ClickEvent okEvent) {
@@ -271,10 +240,11 @@ public class UserAdmin extends CustomComponent {
           });
 
           cancelButton.addClickListener(new Button.ClickListener() {
+
             /**
              * 
              */
-            private static final long serialVersionUID = -8957620319158438769L;
+            private static final long serialVersionUID = 8661506020962989585L;
 
             @Override
             public void buttonClick(ClickEvent okEvent) {
@@ -302,7 +272,11 @@ public class UserAdmin extends CustomComponent {
     });
 
     refresh.addClickListener(new ClickListener() {
-      private static final long serialVersionUID = -3610721151565496269L;
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -295434651623561492L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -311,7 +285,11 @@ public class UserAdmin extends CustomComponent {
     });
 
     updateUser.addClickListener(new ClickListener() {
-      private static final long serialVersionUID = -3610721151565496909L;
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -5539382755814626288L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -319,14 +297,12 @@ public class UserAdmin extends CustomComponent {
       }
     });
 
-
     updateUserWorkgroup.addClickListener(new ClickListener() {
 
       /**
        * 
        */
-      private static final long serialVersionUID = -295434651623561492L;
-
+      private static final long serialVersionUID = 6047120293226784941L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -341,26 +317,10 @@ public class UserAdmin extends CustomComponent {
                 "error");
           } else {
 
-
             DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
                 DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
                     userWorkgroup.getValue().toString()), selectedRow.toString());
 
-            /*
-             * System.out.println("Workgroup Name: " + userWorkgroup.getValue().toString() +
-             * " Workgroup ID: " + DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
-             * userWorkgroup.getValue().toString()) + " ID: " + selectedRow.toString());
-             * 
-             * 
-             * DBManager.getDatabaseInstance().adminUpdatesUserWorkgroup(
-             * DBManager.getDatabaseInstance().getUserWorkgroupIDByName(
-             * userWorkgroup.getValue().toString()),
-             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString()));
-             */
-
-            // System.out.println("Edit Workgroup: " + userWorkgroup.getValue().toString());
-
-            // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
                 LiferayAndVaadinUtils.getUser().getScreenName(),
                 "Admin edited Workgroup: "
@@ -386,11 +346,10 @@ public class UserAdmin extends CustomComponent {
 
     updateUserGroup.addClickListener(new ClickListener() {
 
-
       /**
        * 
        */
-      private static final long serialVersionUID = -5539382755814626288L;
+      private static final long serialVersionUID = 4221871450803747386L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -409,15 +368,6 @@ public class UserAdmin extends CustomComponent {
             DBManager.getDatabaseInstance().adminUpdatesUserGroup(
                 DBManager.getDatabaseInstance().getUserGroupIDByName(
                     userGroup.getValue().toString()), selectedRow.toString());
-
-            // System.out.println("Edit Workgroup: " + userGroup.getValue().toString() + " UserId: "
-            // + DBManager.getDatabaseInstance().getUserIDbyLDAPID(selectedRow.toString()));
-
-            /*
-             * DBManager.getDatabaseInstance().adminUpdatesUserGroups( selectedRow.toString(),
-             * DBManager.getDatabaseInstance().getUserGroupIDByName(
-             * userGroup.getValue().toString()));
-             */
 
             // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
@@ -446,7 +396,7 @@ public class UserAdmin extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = -295434651623561492L;
+      private static final long serialVersionUID = -627345855586383629L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -480,30 +430,6 @@ public class UserAdmin extends CustomComponent {
                     DBManager.getDatabaseInstance().getDeviceIDByName(
                         userDevice.getValue().toString()));
 
-            /*
-             * if multiple users has no LDAP ID assigned of same ID assigned the DB call updates all
-             * of the users therefore the fix was performed
-             * 
-             * DBManager.getDatabaseInstance() .adminUpdatesUserRoleForDevice(
-             * DBManager.getDatabaseInstance().getUserRoleIDbyDesc( userRole.getValue().toString()),
-             * DBManager.getDatabaseInstance().getUserIDbyLDAPID(
-             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())),
-             * DBManager.getDatabaseInstance().getDeviceIDByName(
-             * userDevice.getValue().toString()));
-             * 
-             * System.out.println("User Role: " +
-             * DBManager.getDatabaseInstance().getUserRoleIDbyDesc( userRole.getValue().toString())
-             * + " LdapID: " + DBManager.getDatabaseInstance().getUserIDbyLDAPID(
-             * DBManager.getDatabaseInstance().getUserLDAPIDbyID(selectedRow.toString())) +
-             * " Device: " + DBManager.getDatabaseInstance().getDeviceIDByName(
-             * userDevice.getValue().toString()) + " ID: " + selectedRow.toString());
-             * 
-             * System.out.println("Selected Row: " + ((SingleSelectionModel)
-             * usersGrid.getSelectionModel()).getSelectedRow() + " Device: " + userDevice.getValue()
-             * + " Role: " + userRole.getValue() + " ID: " + selectedRow.toString());
-             */
-
-            // log changes in 'user_log' table
             DBManager.getDatabaseInstance().logEverything(
                 LiferayAndVaadinUtils.getUser().getScreenName(),
                 "Admin edited Instrument, Role, Group");
@@ -532,32 +458,21 @@ public class UserAdmin extends CustomComponent {
       tq.setVersionColumn("OPTLOCK");
       SQLContainer container = new SQLContainer(tq);
 
-      /*
-       * FreeformQuery query = new FreeformQuery(
-       * "SELECT * FROM user INNER JOIN workgroups WHERE user.workgroup_id = workgroups.workgroup_id"
-       * , DBManager.getDatabaseInstanceAlternative(), "user_id"); SQLContainer container = new
-       * SQLContainer(query);
-       */
-
-      // System.out.println("Print Container: " + container.size());
       container.setAutoCommit(isEnabled());
 
       usersGrid = new Grid(container);
-
-      // Create a grid bound to it
-
       usersGrid.setSelectionMode(SelectionMode.NONE);
       usersGrid.setWidth("500px");
       usersGrid.setHeight("300px");
 
       FieldGroup fieldGroup = usersGrid.getEditorFieldGroup();
+
       fieldGroup.addCommitHandler(new FieldGroup.CommitHandler() {
+
         /**
          * 
          */
-        private static final long serialVersionUID = 3799806709907688919L;
-
-
+        private static final long serialVersionUID = -8422227124240709412L;
 
         @Override
         public void preCommit(FieldGroup.CommitEvent commitEvent) throws FieldGroup.CommitException {
@@ -582,52 +497,46 @@ public class UserAdmin extends CustomComponent {
 
       });
 
-      usersGrid.addSelectionListener(selectionEvent -> { // Java 8
-            // Get selection from the selection model
-            Object selected =
-                ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
+      usersGrid.addSelectionListener(selectionEvent -> {
 
-            if (selected != null) {
+        Object selected = ((SingleSelectionModel) usersGrid.getSelectionModel()).getSelectedRow();
 
+        if (selected != null) {
 
-              // userDevice.select(bookAdmin.getSelectedTab().getCaption());
-              userWorkgroup.select(DBManager.getDatabaseInstance().getUserWorkgroupByUserId(
-                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
-                      .toString()));
-              userGroup.select(DBManager.getDatabaseInstance().getUserRoleByUserId(
-                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
-                      .toString()));
+          userWorkgroup.select(DBManager.getDatabaseInstance().getUserWorkgroupByUserId(
+              usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                  .toString()));
+          userGroup.select(DBManager.getDatabaseInstance().getUserRoleByUserId(
+              usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                  .toString()));
 
-              userDevice.addValueChangeListener(new ValueChangeListener() {
+          userDevice.addValueChangeListener(new ValueChangeListener() {
 
-                /**
+            /**
                  * 
                  */
-                private static final long serialVersionUID = -8696555155016720475L;
+            private static final long serialVersionUID = 259043348600214362L;
 
-                @Override
-                public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
-                  userRole
-                      .select(DBManager.getDatabaseInstance().getUserGroupDescriptionByUserID(
-                          usersGrid.getContainerDataSource().getItem(selected)
-                              .getItemProperty("user_id").toString(),
-                          userDevice.getValue().toString()));
+            @Override
+            public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
+              userRole.select(DBManager.getDatabaseInstance().getUserGroupDescriptionByUserID(
+                  usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                      .toString(), userDevice.getValue().toString()));
 
-                }
-              });
+            }
+          });
 
-              isAdmin.setValue(DBManager.getDatabaseInstance().hasAdminPanelAccess(
+          isAdmin.setValue(DBManager.getDatabaseInstance().hasAdminPanelAccess(
+              usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
+                  .toString()));
+
+          Notification.show("Selected "
+              + DBManager.getDatabaseInstance().getUserRoleByUserId(
                   usersGrid.getContainerDataSource().getItem(selected).getItemProperty("user_id")
                       .toString()));
-
-
-              Notification.show("Selected "
-                  + DBManager.getDatabaseInstance().getUserRoleByUserId(
-                      usersGrid.getContainerDataSource().getItem(selected)
-                          .getItemProperty("user_id").toString()));
-            } else
-              Notification.show("Nothing selected");
-          });
+        } else
+          Notification.show("Nothing selected");
+      });
 
     } catch (Exception e) {
       // TODO Auto-generated catch block
@@ -638,26 +547,6 @@ public class UserAdmin extends CustomComponent {
       e.printStackTrace();
     }
 
-    /*
-     * // only admins are allowed to see the admin panel ;) if (!DBManager.getDatabaseInstance()
-     * .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
-     * .equals("1")) { VerticalLayout errorLayout = new VerticalLayout();
-     * infoLabel.setValue("ACCESS DENIED"); errorLayout.addComponent(infoLabel);
-     * showErrorNotification( "Access Denied!",
-     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'."
-     * ); setCompositionRoot(errorLayout); return; }
-     */
-
-    /*
-     * only admins are allowed to see the admin panel ;) if (!DBManager.getDatabaseInstance()
-     * .getUserAdminPanelAccessByLDAPId(LiferayAndVaadinUtils.getUser().getScreenName())
-     * .equals("1")) { VerticalLayout errorLayout = new VerticalLayout();
-     * infoLabel.setValue("ACCESS DENIED"); errorLayout.addComponent(infoLabel); Notification(
-     * "Access Denied!",
-     * "Sorry, you're not allowed to see anything here, at least your username told us so. Do you need assistance? Please contact 'helpdesk@qbic.uni-tuebingen.de'."
-     * , "error"); setCompositionRoot(errorLayout); return; }
-     */
-
     this.setCaption("User Manager");
 
     final TabSheet userAdmin = new TabSheet();
@@ -665,25 +554,14 @@ public class UserAdmin extends CustomComponent {
     userAdmin.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
     userAdmin.addTab(usersGrid());
     userAdmin.getTab(0).setIcon(FontAwesome.USERS);
-    /*
-     * userAdmin.addSelectedTabChangeListener(new SelectedTabChangeListener() {
-     * 
-     * @Override public void selectedTabChange(SelectedTabChangeEvent event) {
-     * 
-     * } });
-     */
 
     gridLayout.setWidth("100%");
 
-    // add components to the grid layout
-    // gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
     gridLayout.addComponent(userAdmin, 0, 1, 5, 1);
     gridLayout.addComponent(refresh, 0, 2);
     gridLayout.addComponent(addUserButton, 1, 2);
     gridLayout.addComponent(deleteUserButton, 2, 2);
     gridLayout.addComponent(isAdmin, 5, 2);
-    // gridLayout.addComponent(save);
-
     gridLayout.addComponent(userWorkgroup, 0, 4);
     gridLayout.addComponent(userDevice, 1, 4);
     gridLayout.addComponent(userRole, 2, 4, 4, 4);
@@ -691,7 +569,6 @@ public class UserAdmin extends CustomComponent {
     gridLayout.addComponent(updateUserWorkgroup, 0, 5);
     gridLayout.addComponent(updateUserRightsAndRoles, 1, 5, 4, 5);
     gridLayout.addComponent(updateUserGroup, 5, 5);
-    // gridLayout.addComponent(newContainerGrid, 1, 4);
 
     gridLayout.setSpacing(true);
     gridLayout.setSizeFull();
@@ -703,42 +580,23 @@ public class UserAdmin extends CustomComponent {
   private Component usersGrid() {
     VerticalLayout devicesLayout = new VerticalLayout();
     devicesLayout.setCaption("Users");
-    // HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    // there will now be space around the test component
-    // components added to the test component will now not stick together but have space between
-    // them
     devicesLayout.setMargin(true);
     devicesLayout.setSpacing(true);
 
-    // BeanItemContainer<UserBean> users = getUsers();
-    // GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(users);
-    // usersGrid = new Grid(gpc);
-    // Create a grid
-
     usersGrid.setWidth("100%");
     usersGrid.setSelectionMode(SelectionMode.SINGLE);
-
-    // System.out.println(usersGrid.getColumns());
-
-    // usersGrid.setColumnOrder("id", "LDAP", "name", "email", "phone", "workgroup", "institute",
-    // "kostenstelle", "project");
-    // usersGrid.removeColumn("status");
-    // usersGrid.removeColumn("role");
 
     usersGrid.setColumnOrder("user_id", "user_ldap", "user_name", "email", "phone", "workgroup_id",
         "group_id", "kostenstelle", "project", "admin_panel");
     usersGrid.sort("user_name", SortDirection.ASCENDING);
 
-    // usersGrid.removeColumn("workgroup_id");
     usersGrid.removeColumn("group_id");
     usersGrid.removeColumn("admin_panel");
 
     usersGrid.getColumn("user_id").setHeaderCaption("ID");
     usersGrid.getColumn("user_ldap").setHeaderCaption("Username");
     usersGrid.getColumn("user_name").setHeaderCaption("Name");
-
-    // usersGrid.getColumn("user_ldap").setEditable(false);
 
     usersGrid.setEditorEnabled(true);
 
@@ -750,23 +608,9 @@ public class UserAdmin extends CustomComponent {
     return devicesLayout;
   }
 
-
-  /*
-   * private BeanItemContainer<UserBean> getUsers() { BeanItemContainer<UserBean> userList = new
-   * BeanItemContainer<UserBean>(UserBean.class); List<UserBean> users =
-   * DBManager.getDatabaseInstance().getUsers(); assert users != null; userList.addAll(users);
-   * return userList; }
-   */
-
   protected void refreshDataSources() {
     UserAdmin bookAdmin = new UserAdmin(null);
     setCompositionRoot(bookAdmin);
-  }
-
-
-  private void refresh(BeanItemContainer<BookingBean> item) {
-    MethodProperty<String> p = (MethodProperty<String>) ((Item) item).getItemProperty("stock");
-    p.fireValueChange();
   }
 
   private void Notification(String title, String description, String type) {

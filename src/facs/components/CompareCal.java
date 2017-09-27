@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -37,7 +36,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.VerticalLayout;
@@ -57,8 +55,6 @@ public class CompareCal extends CustomComponent {
   private BookingModel bookingModel;
   private NativeSelect selectedDevice;
   private Map<String, Calendar> bookMap = new HashMap<String, Calendar>();
-  private Map<String, Set<CalendarEvent>> newEvents = new HashMap<String, Set<CalendarEvent>>();
-  private int eventCounter = 0;
   private Date referenceDate;
 
   private NativeSelect selectedService;
@@ -103,9 +99,6 @@ public class CompareCal extends CustomComponent {
 
     selectedDevice = initCalendars(bookingModel.getDevicesNames());
 
-    selectedService = new NativeSelect("Select Service");
-    selectedService.setDescription("Please select the service you would like to receive!");
-
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
       private static final long serialVersionUID = 8153818693511960689L;
 
@@ -115,21 +108,6 @@ public class CompareCal extends CustomComponent {
         if (bookMap.containsKey(getCurrentDevice())) {
           cal.removeAllComponents();
           setCalendar();
-
-          if (selectedDevice.getValue().equals("Aria")) {
-            selectedService.removeAllItems();
-            selectedService.addItems("Full Service", "Partial Service", "Self Service");
-            selectedService.setValue("Full Service");
-            selectedService.setVisible(true);
-          } else if (selectedDevice.getValue().equals("Mac")) {
-            selectedService.removeAllItems();
-            selectedService.addItems("Self", "Service");
-            selectedService.setValue("Service");
-            selectedService.setVisible(true);
-          } else {
-            selectedService.setValue(null);
-            selectedService.setVisible(false);
-          }
 
         } else {
 
@@ -146,7 +124,6 @@ public class CompareCal extends CustomComponent {
 
     cal.setLocale(Locale.getDefault());
     cal.setImmediate(true);
-    selectedService.setImmediate(true);
     cal.setSizeFull();
     cal.isReadOnly();
 
@@ -157,12 +134,8 @@ public class CompareCal extends CustomComponent {
     gridLayout.setWidth("100%");
 
     gridLayout.addComponent(selectedDevice, 0, 0);
-    gridLayout.addComponent(selectedService, 1, 0);
-
-    selectedService.setVisible(false);
 
     gridLayout.addComponent(cal, 0, 2, 5, 2);
-    // gridLayout.addComponent(countLabel, 2, 0);
 
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
@@ -188,24 +161,6 @@ public class CompareCal extends CustomComponent {
     notify.setPosition(Position.TOP_CENTER);
     notify.setIcon(FontAwesome.FROWN_O);
     notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.MEH_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showSuccessfulNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.SMILE_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_SUCCESS + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     notify.show(Page.getCurrent());
   }
 
@@ -247,7 +202,7 @@ public class CompareCal extends CustomComponent {
   NativeSelect initCalendars(List<String> devices) {
     String selectDeviceCaption = "Select Instrument";
     String selectDeviceDescription =
-        "Please select an instrument to ask for a booking request or to book!";
+        "Please select an instrument to see the device usage and booking data!";
     NativeSelect selectDevice = new NativeSelect();
     selectDevice.addItems(devices);
     selectDevice.setCaption(selectDeviceCaption);
@@ -256,55 +211,4 @@ public class CompareCal extends CustomComponent {
     return selectDevice;
   }
 
-  class MyEventHandler {
-
-    final String MESSAGE_24_HOURS_LIMIT = "o_O 3 Hours Limit Counts!";
-    final String MESSAGE_24_HOURS_LIMIT_DESCRIPTION =
-        "It's not possible to delete this booking since it's already in the last 3 hours limit, please try to contact your facility operator!";
-    final String MESSAGE_IN_THE_PAST_TITLE = "o_O we can't turn back the time!";
-    final String MESSAGE_IN_THE_PAST_DESCRIPTION =
-        "Booking failed because you selected a time frame in the past. Please select current or future dates for booking and try again!";
-    final String MESSAGE_ALREADY_TAKEN_TITLE = "o_O someone else got it first!";
-    final String MESSAGE_ALREADY_TAKEN_DESCRIPTION =
-        "Booking failed because you selected an occupied time frame. Please select a new but 'free' time frame and try again!";
-    final String MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE = "Hands off, not yours.";
-    final String MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION =
-        "Action cancelled because you tried to change someone else's booking. You can only mark/rebook/delete your own bookings.";
-    final String MESSAGE_NOTHING_TO_DELETE_TITLE = "There is no spoon.";
-    final String MESSAGE_NOTHING_TO_DELETE_DESCRIPTION =
-        "Action cancelled because you tried to delete a nonexisting booking. Do not try and bend the spoon. That's impossible.";
-    final String MESSAGE_NOTHING_TO_EDIT_TITLE = "There is no spoon.";
-    final String MESSAGE_NOTHING_TO_EDIT_DESCRIPTION =
-        "Action cancelled because you tried to edit a nonexisting booking. Do not try and bend the spoon. That's impossible.";
-    final String MESSAGE_OVERLAP_TITLE = "Pfoom! It's the sound of an overlap!";
-    final String MESSAGE_OVERLAP_DESCRIPTION =
-        "Unless we have a bug in the system, there is no way to overlap two bookings in the same timeframe. How did this happen now?";
-    final String MESSAGE_ITEM_PURGED = "The booking was deleted!";
-    final String MESSAGE_ITEM_PURGED_DESCRIPTION =
-        "You wanted to delete an upcoming booking and it wasn't within the next 3 hours. All good, item purged.";
-    final String MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN =
-        "You have the Admin Power, please use it wisely! - All good, item purged.";
-    final String MESSAGE_FAULTY_TITLE = "aye aye! Booking is marked as 'Faulty'!";
-    final String MESSAGE_FAULTY_DESCRIPTION =
-        "Something went wrong? As you requested, we marked this booking item as 'Faulty'. Thank you for your feedback, we will take the necessary steps to clear the problem.";
-
-    Calendar cal;
-    BookingModel bookingModel;
-
-    public MyEventHandler(Calendar cal, BookingModel bookingModel) {
-      this.cal = cal;
-      this.bookingModel = bookingModel;
-    }
-
-    void setDate(com.vaadin.ui.components.calendar.event.EditableCalendarEvent event, Date start,
-        Date end) {
-      event.setStart(start);
-      event.setEnd(end);
-      event.setStyleName("color1");
-    }
-
-    void showError(String message) {
-      Notification.show(message, Type.ERROR_MESSAGE);
-    }
-  }
 }

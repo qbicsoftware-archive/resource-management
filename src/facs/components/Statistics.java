@@ -82,9 +82,6 @@ public class Statistics extends CustomComponent {
   private final String durationCaption = "Duration";
   private final String CAPTION = "Usage/Statistics";
 
-  // private NativeSelect selectedYear;
-  // private NativeSelect selectedQuarter;
-
   private ComboBox selectedYear;
   private ComboBox selectedQuarter;
 
@@ -109,8 +106,6 @@ public class Statistics extends CustomComponent {
   private GeneratedPropertyContainer gpcontainer;
   private GeneratedPropertyContainer mpc;
   private GeneratedPropertyContainer ipc;
-
-  // private GridLayout gridLayout = new GridLayout(6, 6);
 
   public Statistics() {
     this.setCaption(CAPTION);
@@ -148,7 +143,7 @@ public class Statistics extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = 7673747658185105191L;
+      private static final long serialVersionUID = -6838645822619456182L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -174,6 +169,7 @@ public class Statistics extends CustomComponent {
         statistics.addTab(serviceGrid(dateStart, dateEnd)).setCaption("Service");
         statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
         statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced");
+        statistics.addTab(invoicedCalGrid(dateStart, dateEnd)).setCaption("Invoice Calendar");
 
         selectedYear.setCaption("Selected Year");
         selectedQuarter.setCaption("Selected Quarter");
@@ -217,7 +213,6 @@ public class Statistics extends CustomComponent {
       }
     });
 
-    // Add some generated properties
     IndexedContainer container = getEmptyContainer();
     gpcontainer = new GeneratedPropertyContainer(container);
 
@@ -227,14 +222,12 @@ public class Statistics extends CustomComponent {
     setRenderers(grid);
     fillRows(grid, start, end);
 
-    // compute total costs
     float totalCosts = 0.0f;
 
     for (Object itemId : gpcontainer.getItemIds())
       totalCosts +=
           ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue()).floatValue();
 
-    // compute total time in milliseconds
     long total = 0;
     for (Object itemId : gpcontainer.getItemIds()) {
       long s = ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue()).getTime();
@@ -242,15 +235,13 @@ public class Statistics extends CustomComponent {
       total += e - s;
     }
 
-    // set footer to contain total cost and time in hours:minutes
     FooterRow footer = grid.appendFooterRow();
     FooterCell footerCellCost = footer.getCell(costCaption);
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
 
-    // Set up a filter for all columns
     HeaderRow filterRow = grid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, container, footer, gpcontainer);
     addRowFilter(filterRow, kostenstelleCaption, container, footer, gpcontainer);
@@ -264,38 +255,24 @@ public class Statistics extends CustomComponent {
             + " · " + LiferayAndVaadinUtils.getUser().getScreenName());
     infoLabel.addStyleName("h4");
 
-    // createInvoice.setSizeFull();
-    // downloadInvoice.setSizeFull();
-
     gridLayout.setWidth("100%");
     gridLayout.setCaption("Statistics");
-    // add components to the grid layout
-    // gridLayout.addComponent(infoLabel, 0, 0, 3, 0);
-    // gridLayout.addComponent(grid, 0, 1, 5, 1);
-    // gridLayout.addComponent(createInvoice, 0, 3);
-    // gridLayout.addComponent(downloadInvoice, 1, 3);
 
     gridLayout.addComponent(grid);
     gridLayout.addComponent(refresh);
     gridLayout.addComponent(createInvoice);
     gridLayout.addComponent(downloadInvoice);
 
-    // gridLayout.setExpandRatio(grid, 3);
-
-    // gridLayout.addComponent(selectedYear);
-    // gridLayout.addComponent(selectedQuarter);
-
     gridLayout.setMargin(true);
     gridLayout.setSpacing(true);
 
-    // grid.setEditorEnabled(true);
     grid.setSelectionMode(SelectionMode.SINGLE);
     grid.addSelectionListener(new SelectionListener() {
 
       /**
        * 
        */
-      private static final long serialVersionUID = -2683274060620429050L;
+      private static final long serialVersionUID = -7568227678189973297L;
 
       @Override
       public void select(SelectionEvent event) {
@@ -318,7 +295,7 @@ public class Statistics extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = 5512585967145932560L;
+      private static final long serialVersionUID = 7480910263373822028L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -328,15 +305,10 @@ public class Statistics extends CustomComponent {
 
         Paths.get(basepath, "WEB-INF/billingTemplates");
 
-        // System.out.println("Basepath: " + basepath);
-
         try {
 
-          // int setUserId = DBManager.getDatabaseInstance().findUserByFullName(ReceiverPI);
           int setUserId =
               DBManager.getDatabaseInstance().findMainContactIDByGroupMembereFullName(ReceiverPI);
-
-          // System.out.println("Main Contact ID: " + setUserId);
 
           if (setUserId > 0) {
 
@@ -346,16 +318,12 @@ public class Statistics extends CustomComponent {
             UserBean user =
                 setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
 
-            // System.out.println("User: " + user);
-
-            // billing.setReceiverPI(ReceiverPI);
             billing.setReceiverPI(user.getName());
             billing.setReceiverInstitution(user.getInstitute());
             billing.setReceiverStreet(user.getStreet());
             billing.setReceiverPostalCode(user.getPostcode());
             billing.setReceiverCity(user.getCity());
 
-            // billing.setSenderTitle("Einrichtung");
             billing.setSenderFaculty("Core Facility Durchflusszytometrie");
 
             billing.setSenderFunction("Leitung:");
@@ -370,19 +338,6 @@ public class Statistics extends CustomComponent {
             billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
             billing.setSenderUrl("www.medizin.uni-tuebingen.de");
 
-            /*
-             * Calendar calendar = Calendar.getInstance(); SimpleDateFormat dateFormat = new
-             * SimpleDateFormat("dd/MM/yyyy");
-             * 
-             * 
-             * try {
-             * 
-             * billing.setDate(dateFormat.format(calendar.getTime()));
-             * System.out.println(dateFormat.format(calendar.getTime()));
-             * 
-             * } catch (Exception e) { e.printStackTrace(); }
-             */
-
             String selectedKostenstelleInitial =
                 (String) gpcontainer.getContainerProperty(grid.getSelectedRow(),
                     kostenstelleCaption).getValue();
@@ -391,8 +346,6 @@ public class Statistics extends CustomComponent {
                     .getValue();
 
             if (selectedKostenstelleInitial != null && selectedProjectInitial == null) {
-
-              // System.out.println("User Project: " + selectedProjectInitial);
 
               billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
               billing.setProjectDescription("Anfordernde Kostenstelle: "
@@ -474,27 +427,20 @@ public class Statistics extends CustomComponent {
               String selectedDevice =
                   (String) gpcontainer.getContainerProperty(itemId, deviceCaption).getValue();
 
-              // System.out.println("Selected Device: " + selectedDevice + " Time Frame: " +
-              // timeFrame + " Cost: " + cost);
-
               if (selectedDevice.equals("Aria")) {
 
                 ariaCosts = ariaCosts + cost;
                 ariaTime = ariaTime + timeFrame;
-                // System.out.println("Aria Costs: " + ariaCosts + " Time: " + ariaTime);
 
               } else if (selectedDevice.equals("LSR Fortessa")) {
 
                 lsrFortessaCosts = lsrFortessaCosts + cost;
                 lsrFortessaTime = lsrFortessaTime + timeFrame;
-                // System.out.println("LSR Fortessa Costs: " + lsrFortessaCosts + " Time: "
-                // + lsrFortessaTime);
 
               } else if (selectedDevice.equals("Canto")) {
 
                 cantoCosts = cantoCosts + cost;
                 cantoTime = cantoTime + timeFrame;
-                // System.out.println("Canto Costs: " + cantoCosts + " Time: " + cantoTime);
 
               } else if (selectedDevice.equals("FC500")) {
 
@@ -543,7 +489,6 @@ public class Statistics extends CustomComponent {
 
             float totalCosts = 0.0f;
 
-            // calculates the total cost of items
             for (Object itemId : gpcontainer.getItemIds()) {
               totalCosts +=
                   ((Number) gpcontainer.getContainerProperty(itemId, costCaption).getValue())
@@ -557,7 +502,7 @@ public class Statistics extends CustomComponent {
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
 
             bill = billing.createPdf();
-            // System.out.println(bill.getAbsolutePath());
+
             if (fileDownloader != null)
               downloadInvoice.removeExtension(fileDownloader);
             fileDownloader = new FileDownloader(new FileResource(bill));
@@ -581,53 +526,6 @@ public class Statistics extends CustomComponent {
               "An error occured while trying to create the invoice. The common problem occurs to be: this no such user or it can not run program 'pdflatex'.");
           e.printStackTrace();
         }
-
-        // for all entries
-        /*
-         * try { Billing billing = new Billing(Paths.get(basepath,
-         * "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
-         * billing.setRecieverInstitution("BER - Berliner Flughafen");
-         * billing.setRecieverPI("Klaus Something");
-         * billing.setRecieverStreet("am berliner flughafen 12");
-         * billing.setRecieverPostalCode("D-12345"); billing.setRecieverCity("Berlin");
-         * 
-         * billing.setSenderName("Dr. rer. nat. Stella Autenrieth");
-         * billing.setSenderFunction("Leiterin"); billing.setSenderPostalCode("72076");
-         * billing.setSenderCity("Tübingen"); billing.setSenderStreet("Otfried-Müller-Straße 10");
-         * billing.setSenderPhone("+49 (0) 7071 29-83156");
-         * billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
-         * billing.setSenderUrl("www.medizin.uni-tuebingen.de");
-         * billing.setSenderFaculty("Medizinischen Fakultät");
-         * 
-         * billing.setProjectDescription("Dieses Angebot beinhaltet jede Menge Extras.");
-         * billing.setProjectShortDescription("jede Menge Extras.");
-         * billing.setProjectNumber("QA2014016");
-         * 
-         * ArrayList<CostEntry> entries = new ArrayList<CostEntry>(); for (Object itemId :
-         * gpcontainer.getItemIds()) { float cost = ((Number)
-         * gpcontainer.getContainerProperty(itemId, costCaption).getValue()) .floatValue(); long s =
-         * ((Date) gpcontainer.getContainerProperty(itemId, startCaption).getValue()) .getTime();
-         * long e = ((Date) gpcontainer.getContainerProperty(itemId,
-         * endCaption).getValue()).getTime(); long timeFrame = e - s; Date start = ((Date)
-         * gpcontainer.getContainerProperty(itemId, startCaption).getValue()); SimpleDateFormat ft =
-         * new SimpleDateFormat("dd.MM.yyyy"); String date = ft.format(start); String description =
-         * "No Description is Available"; String time_frame =
-         * Formatter.toHoursAndMinutes(timeFrame); entries.add(billing.new CostEntry(date,
-         * time_frame, description, cost)); } billing.setCostEntries(entries); float totalCosts =
-         * 0.0f; for (Object itemId : gpcontainer.getItemIds()) { totalCosts += ((Number)
-         * gpcontainer.getContainerProperty(itemId, costCaption).getValue()) .floatValue(); }
-         * 
-         * billing.setTotalCost(String.format("%1$.2f", totalCosts));
-         * 
-         * bill = billing.createPdf(); System.out.println(bill.getAbsolutePath()); if
-         * (fileDownloader != null) downloadBill.removeExtension(fileDownloader); fileDownloader =
-         * new FileDownloader(new FileResource(bill)); fileDownloader.extend(downloadBill);
-         * downloadBill.setEnabled(true); showSuccessfulNotification("Congratulations!",
-         * "Invoice is created and available for download."); } catch (Exception e) {
-         * showErrorNotification( "What the heck!",
-         * "An error occured while trying to create the invoice. The common problem occurs to be: cannot run program 'pdflatex'"
-         * ); e.printStackTrace(); }
-         */
 
       }
 
@@ -672,13 +570,11 @@ public class Statistics extends CustomComponent {
     setRenderers(matchedGrid);
     fillMatchedRows(matchedGrid, dateStart, dateEnd);
 
-    // compute total costs
     float totalCosts = 0.0f;
     for (Object itemIdMatched : mpc.getItemIds())
       totalCosts +=
           ((Number) mpc.getContainerProperty(itemIdMatched, costCaption).getValue()).floatValue();
 
-    // compute total time in milliseconds
     long total = 0;
     for (Object itemIdMatched : mpc.getItemIds()) {
       long s = ((Date) mpc.getContainerProperty(itemIdMatched, startCaption).getValue()).getTime();
@@ -686,16 +582,13 @@ public class Statistics extends CustomComponent {
       total += e - s;
     }
 
-
-    // set footer to contain total cost and time in hours:minutes
     FooterRow footer = matchedGrid.appendFooterRow();
     FooterCell footerCellCost = footer.getCell(costCaption);
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
 
-    // Set up a filter for all columns
     HeaderRow filterRow = matchedGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
     addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
@@ -706,25 +599,20 @@ public class Statistics extends CustomComponent {
     matchedLayout.setMargin(true);
     matchedLayout.setSpacing(true);
 
-    // devicesGrid.setWidth("100%");
     matchedGrid.setSizeFull();
     matchedGrid.setSelectionMode(SelectionMode.SINGLE);
     matchedLayout.addComponent(matchedGrid);
 
     matchedGrid.addSelectionListener(new SelectionListener() {
 
-
       /**
        * 
        */
-      private static final long serialVersionUID = -2683274060620429050L;
+      private static final long serialVersionUID = 6270968376342126363L;
 
       @Override
       public void select(SelectionEvent event) {
-        /*
-         * Notification.show("Select row: " + matchedGrid.getSelectedRow() + " Name: " +
-         * gpcontainer.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption) .getValue());
-         */
+
         downloadInvoiceMatched.setEnabled(false);
         ReceiverPI =
             (String) mpc.getContainerProperty(matchedGrid.getSelectedRow(), nameCaption).getValue();
@@ -736,7 +624,7 @@ public class Statistics extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = -7548522758005539698L;
+      private static final long serialVersionUID = 8904377791996878035L;
       private File bill;
       private FileDownloader fileDownloader;
 
@@ -832,28 +720,6 @@ public class Statistics extends CustomComponent {
 
             ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
 
-            /*
-             * for (Object itemIdMatched : mpc.getItemIds()) {
-             * 
-             * float cost = // grid.getSelectedRow() x4 is replaced by itemId below ((Number)
-             * mpc.getContainerProperty(itemIdMatched, costCaption).getValue()) .floatValue(); long
-             * s = ((Date) mpc.getContainerProperty(itemIdMatched, startCaption).getValue())
-             * .getTime(); long e = ((Date) mpc.getContainerProperty(itemIdMatched,
-             * endCaption).getValue()).getTime(); long timeFrame = e - s; Date start = ((Date)
-             * mpc.getContainerProperty(itemIdMatched, startCaption).getValue()); SimpleDateFormat
-             * ft = new SimpleDateFormat("dd.MM.yyyy"); String date = ft.format(start);
-             * 
-             * String description = ((String) mpc.getContainerProperty(itemIdMatched,
-             * deviceCaption).getValue()) + " Pries/Std: "; System.out.println("Time Frame: " +
-             * timeFrame); String time_frame = Formatter.toHoursAndMinutes(timeFrame);
-             * 
-             * entries.add(billing.new CostEntry(date, time_frame, description, cost));
-             * System.out.println("Date: " + date + " Time Frame: " + time_frame + " Description: "
-             * + description + " Cost: " + cost);
-             * 
-             * }
-             */
-
             float ariaCosts = 0.0f;
             float lsrFortessaCosts = 0.0f;
             float cantoCosts = 0.0f;
@@ -885,28 +751,20 @@ public class Statistics extends CustomComponent {
               String selectedDevice =
                   (String) mpc.getContainerProperty(itemIdMatched, deviceCaption).getValue();
 
-              // System.out.println("Selected Device: " + selectedDevice + " Time Frame: " +
-              // timeFrame
-              // + " Cost: " + cost);
-
               if (selectedDevice.equals("Aria")) {
 
                 ariaCosts = ariaCosts + cost;
                 ariaTime = ariaTime + timeFrame;
-                // System.out.println("Aria Costs: " + ariaCosts + " Time: " + ariaTime);
 
               } else if (selectedDevice.equals("LSR Fortessa")) {
 
                 lsrFortessaCosts = lsrFortessaCosts + cost;
                 lsrFortessaTime = lsrFortessaTime + timeFrame;
-                // System.out.println("LSR Fortessa Costs: " + lsrFortessaCosts + " Time: "
-                // + lsrFortessaTime);
 
               } else if (selectedDevice.equals("Canto")) {
 
                 cantoCosts = cantoCosts + cost;
                 cantoTime = cantoTime + timeFrame;
-                // System.out.println("Canto Costs: " + cantoCosts + " Time: " + cantoTime);
 
               } else if (selectedDevice.equals("FC500")) {
 
@@ -956,15 +814,11 @@ public class Statistics extends CustomComponent {
             billing.setCostEntries(entries);
             float totalCosts = 0.0f;
 
-            // calculates the total cost of items
             for (Object itemIdMatched : mpc.getItemIds()) {
 
               totalCosts +=
                   ((Number) mpc.getContainerProperty(itemIdMatched, costCaption).getValue())
                       .floatValue();
-
-              // Notification.show("Selected "
-              // + DBManager.getDatabaseInstance().);
 
               DBManager.getDatabaseInstance().itemInvoiced(
                   (int) mpc.getContainerProperty(itemIdMatched, logIdCaption).getValue());
@@ -974,7 +828,6 @@ public class Statistics extends CustomComponent {
             billing.setTotalCost(String.format("%1$.2f", totalCosts));
 
             bill = billing.createPdf();
-            // System.out.println(bill.getAbsolutePath());
             if (fileDownloader != null)
               downloadInvoiceMatched.removeExtension(fileDownloader);
             fileDownloader = new FileDownloader(new FileResource(bill));
@@ -1025,7 +878,7 @@ public class Statistics extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = 1L;
+      private static final long serialVersionUID = -788764276412513448L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -1045,13 +898,11 @@ public class Statistics extends CustomComponent {
     setRenderers(noCostsGrid);
     fillNoCostRows(noCostsGrid, dateStart, dateEnd);
 
-    // compute total costs
     float totalCosts = 0.0f;
     for (Object itemIdNoCosts : mpc.getItemIds())
       totalCosts +=
           ((Number) mpc.getContainerProperty(itemIdNoCosts, costCaption).getValue()).floatValue();
 
-    // compute total time in milliseconds
     long total = 0;
     for (Object itemIdNoCosts : mpc.getItemIds()) {
       long s = ((Date) mpc.getContainerProperty(itemIdNoCosts, startCaption).getValue()).getTime();
@@ -1059,15 +910,13 @@ public class Statistics extends CustomComponent {
       total += e - s;
     }
 
-    // set footer to contain total cost and time in hours:minutes
     FooterRow footer = noCostsGrid.appendFooterRow();
     FooterCell footerCellCost = footer.getCell(costCaption);
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
 
-    // Set up a filter for all columns
     HeaderRow filterRow = noCostsGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
     addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
@@ -1077,7 +926,6 @@ public class Statistics extends CustomComponent {
 
     noCostLayout.setMargin(true);
     noCostLayout.setSpacing(true);
-    // devicesGrid.setWidth("100%");
     noCostsGrid.setSizeFull();
 
     noCostLayout.addComponent(noCostsGrid);
@@ -1101,7 +949,7 @@ public class Statistics extends CustomComponent {
       /**
        * 
        */
-      private static final long serialVersionUID = 1L;
+      private static final long serialVersionUID = -5472565174556158752L;
 
       @Override
       public void buttonClick(ClickEvent event) {
@@ -1121,13 +969,11 @@ public class Statistics extends CustomComponent {
     setRenderers(serviceGrid);
     fillNoCostRows(serviceGrid, dateStart, dateEnd);
 
-    // compute total costs
     float totalCosts = 0.0f;
     for (Object itemIdNoCosts : mpc.getItemIds())
       totalCosts +=
           ((Number) mpc.getContainerProperty(itemIdNoCosts, costCaption).getValue()).floatValue();
 
-    // compute total time in milliseconds
     long total = 0;
     for (Object itemIdNoCosts : mpc.getItemIds()) {
       long s = ((Date) mpc.getContainerProperty(itemIdNoCosts, startCaption).getValue()).getTime();
@@ -1135,15 +981,13 @@ public class Statistics extends CustomComponent {
       total += e - s;
     }
 
-    // set footer to contain total cost and time in hours:minutes
     FooterRow footer = serviceGrid.appendFooterRow();
     FooterCell footerCellCost = footer.getCell(costCaption);
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
 
-    // Set up a filter for all columns
     HeaderRow filterRow = serviceGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, mcontainer, footer, mpc);
     addRowFilter(filterRow, kostenstelleCaption, mcontainer, footer, mpc);
@@ -1153,7 +997,6 @@ public class Statistics extends CustomComponent {
 
     noCostLayout.setMargin(true);
     noCostLayout.setSpacing(true);
-    // devicesGrid.setWidth("100%");
     serviceGrid.setSizeFull();
 
     noCostLayout.addComponent(serviceGrid);
@@ -1197,13 +1040,11 @@ public class Statistics extends CustomComponent {
     setRenderers(invoicedGrid);
     fillInvoicedRows(invoicedGrid, dateStart, dateEnd);
 
-    // compute total costs
     float totalCosts = 0.0f;
     for (Object itemIdInvoiced : ipc.getItemIds())
       totalCosts +=
           ((Number) ipc.getContainerProperty(itemIdInvoiced, costCaption).getValue()).floatValue();
 
-    // compute total time in milliseconds
     long total = 0;
     for (Object itemIdInvoiced : ipc.getItemIds()) {
       long s = ((Date) ipc.getContainerProperty(itemIdInvoiced, startCaption).getValue()).getTime();
@@ -1211,15 +1052,13 @@ public class Statistics extends CustomComponent {
       total += e - s;
     }
 
-    // set footer to contain total cost and time in hours:minutes
     FooterRow footer = invoicedGrid.appendFooterRow();
     FooterCell footerCellCost = footer.getCell(costCaption);
     footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
 
     FooterCell footerCellEnd = footer.getCell(endCaption);
-    footerCellEnd.setText(Formatter.toHoursAndMinutes(total)); // "%1$.0f hours"
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
 
-    // Set up a filter for all columns
     HeaderRow filterRow = invoicedGrid.appendHeaderRow();
     addRowFilter(filterRow, deviceCaption, icontainer, footer, ipc);
     addRowFilter(filterRow, kostenstelleCaption, icontainer, footer, ipc);
@@ -1229,10 +1068,82 @@ public class Statistics extends CustomComponent {
 
     invoicedLayout.setMargin(true);
     invoicedLayout.setSpacing(true);
-    // devicesGrid.setWidth("100%");
     invoicedGrid.setSizeFull();
 
     invoicedLayout.addComponent(invoicedGrid);
+    invoicedLayout.addComponent(refreshMatched);
+
+    return invoicedLayout;
+  }
+
+
+  private Component invoicedCalGrid(String dateStart, String dateEnd) {
+
+    String buttonRefreshTitle = "Refresh";
+    Button refreshMatched = new Button(buttonRefreshTitle);
+    refreshMatched.setIcon(FontAwesome.REFRESH);
+    refreshMatched.setDescription("Click here to reload the data from the database!");
+    refreshMatched.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+    Grid invoicedCalGrid;
+
+    refreshMatched.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        refreshDataSources();
+
+      }
+    });
+
+    IndexedContainer iccontainer = getEmptyContainer();
+
+    GeneratedPropertyContainer icpc = new GeneratedPropertyContainer(iccontainer);
+
+    VerticalLayout invoicedLayout = new VerticalLayout();
+
+    invoicedCalGrid = new Grid(icpc);
+
+    setRenderers(invoicedCalGrid);
+    fillInvoiceCalendarRows(invoicedCalGrid, dateStart, dateEnd);
+
+    float totalCosts = 0.0f;
+    for (Object itemIdInvoiced : ipc.getItemIds())
+      totalCosts +=
+          ((Number) icpc.getContainerProperty(itemIdInvoiced, costCaption).getValue()).floatValue();
+
+    long total = 0;
+    for (Object itemIdInvoiced : icpc.getItemIds()) {
+      long s =
+          ((Date) icpc.getContainerProperty(itemIdInvoiced, startCaption).getValue()).getTime();
+      long e = ((Date) icpc.getContainerProperty(itemIdInvoiced, endCaption).getValue()).getTime();
+      total += e - s;
+    }
+
+    FooterRow footer = invoicedCalGrid.appendFooterRow();
+    FooterCell footerCellCost = footer.getCell(costCaption);
+    footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
+
+    FooterCell footerCellEnd = footer.getCell(endCaption);
+    footerCellEnd.setText(Formatter.toHoursAndMinutes(total));
+
+    HeaderRow filterRow = invoicedCalGrid.appendHeaderRow();
+    addRowFilter(filterRow, deviceCaption, iccontainer, footer, icpc);
+    addRowFilter(filterRow, kostenstelleCaption, iccontainer, footer, icpc);
+    addRowFilter(filterRow, nameCaption, iccontainer, footer, icpc);
+    addRowFilter(filterRow, projectCaption, iccontainer, footer, icpc);
+    addRowFilter(filterRow, instituteCaption, iccontainer, footer, icpc);
+
+    invoicedLayout.setMargin(true);
+    invoicedLayout.setSpacing(true);
+    invoicedCalGrid.setSizeFull();
+
+    invoicedLayout.addComponent(invoicedCalGrid);
     invoicedLayout.addComponent(refreshMatched);
 
     return invoicedLayout;
@@ -1250,12 +1161,6 @@ public class Statistics extends CustomComponent {
 
   }
 
-  /**
-   * fills the rows with values from the database NOTE: time block can have null values. Probably it
-   * happens only to end. In that case start == end
-   * 
-   * @param grid
-   */
   private void fillRows(Grid grid, String dateStart, String dateEnd) {
     List<MachineOccupationBean> mobeans =
         DBManager.getDatabaseInstance().getPhysicalTimeBlocksSetDates(dateStart, dateEnd);
@@ -1269,12 +1174,8 @@ public class Statistics extends CustomComponent {
     for (MachineOccupationBean mobean : mobeans) {
 
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
-      // System.out.println("userId: " + userId);
 
-      // List<String> kostenStelle = new ArrayList<String>();
-      // String kostenStelle;
-      // kostenStelle.add("unknown");
-
+      int duration = 0;
       String kostenStelle = "";
       String institute = "";
       String project = "";
@@ -1282,30 +1183,17 @@ public class Statistics extends CustomComponent {
       float cost = 0f;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
-        // System.out.println("userId: " + userId);
-        // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
-        // System.out.println("User Institute (fillRows): " + institute);
         project = user.getProject();
-        // System.out.println("User Project (fillRows): " + project);
-        // System.out.println(user.getId() + " ************************************* "
-        // + mobean.getDeviceId());
-        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
-        // duration = mobean.getDuration();
         cost = mobean.getCost();
+        duration = mobean.getDuration();
       }
 
-      // System.out.println("LogId: " + mobean.getLogId() + " Device: "
-      // + DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName()
-      // + " Kostenstelle: " + kostenStelle + " Project: " + project + " Institute: " + institute
-      // + " Start: " + mobean.getStart() + " End: " + end + " Cost: " + cost
-      // + " User Full Name: " + mobean.getUserFullName());
       grid.addRow(mobean.getLogId(),
           DBManager.getDatabaseInstance().getDeviceById(mobean.getDeviceId()).getName(),
-          kostenStelle, project, institute, mobean.getStart(), end, cost, mobean.getUserFullName());
-      // System.out.println("User: " + user.getName() + " Kostenstelle:" + kostenStelle);
-      // kostenStelle.get(0), mobean.getStart(), end, cost, institute);
+          kostenStelle, project, institute, mobean.getStart(), end, duration, cost,
+          mobean.getUserFullName());
     }
 
   }
@@ -1313,8 +1201,6 @@ public class Statistics extends CustomComponent {
   private void fillMatchedRows(Grid grid, String dateStart, String dateEnd) {
     List<MachineOccupationBean> mobeans =
         DBManager.getDatabaseInstance().getMatchedTimeBlocksSetDates(dateStart, dateEnd);
-
-    // System.out.println("Size: " + mobeans.size());
 
     if (mobeans.size() <= 0)
       Notification(
@@ -1325,24 +1211,21 @@ public class Statistics extends CustomComponent {
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
       float cost = 0;
+      int duration = 0;
       String kostenStelle = "";
       String institute = "";
       String project = "";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
-        // System.out.println("userId: " + userId);
-        // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
         project = user.getProject();
-        // System.out.println("User Project (fillMatchedRows): " + project);
-        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        duration = mobean.getDuration();
         cost = mobean.getCost();
-        // cost = getCostByDuration(user.getId(), mobean.getDuration(), mobean.getDeviceId());
       }
       grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
-          mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
+          mobean.getStart(), end, duration, cost, mobean.getUserFullName());
     }
 
   }
@@ -1358,25 +1241,25 @@ public class Statistics extends CustomComponent {
     for (MachineOccupationBean mobean : mobeans) {
       int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
       float cost = 0;
+      int duration = 0;
       String kostenStelle = "";
       String institute = "";
       String project = "";
       UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
       Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
       if (user != null) {
-        // System.out.println("userId: " + userId);
-        // System.out.println("name: " + mobean.getUserFullName());
         kostenStelle = user.getKostenstelle();
         institute = user.getInstitute();
         project = user.getProject();
-        // System.out.println("User Project (fillNoCosts): " + project);
-        // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+        duration = (int) ((mobean.getDuration() / 900000) * 0.25);
         cost = mobean.getCost();
       }
       grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
-          mobean.getStart(), end, mobean.getCost(), mobean.getUserFullName());
+          mobean.getStart(), end, duration, cost, mobean.getUserFullName());
+
     }
   }
+
 
   private void fillInvoicedRows(Grid grid, String dateStart, String dateEnd) {
     List<MachineOccupationBean> mobeans =
@@ -1387,63 +1270,72 @@ public class Statistics extends CustomComponent {
       for (MachineOccupationBean mobean : mobeans) {
         int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
         float cost = 0;
+        int duration = 0;
         String kostenStelle = "";
         String institute = "";
         String project = "";
         UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
         Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
         if (user != null) {
-          // System.out.println("userId: " + userId);
-          // System.out.println("name: " + mobean.getUserFullName());
           kostenStelle = user.getKostenstelle();
           institute = user.getInstitute();
           project = user.getProject();
-          // System.out.println("User Project (fillNoCosts): " + project);
-          // cost = getCost(user.getId(), mobean.getStart(), end, mobean.getDeviceId());
+          duration = mobean.getDuration();
           cost = mobean.getCost();
         }
         grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
-            mobean.getStart(), end, cost, mobean.getUserFullName());
+            mobean.getStart(), end, duration, cost, mobean.getUserFullName());
       }
 
   }
 
-  private float getCost(int userId, Date start, Date end, int resourceId) {
-    // System.out.println("Statistics: UserId: " + userId + " ResourceId: " + resourceId);
-    float cost = 0f;
-    float costPerHour =
-        DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
-    // System.out.println("Cost per Hour: " + costPerHour);
-    if (costPerHour > 0) {
-      float hoursUsed = Formatter.toHours(start, end);
-      // System.out.println("Hours Used: " + hoursUsed);
-      cost = hoursUsed * costPerHour;
-      // System.out.println("Cost: " + cost);
-    }
-    return cost;
+  private void fillInvoiceCalendarRows(Grid grid, String dateStart, String dateEnd) {
+    List<MachineOccupationBean> mobeans =
+        DBManager.getDatabaseInstance().getInvoiceCalendarTimeBlocksSetDates(dateStart, dateEnd);
+
+    if (mobeans.size() > 0)
+
+      for (MachineOccupationBean mobean : mobeans) {
+        int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+        float cost = 0;
+        int duration = 0;
+        String kostenStelle = "";
+        String institute = "";
+        String project = "";
+        UserBean user = userId > 0 ? DBManager.getDatabaseInstance().getUserById(userId) : null;
+        Date end = mobean.getEnd() == null ? mobean.getStart() : mobean.getEnd();
+        if (user != null) {
+          kostenStelle = user.getKostenstelle();
+          institute = user.getInstitute();
+          project = user.getProject();
+          duration = mobean.getDuration();
+          cost = mobean.getCost();
+        }
+        grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
+            mobean.getStart(), end, duration, cost, mobean.getUserFullName());
+      }
+
   }
 
-
-  private float getCostByDuration(int userId, float durationInMS, int resourceId) {
-    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
-    float cost = 0f;
-    float costPerHour =
-        DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
-    // System.out.println("Cost per Hour: " + costPerHour);
-    if (costPerHour > 0) {
-      // float hoursUsed = Formatter.toHours(start, end);
-      // System.out.println("durationInHours: " + durationInHours);
-      cost = (float) (((durationInMS / 900000) * 0.25) * costPerHour);
-      // System.out.println("Cost: " + cost);
-    }
-    return cost;
-  }
-
-  /**
-   * create an empty container for the grid. Different containers might follow
+  /*
+   * private float getCost(int userId, Date start, Date end, int resourceId) { //
+   * System.out.println("Statistics: UserId: " + userId + " ResourceId: " + resourceId); float cost
+   * = 0f; float costPerHour = DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId,
+   * resourceId); // System.out.println("Cost per Hour: " + costPerHour); if (costPerHour > 0) {
+   * float hoursUsed = Formatter.toHours(start, end); // System.out.println("Hours Used: " +
+   * hoursUsed); cost = hoursUsed * costPerHour; // System.out.println("Cost: " + cost); } return
+   * cost; }
    * 
-   * @return
+   * 
+   * private float getCostByDuration(int userId, float durationInMS, int resourceId) { //
+   * System.out.println("UserId: " + userId + " ResourceId: " + resourceId); float cost = 0f; float
+   * costPerHour = DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
+   * // System.out.println("Cost per Hour: " + costPerHour); if (costPerHour > 0) { // float
+   * hoursUsed = Formatter.toHours(start, end); // System.out.println("durationInHours: " +
+   * durationInHours); cost = (float) (((durationInMS / 900000) * 0.25) * costPerHour); //
+   * System.out.println("Cost: " + cost); } return cost; }
    */
+
   private IndexedContainer getEmptyContainer() {
     final IndexedContainer container = new IndexedContainer();
     // some columns
@@ -1454,40 +1346,34 @@ public class Statistics extends CustomComponent {
     container.addContainerProperty(instituteCaption, String.class, null);
     container.addContainerProperty(startCaption, Date.class, null);
     container.addContainerProperty(endCaption, Date.class, null);
+    container.addContainerProperty(durationCaption, Integer.class, null);
     container.addContainerProperty(costCaption, Float.class, null);
     container.addContainerProperty(nameCaption, String.class, null);
     return container;
   }
 
-  /**
-   * adds a new filter to the header row
-   * 
-   * @param headerRow
-   * @param propertyId
-   * @param container
-   */
   public void addRowFilter(HeaderRow headerRow, final String propertyId,
       final IndexedContainer container, final FooterRow footer,
       final GeneratedPropertyContainer gpcontainerF) {
     HeaderCell headerCellDevice = headerRow.getCell(propertyId);
-    // Have an input field to use for filter
+
     TextField filterField = new TextField();
     filterField.setColumns(9);
     filterField.setInputPrompt("Filter");
     filterField.addStyleName(ValoTheme.TEXTFIELD_TINY);
-    // Update filter When the filter input is changed
+
     filterField.addTextChangeListener(new TextChangeListener() {
       private static final long serialVersionUID = -6252315973584227301L;
 
       @Override
       public void textChange(TextChangeEvent change) {
-        // Can't modify filters so need to replace
+
         container.removeContainerFilters(propertyId);
-        // (Re)create the filter if necessary
+
         if (!change.getText().isEmpty())
           container.addContainerFilter(new SimpleStringFilter(propertyId, change.getText(), true,
               false));
-        // compute total costs
+
         float totalCosts = 0.0f;
         for (Object itemId : gpcontainerF.getItemIds()) {
           totalCosts +=
@@ -1495,7 +1381,6 @@ public class Statistics extends CustomComponent {
                   .floatValue();
         }
 
-        // compute total time in milliseconds
         long total = 0;
         for (Object itemId : gpcontainerF.getItemIds()) {
           long s =
@@ -1507,7 +1392,6 @@ public class Statistics extends CustomComponent {
 
         FooterCell footerCellCost = footer.getCell(costCaption);
         footerCellCost.setText(String.format("%1$.2f € total", totalCosts));
-
         FooterCell footerCellEnd = footer.getCell(endCaption);
         int hours = (int) (total * 0.000000277778f);
         float minutes = (total * 0.000000277778f - hours) * 60;
@@ -1524,15 +1408,6 @@ public class Statistics extends CustomComponent {
     notify.setPosition(Position.TOP_CENTER);
     notify.setIcon(FontAwesome.FROWN_O);
     notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.MEH_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     notify.show(Page.getCurrent());
   }
 

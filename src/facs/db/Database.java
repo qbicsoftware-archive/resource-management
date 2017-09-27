@@ -1053,6 +1053,92 @@ public enum Database {
     return booking_id;
   }
 
+
+  public int addInvoice(String uuid, String device_name, Date start, Date end, long duration,
+      String service, String kostenstelle, double cost) {
+    int booking_id = -1;
+    if (uuid == null || uuid.isEmpty() || start == null || end == null) {
+      return booking_id;
+    }
+
+    // System.out.println("Database.java 131 util start: " + start);
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+    java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
+    // System.out.println("Database.java 131 sql start: " + sqlStart);
+    // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
+    String sql =
+        "INSERT INTO invoicing (user_ldap, device_name, start, end, duration, service, kostenstelle, price) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, uuid);
+      statement.setString(2, device_name);
+      statement.setTimestamp(3, sqlStart);
+      statement.setTimestamp(4, sqlEnd);
+      statement.setLong(5, duration);
+      statement.setString(6, service);
+      statement.setString(7, kostenstelle);
+      statement.setDouble(8, cost);
+      // execute the statement, data IS NOT commit yet
+      statement.execute();
+      ResultSet rs = statement.getGeneratedKeys();
+      if (rs.next()) {
+        booking_id = rs.getInt(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return booking_id;
+  }
+
+  public int addInvoice(String uuid, String device_name, Date start, Date end, long duration,
+      String service, String kostenstelle, double cost, boolean confirmation) {
+    int booking_id = -1;
+    if (uuid == null || uuid.isEmpty() || start == null || end == null) {
+      return booking_id;
+    }
+
+    // System.out.println("Database.java 131 util start: " + start);
+    java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
+    java.sql.Timestamp sqlEnd = new java.sql.Timestamp(end.getTime());
+    // System.out.println("Database.java 131 sql start: " + sqlStart);
+    // java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(timestamp.getTime());
+    String sql =
+        "INSERT INTO invoicing (user_ldap, device_name, start, end, duration, service, kostenstelle, price, confirmation) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // The following statement is an try-with-devices statement, which declares two devices,
+    // conn and statement, which will be automatically closed when the try block terminates
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, uuid);
+      statement.setString(2, device_name);
+      statement.setTimestamp(3, sqlStart);
+      statement.setTimestamp(4, sqlEnd);
+      statement.setLong(5, duration);
+      statement.setString(6, service);
+      statement.setString(7, kostenstelle);
+      statement.setDouble(8, cost);
+      statement.setBoolean(9, confirmation);
+      // execute the statement, data IS NOT commit yet
+      statement.execute();
+      ResultSet rs = statement.getGeneratedKeys();
+      if (rs.next()) {
+        booking_id = rs.getInt(1);
+      }
+      // nothing will be in the database, until you commit it!
+      // conn.commit();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return booking_id;
+  }
+
+
+
   /**
    * return all device names to display inside the drop-down menu
    * 
@@ -1121,6 +1207,54 @@ public enum Database {
       e.printStackTrace();
     }
 
+    return events;
+  }
+
+
+  public ArrayList<CalendarEvent> getAllInvoicingBookings(String uuid, String device_name) {
+    ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
+    String sql =
+        "SELECT * FROM invoicing INNER JOIN user ON invoicing.user_ldap = user.user_ldap WHERE deleted IS NULL AND device_name = ?";
+    // device_id = device_id+1;
+
+    try (Connection conn = login();
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+      statement.setString(1, device_name);
+      ResultSet rs = statement.executeQuery();
+
+      while (rs.next()) {
+
+        String service = rs.getString("service") + " · ";
+        if (rs.getString("service") == null)
+          service = "";
+
+        if (uuid.equals(rs.getString("user_ldap")) && rs.getString("confirmation") == null) {
+          BasicEvent canbedeleted =
+              new BasicEvent(rs.getString("user.user_name"), service + "K: "
+                  + rs.getString("kostenstelle") + " · " + "Approx. Cost: €"
+                  + rs.getString("price") + "-", rs.getTimestamp("start"), rs.getTimestamp("end"));
+          canbedeleted.setStyleName("color5");
+          events.add(canbedeleted);
+        } else if (uuid.equals(rs.getString("user_ldap")) && rs.getString("confirmation") != null) {
+          BasicEvent cannotbedeleted =
+              new BasicEvent(rs.getString("user.user_name"), service + "K: "
+                  + rs.getString("kostenstelle") + " · " + "Approx. Cost: €"
+                  + rs.getString("price") + "-", rs.getTimestamp("start"), rs.getTimestamp("end"));
+          cannotbedeleted.setStyleName("color1");
+          events.add(cannotbedeleted);
+        } else {
+          BasicEvent cannotbedeleted =
+              new BasicEvent(rs.getString("user.user_name"), "Contact: " + rs.getString("email")
+                  + " · Tel: " + rs.getString("phone"), rs.getTimestamp("start"),
+                  rs.getTimestamp("end"));
+          cannotbedeleted.setStyleName("color3");
+          events.add(cannotbedeleted);
+        }
+
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
     return events;
   }
 
@@ -2765,6 +2899,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("logs.duration"));
         obean.add(m);
       }
       statement.close();
@@ -2777,7 +2912,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocks() {
 
     String sql =
-        "SELECT DISTINCT logs.log_id logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
+        "SELECT DISTINCT logs.log_id logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.duration, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start` AND logs.`user_full_name` = user.`user_name`";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -2791,6 +2926,7 @@ public enum Database {
         m.setUserFullName(rs.getString("user.user_name"));
         m.setStart(rs.getTimestamp("logs.start"));
         m.setEnd(rs.getTimestamp("logs.end"));
+        m.setDuration(rs.getInt("logs.duration"));
         m.setCost(rs.getFloat("logs.cost"));
         obean.add(m);
       }
@@ -2804,7 +2940,7 @@ public enum Database {
   public List<MachineOccupationBean> getMatchedTimeBlocksSetDates(String dateStart, String dateEnd) {
 
     String sql =
-        "SELECT DISTINCT logs.log_id, logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.invoiced IS NULL AND logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
+        "SELECT DISTINCT logs.log_id, logs.device_id, logs.device_name, user.kostenstelle, logs.start, logs.end, logs.duration, logs.cost, user.user_name  FROM logs INNER JOIN booking INNER JOIN user WHERE logs.invoiced IS NULL AND logs.`device_name` = booking.`device_name` AND logs.`start_round` = booking.`start`AND logs.`user_full_name` = user.`user_name` AND logs.start BETWEEN '"
             + dateStart + "' AND '" + dateEnd + "'";
 
     List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
@@ -2819,6 +2955,7 @@ public enum Database {
         m.setUserFullName(rs.getString("user.user_name"));
         m.setStart(rs.getTimestamp("logs.start"));
         m.setEnd(rs.getTimestamp("logs.end"));
+        m.setDuration(rs.getInt("logs.duration"));
         m.setCost(rs.getFloat("logs.cost"));
         obean.add(m);
       }
@@ -2874,6 +3011,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("duration"));
         m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
@@ -2901,6 +3039,7 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("duration"));
         m.setCost(rs.getFloat("cost"));
         obean.add(m);
       }
@@ -2928,7 +3067,36 @@ public enum Database {
         m.setUserName(rs.getString("user_name"));
         m.setStart(rs.getTimestamp("start"));
         m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("logs.duration"));
         m.setCost(rs.getFloat("cost"));
+        obean.add(m);
+      }
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return obean;
+  }
+
+  public List<MachineOccupationBean> getInvoiceCalendarTimeBlocksSetDates(String dateStart,
+      String dateEnd) {
+    String sql =
+        "SELECT * FROM invoicing WHERE start BETWEEN '" + dateStart + "' AND '" + dateEnd + "'";
+    List<MachineOccupationBean> obean = new ArrayList<MachineOccupationBean>();
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        MachineOccupationBean m = new MachineOccupationBean();
+        m.setLogId(rs.getInt("booking_id"));
+        // m.setDeviceId(rs.getInt("device_id"));
+        m.setDeviceName(rs.getString("device_name"));
+        // m.setUserFullName(rs.getString("user_full_name"));
+        // m.setUserName(rs.getString("user_name"));
+        m.setStart(rs.getTimestamp("start"));
+        m.setEnd(rs.getTimestamp("end"));
+        m.setDuration(rs.getInt("logs.duration"));
+        m.setCost(rs.getFloat("price"));
         obean.add(m);
       }
       statement.close();

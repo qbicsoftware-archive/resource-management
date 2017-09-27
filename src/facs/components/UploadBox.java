@@ -55,19 +55,19 @@ import facs.utils.Formatter;
 
 public class UploadBox extends CustomComponent implements Receiver, ProgressListener,
     FailedListener, SucceededListener {
+
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
-  private final String UPLOAD_CAPTION = "Upload Statistics Here";
+  private static final long serialVersionUID = -7104908728643930175L;
+
+  // private final String UPLOAD_CAPTION = "Upload Statistics Here";
   private final String CAPTION = "Upload Instrument Statistics";
-  // Put upload in this memory buffer that grows automatically
+
   ByteArrayOutputStream os = new ByteArrayOutputStream(10240);
-  // Name of the uploaded file
   String filename;
   ProgressBar progress = new ProgressBar(0.0f);
 
-  // TODO if success or failed show message
   Label finishedMessage = new Label("Finito!");
 
   final String cvsSplitBy = ",";
@@ -77,7 +77,6 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
 
   public UploadBox() {
     this.setCaption(CAPTION);
-    // there has to be a device selected.
     devices = new NativeSelect("Select Instrument");
     devices
         .setDescription("Select an instrument in order to upload information for that specific instrument.");
@@ -86,12 +85,10 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     for (DeviceBean bean : DBManager.getDatabaseInstance().getDevices()) {
       deviceNameToId.put(bean.getName(), bean.getId());
       devices.addItem(bean.getName());
-      // System.out.println("Bean.getName: " + bean.getName() + " Bean.getId: " + bean.getId());
     }
     occupationGrid = new Grid();
     occupationGrid.setSizeFull();
 
-    // Create the upload component and handle all its events
     final Upload upload = new Upload();
     upload.setReceiver(this);
     upload.addProgressListener(this);
@@ -99,7 +96,6 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     upload.addSucceededListener(this);
     upload.setVisible(false);
 
-    // one can only upload csvs, if a device was selected.
     devices.addValueChangeListener(new ValueChangeListener() {
 
       /**
@@ -113,12 +109,8 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       }
     });
 
-    // Put the upload and image display in a panel
-    // Panel panel = new Panel(UPLOAD_CAPTION);
-    // panel.setWidth("100%");
     VerticalLayout panelContent = new VerticalLayout();
     panelContent.setSpacing(true);
-    // panel.setContent(panelContent);
     panelContent.addComponent(devices);
     panelContent.addComponent(upload);
     panelContent.addComponent(progress);
@@ -132,11 +124,10 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     setCompositionRoot(panelContent);
   }
 
-
   @Override
   public OutputStream receiveUpload(String filename, String mimeType) {
     this.filename = filename;
-    os.reset(); // Needed to allow re-uploading
+    os.reset();
     return os;
   }
 
@@ -165,9 +156,8 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
       StringReader sr = new StringReader(os.toString());
       BufferedReader br = new BufferedReader(sr);
 
-      // skip header
       br.readLine();
-      // read body
+
       while ((line = br.readLine()) != null) {
         String[] userInfo = line.split(cvsSplitBy);
         MachineOccupationBean bean = new MachineOccupationBean();
@@ -176,7 +166,6 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         try {
           bean.setBean(userInfo, deviceNameToId.get((getCurrentDevice())));
         } catch (Exception e) {
-          // e.printStackTrace();
         }
         container.addBean(bean);
 
@@ -221,11 +210,8 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
             calendar.getTime(), bean.getStart(), bean.getEnd(), duration,
             LiferayAndVaadinUtils.getUser().getScreenName(), cost);
 
-        // System.out.println("Cost: " + cost);
-
         occupationGrid.setContainerDataSource(container);
       }
-      // addBeansToGrid(container);
     } catch (IOException e) {
       e.printStackTrace();
       showErrorNotification("Can't read uploaded file.",
@@ -236,19 +222,10 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
         "Hopefully all good! Successful uploads expectedly lead to successful parsing of the documents.");
   }
 
-  private void If(boolean b) {
-    // TODO Auto-generated method stub
-
-  }
-
-
-
   private float getCost(int userId, Date start, Date end, int resourceId) {
-    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
     float cost = 0f;
     float costPerHour =
         DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
-    // System.out.println("Cost per Hour: " + costPerHour);
     if (costPerHour > 0) {
       float hoursUsed = Formatter.toHours(start, end);
       System.out.println("Hours Used: " + hoursUsed);
@@ -259,13 +236,10 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
   }
 
   private float getCostByDuration(int userId, float durationInHours, int resourceId) {
-    // System.out.println("UserId: " + userId + " ResourceId: " + resourceId);
     float cost = 0f;
     float costPerHour =
         DBManager.getDatabaseInstance().getCostByResourceAndUserIds(userId, resourceId);
-    // System.out.println("Cost per Hour: " + costPerHour);
     if (costPerHour > 0) {
-      // float hoursUsed = Formatter.toHours(start, end);
       System.out.println("durationInHours: " + durationInHours);
       cost = durationInHours * costPerHour;
       System.out.println("Cost: " + cost);
@@ -273,23 +247,12 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     return cost;
   }
 
-
-
   private void showErrorNotification(String title, String description) {
     Notification notify = new Notification(title, description);
     notify.setDelayMsec(16000);
     notify.setPosition(Position.TOP_CENTER);
     notify.setIcon(FontAwesome.FROWN_O);
     notify.setStyleName(ValoTheme.NOTIFICATION_ERROR + " " + ValoTheme.NOTIFICATION_CLOSABLE);
-    notify.show(Page.getCurrent());
-  }
-
-  private void showNotification(String title, String description) {
-    Notification notify = new Notification(title, description);
-    notify.setDelayMsec(8000);
-    notify.setPosition(Position.TOP_CENTER);
-    notify.setIcon(FontAwesome.MEH_O);
-    notify.setStyleName(ValoTheme.NOTIFICATION_TRAY + " " + ValoTheme.NOTIFICATION_CLOSABLE);
     notify.show(Page.getCurrent());
   }
 
@@ -302,16 +265,9 @@ public class UploadBox extends CustomComponent implements Receiver, ProgressList
     notify.show(Page.getCurrent());
   }
 
-
-  private void addBeansToGrid(BeanItemContainer<MachineOccupationBean> container) {
-
-  }
-
-
   private String getCurrentDevice() {
     return (String) devices.getValue();
   }
-
 
   @Override
   public void uploadFailed(FailedEvent event) {
