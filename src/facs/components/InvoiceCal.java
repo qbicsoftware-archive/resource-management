@@ -32,10 +32,8 @@ import java.util.TimeZone;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.Action;
-import com.vaadin.server.ExternalResource;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -142,7 +140,7 @@ public class InvoiceCal extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         submitInvoice(bookingModel.getLDAP(), getCurrentDevice());
         newEvents.clear();
-        refreshDataSources();
+        // refreshDataSources();
       }
     });
 
@@ -164,8 +162,15 @@ public class InvoiceCal extends CustomComponent {
 
     invoice4Users.addItems(db.getAllUserNames());
 
+    selectedKostenstelle.addItems(db.getKostenstelleCodes());
+
     selectedDevice.addValueChangeListener(new ValueChangeListener() {
-      private static final long serialVersionUID = 8153818693511960689L;
+
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -679217811200988232L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -202,6 +207,8 @@ public class InvoiceCal extends CustomComponent {
     countLabel.setValue("Invoice Count: " + db.getAllUnconfirmedCount() + " - Machine Output: "
         + db.getAllBookingTotalCount());
 
+    selectedKostenstelle.select(db.getKostenstelleByLDAPId(bookingModel.getLDAP()));
+
     cal.setLocale(Locale.getDefault());
     cal.setImmediate(true);
     selectedService.setImmediate(true);
@@ -215,7 +222,7 @@ public class InvoiceCal extends CustomComponent {
     gridLayout.setWidth("100%");
 
     gridLayout.addComponent(selectedDevice, 0, 0);
-    // gridLayout.addComponent(selectedService, 1, 0);
+    gridLayout.addComponent(selectedService, 1, 0);
 
     selectedService.setVisible(false);
 
@@ -576,10 +583,16 @@ public class InvoiceCal extends CustomComponent {
       Date endX = new Date();
       endX.setTime(end.getTime() - 1);
 
-      if (start.before(referenceDate)) {
-        showErrorNotification(MESSAGE_IN_THE_PAST_TITLE, MESSAGE_IN_THE_PAST_DESCRIPTION);
+      /*
+       * if (start.before(referenceDate)) { showErrorNotification(MESSAGE_IN_THE_PAST_TITLE,
+       * MESSAGE_IN_THE_PAST_DESCRIPTION);
+       * 
+       * } else if (cal.getEvents(startX, endX).size() > 0) {
+       * showErrorNotification(MESSAGE_ALREADY_TAKEN_TITLE, MESSAGE_ALREADY_TAKEN_DESCRIPTION); }
+       * else { addEvent(start, end); return true; } return false;
+       */
 
-      } else if (cal.getEvents(startX, endX).size() > 0) {
+      if (cal.getEvents(startX, endX).size() > 0) {
         showErrorNotification(MESSAGE_ALREADY_TAKEN_TITLE, MESSAGE_ALREADY_TAKEN_DESCRIPTION);
       } else {
         addEvent(start, end);
@@ -615,10 +628,12 @@ public class InvoiceCal extends CustomComponent {
    */
   class MyActionHandler extends MyEventHandler implements Action.Handler {
 
+
+
     /**
      * 
      */
-    private static final long serialVersionUID = 1726108611654552992L;
+    private static final long serialVersionUID = 2853064918217833660L;
 
     public MyActionHandler(Calendar cal, BookingModel bookingModel) {
       super(cal, bookingModel);
@@ -626,8 +641,10 @@ public class InvoiceCal extends CustomComponent {
 
     Action addEventAction = new Action("Create Booking");
     Action deleteEventAction = new Action("Delete this booking");
-    Action sendEventAction = new Action("Send an e-mail");
-    Action faultyEventAction = new Action("Mark booking as 'faulty'");
+
+    // Action sendEventAction = new Action("Send an e-mail");
+
+    // Action faultyEventAction = new Action("Mark booking as 'faulty'");
 
     @Override
     public Action[] getActions(Object target, Object sender) {
@@ -645,7 +662,8 @@ public class InvoiceCal extends CustomComponent {
       if (events.size() == 0)
         return new Action[] {addEventAction};
       else
-        return new Action[] {deleteEventAction, sendEventAction, faultyEventAction};
+        // return new Action[] {deleteEventAction, sendEventAction, faultyEventAction};
+        return new Action[] {deleteEventAction};
     }
 
     @Override
@@ -666,21 +684,23 @@ public class InvoiceCal extends CustomComponent {
 
       } else if (action == deleteEventAction) {
 
-        long localTime = System.currentTimeMillis();
-        long eventTime = ((CalendarEvent) target).getStart().getTime();
-        long twentyFourHoursLimit = 10800000;
+        // long localTime = System.currentTimeMillis();
+        // long eventTime = ((CalendarEvent) target).getStart().getTime();
+        // long twentyFourHoursLimit = 10800000;
 
         if (target instanceof CalendarEvent) {
           if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
-            if (eventTime - localTime > twentyFourHoursLimit) {
+
+            /*
+             * if (eventTime - localTime > twentyFourHoursLimit) { removeEvent((CalendarEvent)
+             * target); db.removeBooking(((CalendarEvent) target).getStart(), (String)
+             * selectedDevice.getValue()); refreshDataSources();
+             * showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION); }
+             */
+
+            if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
               removeEvent((CalendarEvent) target);
-              db.removeBooking(((CalendarEvent) target).getStart(),
-                  (String) selectedDevice.getValue());
-              refreshDataSources();
-              showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION);
-            } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
-              removeEvent((CalendarEvent) target);
-              db.removeBooking(((CalendarEvent) target).getStart(),
+              db.removeInvoice(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
               refreshDataSources();
               showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
@@ -688,7 +708,7 @@ public class InvoiceCal extends CustomComponent {
               showErrorNotification(MESSAGE_24_HOURS_LIMIT, MESSAGE_24_HOURS_LIMIT_DESCRIPTION);
           } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
             removeEvent((CalendarEvent) target);
-            db.removeBooking(((CalendarEvent) target).getStart(),
+            db.removeInvoice(((CalendarEvent) target).getStart(),
                 (String) selectedDevice.getValue());
             refreshDataSources();
             showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
@@ -699,26 +719,23 @@ public class InvoiceCal extends CustomComponent {
         } else
           showErrorNotification(MESSAGE_NOTHING_TO_DELETE_TITLE,
               MESSAGE_NOTHING_TO_DELETE_DESCRIPTION);
-      } else if (action == sendEventAction) {
-
-        Resource res =
-            new ExternalResource("mailto:"
-                + db.getEmailbyUserName(((CalendarEvent) target).getCaption()));
-
-        Page.getCurrent().open(((ExternalResource) res).getURL(), null);
-
-      } else if (action == faultyEventAction) {
-        if (target instanceof CalendarEvent) {
-          if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
-            db.markAsFaulty(((CalendarEvent) target).getStart(), (String) selectedDevice.getValue());
-            showNotification(MESSAGE_FAULTY_TITLE, MESSAGE_FAULTY_DESCRIPTION);
-            refreshDataSources();
-          } else {
-            showErrorNotification(MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE,
-                MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION);
-          }
-        }
       }
+
+      /*
+       * else if (action == sendEventAction) {
+       * 
+       * Resource res = new ExternalResource("mailto:" + db.getEmailbyUserName(((CalendarEvent)
+       * target).getCaption()));
+       * 
+       * Page.getCurrent().open(((ExternalResource) res).getURL(), null);
+       * 
+       * } else if (action == faultyEventAction) { if (target instanceof CalendarEvent) { if
+       * (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
+       * db.markAsFaulty(((CalendarEvent) target).getStart(), (String) selectedDevice.getValue());
+       * showNotification(MESSAGE_FAULTY_TITLE, MESSAGE_FAULTY_DESCRIPTION); refreshDataSources(); }
+       * else { showErrorNotification(MESSAGE_PERMISSION_DENIED_TIME_SLOT_TITLE,
+       * MESSAGE_PERMISSION_DENIED_TIME_SLOT_DESCRIPTION); } } }
+       */
     }
   }
 

@@ -130,7 +130,7 @@ public class Booking extends CustomComponent {
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
-    versionLabel.setValue("Version 0.2.170405");
+    versionLabel.setValue("Version 0.2.171016");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();

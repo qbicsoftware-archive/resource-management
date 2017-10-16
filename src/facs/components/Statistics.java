@@ -164,12 +164,14 @@ public class Statistics extends CustomComponent {
 
         statistics.addStyleName(ValoTheme.TABSHEET_FRAMED);
         statistics.addStyleName(ValoTheme.TABSHEET_EQUAL_WIDTH_TABS);
-        statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
-        statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
-        statistics.addTab(serviceGrid(dateStart, dateEnd)).setCaption("Service");
+        statistics.addTab(invoicedCalGrid(dateStart, dateEnd)).setCaption("Invoicing Calendar");
+        statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced Bookings");
         statistics.addTab(initialGrid(dateStart, dateEnd)).setCaption("All");
-        statistics.addTab(invoicedGrid(dateStart, dateEnd)).setCaption("Invoiced");
-        statistics.addTab(invoicedCalGrid(dateStart, dateEnd)).setCaption("Invoice Calendar");
+        statistics.addTab(serviceGrid(dateStart, dateEnd)).setCaption("Service");
+        statistics.addTab(noCostsGrid(dateStart, dateEnd)).setCaption("No Costs");
+        statistics.addTab(newMatchedGrid(dateStart, dateEnd)).setCaption("Matched");
+
+
 
         selectedYear.setCaption("Selected Year");
         selectedQuarter.setCaption("Selected Quarter");
@@ -1076,14 +1078,19 @@ public class Statistics extends CustomComponent {
     return invoicedLayout;
   }
 
-
   private Component invoicedCalGrid(String dateStart, String dateEnd) {
+
+    Button createInvoiceMatched = new Button("Create Invoice");
+    Button downloadInvoiceMatched = new Button("Download Invoice");
 
     String buttonRefreshTitle = "Refresh";
     Button refreshMatched = new Button(buttonRefreshTitle);
     refreshMatched.setIcon(FontAwesome.REFRESH);
     refreshMatched.setDescription("Click here to reload the data from the database!");
     refreshMatched.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+
+    createInvoiceMatched.setEnabled(false);
+    downloadInvoiceMatched.setEnabled(false);
 
     Grid invoicedCalGrid;
 
@@ -1102,18 +1109,16 @@ public class Statistics extends CustomComponent {
     });
 
     IndexedContainer iccontainer = getEmptyContainer();
-
     GeneratedPropertyContainer icpc = new GeneratedPropertyContainer(iccontainer);
 
-    VerticalLayout invoicedLayout = new VerticalLayout();
-
+    VerticalLayout invoicedCalLayout = new VerticalLayout();
     invoicedCalGrid = new Grid(icpc);
 
     setRenderers(invoicedCalGrid);
     fillInvoiceCalendarRows(invoicedCalGrid, dateStart, dateEnd);
 
     float totalCosts = 0.0f;
-    for (Object itemIdInvoiced : ipc.getItemIds())
+    for (Object itemIdInvoiced : icpc.getItemIds())
       totalCosts +=
           ((Number) icpc.getContainerProperty(itemIdInvoiced, costCaption).getValue()).floatValue();
 
@@ -1139,16 +1144,274 @@ public class Statistics extends CustomComponent {
     addRowFilter(filterRow, projectCaption, iccontainer, footer, icpc);
     addRowFilter(filterRow, instituteCaption, iccontainer, footer, icpc);
 
-    invoicedLayout.setMargin(true);
-    invoicedLayout.setSpacing(true);
+    invoicedCalLayout.setMargin(true);
+    invoicedCalLayout.setSpacing(true);
+
     invoicedCalGrid.setSizeFull();
+    invoicedCalGrid.setSelectionMode(SelectionMode.SINGLE);
+    invoicedCalLayout.addComponent(invoicedCalGrid);
 
-    invoicedLayout.addComponent(invoicedCalGrid);
-    invoicedLayout.addComponent(refreshMatched);
+    invoicedCalGrid.addSelectionListener(new SelectionListener() {
 
-    return invoicedLayout;
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 6270968376342126363L;
+
+      @Override
+      public void select(SelectionEvent event) {
+
+        downloadInvoiceMatched.setEnabled(false);
+        ReceiverPI =
+            (String) icpc.getContainerProperty(invoicedCalGrid.getSelectedRow(), nameCaption)
+                .getValue();
+        createInvoiceMatched.setEnabled(true);
+      }
+    });
+    createInvoiceMatched.addClickListener(new ClickListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 8904377791996878035L;
+      private File bill;
+      private FileDownloader fileDownloader;
+
+      @Override
+      public void buttonClick(ClickEvent event) {
+        String basepath = VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
+
+        Paths.get(basepath, "WEB-INF/billingTemplates");
+
+        try {
+
+          int setUserId =
+              DBManager.getDatabaseInstance().findMainContactIDByGroupMembereFullName(ReceiverPI);
+
+          if (setUserId > 0) {
+
+            Billing billing =
+                new Billing(Paths.get(basepath, "WEB-INF/billingTemplates").toFile(), "Angebot.tex");
+
+            UserBean user =
+                setUserId > 0 ? DBManager.getDatabaseInstance().getUserById(setUserId) : null;
+
+            billing.setReceiverPI(user.getName());
+            billing.setReceiverInstitution(user.getInstitute());
+            billing.setReceiverStreet(user.getStreet());
+            billing.setReceiverPostalCode(user.getPostcode());
+            billing.setReceiverCity(user.getCity());
+
+            billing.setSenderFaculty("Core Facility Durchflusszytometrie");
+
+            billing.setSenderFunction("Leitung:");
+            billing.setSenderName("Dr. Stella Autenrieth");
+
+            billing.setSenderInstitute("Medizinische Klinik Tübingen");
+            billing.setSenderStreet("Otfried-Müller-Straße 10");
+            billing.setSenderPostalCode("72076");
+            billing.setSenderCity("Tübingen");
+
+            billing.setSenderPhone("+49 (0) 7071 29-83156");
+            billing.setSenderEmail("stella.autenrieth@med.uni-tuebingen.de");
+            billing.setSenderUrl("www.medizin.uni-tuebingen.de");
+
+            String selectedKostenstelleMatched =
+                (String) icpc.getContainerProperty(invoicedCalGrid.getSelectedRow(),
+                    kostenstelleCaption).getValue();
+            String selectedProjectMatched =
+                (String) icpc
+                    .getContainerProperty(invoicedCalGrid.getSelectedRow(), projectCaption)
+                    .getValue();
+
+
+            if (selectedKostenstelleMatched != null && selectedProjectMatched == null) {
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleMatched);
+
+              billing
+                  .setProjectShortDescription("Aufstellung zur Internen Leistungsverrechnung (ILV)");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleMatched + " abgebucht.");
+
+              billing.setMwstShare("0%");
+              billing.setMwstCost("0");
+
+            } else if (selectedKostenstelleMatched != null && selectedProjectMatched != null) {
+
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+              billing.setProjectDescription("Anfordernde Kostenstelle: "
+                  + selectedKostenstelleMatched);
+
+              billing.setProjectShortDescription("");
+
+              billing
+                  .setProjectLongDescription("Bitte Rechnungsbetrag nicht anweisen. Der Betrag wird in den nächsten Tagen von der von Ihnen angegebenen Kostenstelle "
+                      + selectedKostenstelleMatched + " " + selectedProjectMatched + " abgebucht.");
+
+              billing.setMwstShare("0%");
+              billing.setMwstCost("0");
+
+            } else {
+
+              billing.setProjectShortDescription("Rechnung");
+              billing.setInvoiceNumber("Rechnungs Nr: FCF" + selectedYear.getValue());
+
+              billing
+                  .setProjectLongDescription("Bitte überweisen Sie den Rechnungsbetrag innerhalb von 30 Tagen auf das angegeben Konto des Universitätsklinikums Tübingen unter Angabe der Rechnungsnummer und Kostenstelle.");
+
+              billing.setMwstShare("19%");
+
+            }
+
+            ArrayList<CostEntry> entries = new ArrayList<CostEntry>();
+
+            float ariaCosts = 0.0f;
+            float lsrFortessaCosts = 0.0f;
+            float cantoCosts = 0.0f;
+            float fc500Costs = 0.0f;
+            float consultingCosts = 0.0f;
+            float lyricCosts = 0.0f;
+            float cost = 0.0f;
+
+            long ariaTime = 0;
+            long lsrFortessaTime = 0;
+            long cantoTime = 0;
+            long fc500Time = 0;
+            long consultingTime = 0;
+            long lyricTime = 0;
+
+            for (Object itemIdMatched : icpc.getItemIds()) {
+
+              cost =
+                  ((Number) icpc.getContainerProperty(itemIdMatched, costCaption).getValue())
+                      .floatValue();
+              long s =
+                  ((Date) icpc.getContainerProperty(itemIdMatched, startCaption).getValue())
+                      .getTime();
+              long e =
+                  ((Date) icpc.getContainerProperty(itemIdMatched, endCaption).getValue())
+                      .getTime();
+
+              long timeFrame = e - s;
+
+              String selectedDevice =
+                  (String) icpc.getContainerProperty(itemIdMatched, deviceCaption).getValue();
+
+              if (selectedDevice.equals("Aria")) {
+
+                ariaCosts = ariaCosts + cost;
+                ariaTime = ariaTime + timeFrame;
+
+              } else if (selectedDevice.equals("LSR Fortessa")) {
+
+                lsrFortessaCosts = lsrFortessaCosts + cost;
+                lsrFortessaTime = lsrFortessaTime + timeFrame;
+
+              } else if (selectedDevice.equals("Canto")) {
+
+                cantoCosts = cantoCosts + cost;
+                cantoTime = cantoTime + timeFrame;
+
+              } else if (selectedDevice.equals("FC500")) {
+
+                fc500Costs = fc500Costs + cost;
+                fc500Time = fc500Time + timeFrame;
+
+              } else if (selectedDevice.equals("Consulting")) {
+
+                consultingCosts = consultingCosts + cost;
+                consultingTime = consultingTime + timeFrame;
+
+              }
+
+              else if (selectedDevice.equals("Lyric")) {
+
+                lyricCosts = lyricCosts + cost;
+                lyricTime = lyricTime + timeFrame;
+
+              }
+
+            }
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(ariaTime),
+                "L4.1 Sortierung Aria", ariaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(lsrFortessaTime),
+                "L4.2 Messung LSR Fortessa", lsrFortessaCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(cantoTime),
+                "L4.3 Messung Canto", cantoCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(fc500Time), "L4.4 FC500",
+                fc500Costs));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
+                "L4.5 Consulting", consultingCosts));
+
+            entries.add(billing.new CostEntry(selectedQuarter.getValue() + " "
+                + selectedYear.getValue(), Formatter.toHoursAndMinutes(consultingTime),
+                "L4.6 Lyric", lyricCosts));
+
+            billing.setCostEntries(entries);
+            float totalCosts = 0.0f;
+
+            for (Object itemIdMatched : icpc.getItemIds()) {
+
+              totalCosts +=
+                  ((Number) icpc.getContainerProperty(itemIdMatched, costCaption).getValue())
+                      .floatValue();
+
+              DBManager.getDatabaseInstance().itemInvoiced(
+                  (int) icpc.getContainerProperty(itemIdMatched, logIdCaption).getValue());
+
+            }
+
+            billing.setTotalCost(String.format("%1$.2f", totalCosts));
+
+            bill = billing.createPdf();
+            if (fileDownloader != null)
+              downloadInvoiceMatched.removeExtension(fileDownloader);
+            fileDownloader = new FileDownloader(new FileResource(bill));
+            fileDownloader.extend(downloadInvoiceMatched);
+            downloadInvoiceMatched.setEnabled(true);
+            showSuccessfulNotification("Congratulations!",
+                "Invoice is created and available for download.");
+            downloadInvoice.setEnabled(true);
+          } else {
+            createInvoiceMatched.setEnabled(false);
+            downloadInvoiceMatched.setEnabled(false);
+            showErrorNotification(
+                "No such user found!",
+                "An error occured while trying to create the invoice. The common problem occurs to be: there is no such user in the database. Make sure that each Workgroup has a main contact person assigned.");
+          }
+        }
+
+        catch (Exception e) {
+          showErrorNotification(
+              "What the heck!",
+              "An error occured while trying to create the invoice. The common problem occurs to be: this no such user or it can not run program 'pdflatex'.");
+          e.printStackTrace();
+        }
+
+      }
+
+    });
+
+    invoicedCalLayout.addComponent(refreshMatched);
+    invoicedCalLayout.addComponent(createInvoiceMatched);
+    invoicedCalLayout.addComponent(downloadInvoiceMatched);
+
+    return invoicedCalLayout;
   }
-
 
   private void setRenderers(Grid grid) {
     grid.getColumn(costCaption).setRenderer(new NumberRenderer("%1$.2f €"));
@@ -1260,7 +1523,6 @@ public class Statistics extends CustomComponent {
     }
   }
 
-
   private void fillInvoicedRows(Grid grid, String dateStart, String dateEnd) {
     List<MachineOccupationBean> mobeans =
         DBManager.getDatabaseInstance().getInvoicedTimeBlocksSetDates(dateStart, dateEnd);
@@ -1297,6 +1559,7 @@ public class Statistics extends CustomComponent {
 
       for (MachineOccupationBean mobean : mobeans) {
         int userId = DBManager.getDatabaseInstance().findUserByFullName(mobean.getUserFullName());
+        System.out.println("UserId: " + userId);
         float cost = 0;
         int duration = 0;
         String kostenStelle = "";
@@ -1313,6 +1576,11 @@ public class Statistics extends CustomComponent {
         }
         grid.addRow(mobean.getLogId(), mobean.getDeviceName(), kostenStelle, project, institute,
             mobean.getStart(), end, duration, cost, mobean.getUserFullName());
+        // grid.addRow(mobean.getLogId(), mobean.getDeviceName(), mobean.getStart(), end, duration,
+        // cost);
+        System.out.println("ID:" + mobean.getLogId() + " Device: " + mobean.getDeviceName()
+            + " Start: " + mobean.getStart() + " End: " + end + "Duration: " + duration + " Cost: "
+            + cost + " User Info: " + user + " " + kostenStelle + " " + institute);
       }
 
   }
