@@ -130,7 +130,7 @@ public class Booking extends CustomComponent {
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
-    versionLabel.setValue("Version 0.2.171016");
+    versionLabel.setValue("Version 0.2.171017");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();
@@ -204,7 +204,7 @@ public class Booking extends CustomComponent {
           } else if (selectedDevice.getValue().equals("Mac")) {
             selectedService.removeAllItems();
             selectedService.addItems("Self", "Service");
-            selectedService.setValue("Service");
+            selectedService.setValue("Self");
             selectedService.setVisible(true);
           } else {
             selectedService.setValue(null);
@@ -225,7 +225,7 @@ public class Booking extends CustomComponent {
           } else if (selectedDevice.getValue().equals("Mac")) {
             selectedService.removeAllItems();
             selectedService.addItems("Self", "Service");
-            selectedService.setValue("Service");
+            selectedService.setValue("Self");
             selectedService.setVisible(true);
           } else {
             selectedService.setValue(null);

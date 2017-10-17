@@ -1795,6 +1795,21 @@ public enum Database {
     return costLocId;
   }
 
+  public Date getLastDate(Date referenceDate) {
+    String sql = "SELECT start FROM logs WHERE invoiced = 2 ORDER BY log_id DESC LIMIT 1;";
+    Date date = referenceDate;
+    try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
+      ResultSet rs = statement.executeQuery();
+      if (rs.next()) {
+        date = rs.getDate("start");
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return date;
+  }
+
   public String getKostenstelleByUserId(int userId) {
     String sql =
         "SELECT kostenstelle.kostenstelle_code FROM kostenstelle INNER JOIN user ON user.kostenstelle=kostenstelle.kostenstelle_code WHERE user.user_id = ?";

@@ -95,6 +95,8 @@ public class InvoiceCal extends CustomComponent {
     this.bookingModel = bookingModel;
     this.referenceDate = referenceDate;
 
+    // System.out.println("Reference Date: " + referenceDate);
+
     Label selectDeviceLabel = new Label();
     selectDeviceLabel.addStyleName("h4");
     selectDeviceLabel.setValue("Select Instrument");
@@ -140,7 +142,7 @@ public class InvoiceCal extends CustomComponent {
       public void buttonClick(ClickEvent event) {
         submitInvoice(bookingModel.getLDAP(), getCurrentDevice());
         newEvents.clear();
-        // refreshDataSources();
+        refreshDataSources();
       }
     });
 
@@ -249,12 +251,9 @@ public class InvoiceCal extends CustomComponent {
   void submitInvoice(String user_ldap, String currentDevice) {
 
     if (eventCounter == 0) {
-
       showNotification("We couldn't find any event to add!",
           "Did you select a time frame?\nPlease select a time frame at first then try again.");
-
       return;
-
     }
 
     if (db.getDeviceRestriction(currentDevice) == true) {
@@ -294,6 +293,8 @@ public class InvoiceCal extends CustomComponent {
               if (invoice4Users.getValue() != null) {
 
                 String userLDAPId = db.getUserLDAPIDbyUserName(invoice4Users.getValue().toString());
+
+                // System.out.println("userLDAPId: " + userLDAPId);
 
                 db.addInvoice(
                     userLDAPId,
@@ -450,12 +451,19 @@ public class InvoiceCal extends CustomComponent {
   public void refreshDataSources() {
     BookingModel bookingModel = FacsModelUtil.getInvoicingBookingModel();
     setCompositionRoot(new InvoiceCal(bookingModel, referenceDate));
-
   }
 
   Calendar initCal(BookingModel bookingmodel, String currentDevice) {
 
     Calendar calendar = invoiceCalendar(bookingmodel);
+
+    Date start = db.getLastDate(referenceDate);
+    long ltime = start.getTime() + 6 * 24 * 60 * 60 * 1000;
+    Date end = new Date(ltime);
+
+    calendar.setStartDate(start);
+    calendar.setEndDate(end);
+
     return calendar;
 
   }
@@ -507,27 +515,39 @@ public class InvoiceCal extends CustomComponent {
 
   void addEvent(Date start, Date end) {
     try {
-      CalendarEvent event =
-          new BasicEvent(bookingModel.userName() + " ( " + bookingModel.getKostenstelle() + " "
-              + bookingModel.getProject() + ")", "Approx. costs for this booking: €"
-              + bookingModel.cost(start, end,
-                  getCost(getCurrentDevice(), (String) selectedService.getValue(), getGroupID()))
-              + "-", start, end);
-      ((BasicEvent) event).setStyleName("color4");
-      bookMap.get(getCurrentDevice()).addEvent(event);
-      if (!newEvents.containsKey(getCurrentDevice()) || newEvents.get(getCurrentDevice()) == null) {
-        HashSet<CalendarEvent> set = new HashSet<CalendarEvent>();
-        set.add(event);
-        newEvents.put(getCurrentDevice(), set);
+
+      if (invoice4Users.getValue() != null) {
+        CalendarEvent event =
+            new BasicEvent(invoice4Users.getValue().toString() +
+            // bookingModel.userName() +
+                " ( " + bookingModel.getKostenstelle() + " " + bookingModel.getProject() + ")",
+                "Approx. costs for this booking: €"
+                    + bookingModel.cost(
+                        start,
+                        end,
+                        getCost(getCurrentDevice(), (String) selectedService.getValue(),
+                            getGroupID())) + "-", start, end);
+        ((BasicEvent) event).setStyleName("color4");
+
+        bookMap.get(getCurrentDevice()).addEvent(event);
+        if (!newEvents.containsKey(getCurrentDevice()) || newEvents.get(getCurrentDevice()) == null) {
+          HashSet<CalendarEvent> set = new HashSet<CalendarEvent>();
+          set.add(event);
+          newEvents.put(getCurrentDevice(), set);
+        } else {
+          newEvents.get(getCurrentDevice()).add(event);
+        }
+        eventCounter++;
       } else {
-        newEvents.get(getCurrentDevice()).add(event);
+        showErrorNotification("You need to select a username first!",
+            "Please select the name of the user at first, then select a time slot and click on Book!");
+        return;
       }
-      eventCounter++;
+
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
-
 
   void removeEvent(CalendarEvent event) {
     bookMap.get(getCurrentDevice()).removeEvent(event);
