@@ -1167,7 +1167,7 @@ public enum Database {
   public ArrayList<CalendarEvent> getAllBookingsPlusMachineOutput(String uuid, String device_name) {
     ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
     String sql =
-        "SELECT DISTINCT * FROM logs INNER JOIN user ON logs.user_full_name = user.user_name WHERE user_ldap != 'deleted' AND logs.device_name = ?;";
+        "SELECT DISTINCT * FROM logs INNER JOIN user ON logs.user_full_name = user.user_name WHERE user_ldap != 'deleted' AND logs.device_name = ? AND logs.invoiced IS NULL;";
 
     String sql2 =
         "SELECT DISTINCT * FROM booking INNER JOIN user ON booking.user_ldap = user.user_ldap WHERE user.user_ldap != 'deleted' AND booking.`deleted` IS NULL AND booking.device_name = ?;";
@@ -1181,8 +1181,9 @@ public enum Database {
 
         BasicEvent cannotbedeleted2 =
             new BasicEvent(rs2.getString("user.user_name"), "Contact: "
-                + rs2.getString("user.email") + " · Tel: " + rs2.getString("user.phone"),
-                rs2.getTimestamp("booking.start"), rs2.getTimestamp("booking.end"));
+                + rs2.getString("user.email") + " · Start: " + rs2.getTimestamp("booking.start")
+                + " · End: " + rs2.getTimestamp("booking.end"), rs2.getTimestamp("booking.start"),
+                rs2.getTimestamp("booking.end"));
         cannotbedeleted2.setStyleName("color3");
         events.add(cannotbedeleted2);
       }
@@ -1200,8 +1201,9 @@ public enum Database {
 
         BasicEvent cannotbedeleted =
             new BasicEvent(rs.getString("logs.user_full_name"), "Contact: "
-                + rs.getString("user.email") + " · Tel: " + rs.getString("user.phone"),
-                rs.getTimestamp("logs.start"), rs.getTimestamp("logs.end"));
+                + rs.getString("user.email") + " · Start: " + rs.getTimestamp("logs.start")
+                + " · End: " + rs.getTimestamp("logs.end"), rs.getTimestamp("logs.start"),
+                rs.getTimestamp("logs.end"));
         cannotbedeleted.setStyleName("color5");
         events.add(cannotbedeleted);
 
@@ -2117,7 +2119,7 @@ public enum Database {
 
     java.sql.Timestamp sqlStart = new java.sql.Timestamp(start.getTime());
 
-    String sql = "UPDATE invoicing SET deleted = 1 WHERE start = ? AND device_name = ?";
+    String sql = "UPDATE logs SET invoiced = 3 WHERE start = ? AND device_name = ?";
     try (Connection conn = login(); PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setTimestamp(1, sqlStart);
       statement.setString(2, device_name);

@@ -63,13 +63,6 @@ public class BookingModel implements Serializable {
     return names;
   }
 
-  /**
-   * get calendar events +- days of the given date
-   * 
-   * @param date
-   * @int days
-   * @return
-   */
   public List<Event> getCalEvents(Date date, int days) {
     return null;
   }
@@ -84,9 +77,7 @@ public class BookingModel implements Serializable {
 
   public double cost(java.util.Date start, java.util.Date end, int deviceCost) {
     double frame = ((end.getTime() - start.getTime()) / 360000);
-    // System.out.println("Cost: "+ deviceCost + " Frame: "+ frame);
     double calcCost = (frame * deviceCost) / 10;
-    // System.out.println("CalcCost: " +calcCost);
     return (frame * deviceCost) / 10;
   }
 
@@ -124,11 +115,6 @@ public class BookingModel implements Serializable {
     return null;
   }
 
-  /**
-   * sets a map for devices and
-   * 
-   * @param deviceCalendarEvents
-   */
   public void setDeviceCalendarEvents(Map<String, List<CalendarEvent>> deviceCalendarEvents) {
     this.deviceCalendarEvents = deviceCalendarEvents;
   }

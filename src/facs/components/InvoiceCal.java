@@ -709,6 +709,10 @@ public class InvoiceCal extends CustomComponent {
         // long twentyFourHoursLimit = 10800000;
 
         if (target instanceof CalendarEvent) {
+
+          System.out.println("Group ID 1? " + bookingModel.getGroupID() + "Access 1?"
+              + bookingModel.hasAdminPanelAccess());
+
           if (((CalendarEvent) target).getCaption().startsWith(bookingModel.userName())) {
 
             /*
@@ -718,7 +722,8 @@ public class InvoiceCal extends CustomComponent {
              * showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION); }
              */
 
-            if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
+            // Admin can REMOVE events
+            if (bookingModel.getGroupID().equals("1") || bookingModel.hasAdminPanelAccess() == 1) {
               removeEvent((CalendarEvent) target);
               db.removeInvoice(((CalendarEvent) target).getStart(),
                   (String) selectedDevice.getValue());
@@ -726,7 +731,9 @@ public class InvoiceCal extends CustomComponent {
               showNotification(MESSAGE_ITEM_PURGED, MESSAGE_ITEM_PURGED_DESCRIPTION_ADMIN);
             } else
               showErrorNotification(MESSAGE_24_HOURS_LIMIT, MESSAGE_24_HOURS_LIMIT_DESCRIPTION);
-          } else if (bookingModel.getGroupID().equals("1")) { // Admin can REMOVE events
+          }
+          // Admin can REMOVE events
+          else if (bookingModel.getGroupID().equals("1") || bookingModel.hasAdminPanelAccess() == 1) {
             removeEvent((CalendarEvent) target);
             db.removeInvoice(((CalendarEvent) target).getStart(),
                 (String) selectedDevice.getValue());

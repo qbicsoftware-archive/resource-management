@@ -130,7 +130,7 @@ public class Booking extends CustomComponent {
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
-    versionLabel.setValue("Version 0.2.171017");
+    versionLabel.setValue("Version 0.2.171018");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();
@@ -1213,6 +1213,8 @@ public class Booking extends CustomComponent {
 
         long localTime = System.currentTimeMillis();
         long eventTime = ((CalendarEvent) target).getStart().getTime();
+
+        // users can't delete their bookings within the next 3 hours
         long twentyFourHoursLimit = 10800000;
 
         if (target instanceof CalendarEvent) {

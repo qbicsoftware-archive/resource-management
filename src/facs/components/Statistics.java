@@ -1149,6 +1149,7 @@ public class Statistics extends CustomComponent {
 
     invoicedCalGrid.setSizeFull();
     invoicedCalGrid.setSelectionMode(SelectionMode.SINGLE);
+    // invoicedCalGrid.setEditorEnabled(true);
     invoicedCalLayout.addComponent(invoicedCalGrid);
 
     invoicedCalGrid.addSelectionListener(new SelectionListener() {
