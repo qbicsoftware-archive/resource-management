@@ -1,7 +1,7 @@
 /*******************************************************************************
  * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
  * booking devices or planning resources for services and integration of relevant data into the
- * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * common portal infrastructure. Copyright (C) 2017 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -114,6 +114,10 @@ public class Booking extends CustomComponent {
 
   public Booking(final BookingModel bookingModel, Date referenceDate) {
 
+    showErrorNotification(
+        "Attention!",
+        "Dear Flow Cytometry users, we identified a strange behaviour within the calendar element (Monday-Tuesday shift). We are investigating the issue and look for a fix. Until then pay attention to the header of the day while booking instruments.");
+
     this.bookingModel = bookingModel;
     this.referenceDate = referenceDate;
 
@@ -130,7 +134,7 @@ public class Booking extends CustomComponent {
     book4Users.setEnabled(true);
 
     final Label versionLabel = new Label();
-    versionLabel.setValue("Version 0.2.171018");
+    versionLabel.setValue("Version 0.2.171109");
 
     Label userNameLabel = new Label();
     Label userRoleLabel = new Label();
@@ -900,8 +904,8 @@ public class Booking extends CustomComponent {
   private Calendar basicCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
     cal.setFirstVisibleHourOfDay(8);
     cal.setLastVisibleHourOfDay(18);
@@ -929,8 +933,8 @@ public class Booking extends CustomComponent {
   private Calendar noviceCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
     cal.setFirstVisibleHourOfDay(9);
     cal.setLastVisibleHourOfDay(17);
@@ -959,8 +963,8 @@ public class Booking extends CustomComponent {
   private Calendar advancedCalendar(final BookingModel bookingmodel) {
     final Calendar cal = new Calendar();
 
-    cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
-    cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
+    // cal.setFirstVisibleDayOfWeek(java.util.Calendar.SUNDAY);
+    // cal.setLastVisibleDayOfWeek(java.util.Calendar.THURSDAY);
 
     for (CalendarEvent event : bookingmodel.getAllEvents(getCurrentDevice())) {
       cal.addEvent(event);

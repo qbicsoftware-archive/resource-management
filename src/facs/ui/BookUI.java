@@ -1,7 +1,7 @@
 /*******************************************************************************
  * QBiC Calendar provides an infrastructure for defining calendars for specific purposes like
  * booking devices or planning resources for services and integration of relevant data into the
- * common portal infrastructure. Copyright (C) 2016 Aydın Can Polatkan & David Wojnar
+ * common portal infrastructure. Copyright (C) 2017 Aydın Can Polatkan & David Wojnar
  * 
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -19,7 +19,6 @@ package facs.ui;
 import java.util.Date;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -38,7 +37,7 @@ public class BookUI extends UI {
 
   // @WebServlet(value = "/*", asyncSupported = true)
   // @VaadinServletConfiguration(productionMode = false, ui = BookUI.class)
-  @Widgetset("com.vaadin.DefaultWidgetSet")
+  // @Widgetset("com.vaadin.DefaultWidgetSet")
   public static class Servlet extends VaadinServlet {
 
     /*
